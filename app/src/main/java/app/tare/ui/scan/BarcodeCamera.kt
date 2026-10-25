@@ -11,7 +11,6 @@ import androidx.camera.lifecycle.awaitInstance
 import androidx.camera.mlkit.vision.MlKitAnalyzer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,8 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
@@ -49,23 +46,6 @@ fun BarcodeCamera(
     val currentOnError by rememberUpdatedState(onError)
     var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
     var camera by remember { mutableStateOf<Camera?>(null) }
-
-    // "Active" while the camera runs in the foreground, so a crash in that window (but not a
-    // background kill) switches this phone to Google's scanner.
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_START -> CameraScannerGuard.active(context, true)
-                Lifecycle.Event.ON_STOP -> CameraScannerGuard.active(context, false)
-                else -> Unit
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            CameraScannerGuard.active(context, false)
-        }
-    }
 
     LaunchedEffect(lifecycleOwner) {
         var provider: ProcessCameraProvider? = null
@@ -96,7 +76,8 @@ fun BarcodeCamera(
             awaitCancellation()
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Errors too: a native library that won't load is an UnsatisfiedLinkError.
             CameraScannerGuard.failed(context)
             currentOnError(e)
         } finally {

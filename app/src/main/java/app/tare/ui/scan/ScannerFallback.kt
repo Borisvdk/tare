@@ -43,6 +43,11 @@ object CameraScannerGuard {
         prefs(context).edit().clear().apply()
     }
 
+    /** The choice in Settings: Google's scanner, or Tare's own camera. */
+    fun useGoogle(context: Context, google: Boolean) {
+        if (google) prefs(context).edit().putBoolean(BROKEN, true).apply() else reset(context)
+    }
+
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 }
 
