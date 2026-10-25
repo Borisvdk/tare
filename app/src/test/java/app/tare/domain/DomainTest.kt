@@ -161,3 +161,11 @@ class CustomPortionsTest {
         ).inOrder()
     }
 }
+
+class ConvertersTest {
+    @Test
+    fun portionsFromNewerVersionsStillParse() {
+        val parsed = app.tare.data.db.Converters().portionsFromJson("""[{"label":"cup","grams":150.0,"futureField":"x"}]""")
+        assertThat(parsed).containsExactly(Portion("cup", 150.0))
+    }
+}

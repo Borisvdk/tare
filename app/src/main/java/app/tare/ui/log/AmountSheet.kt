@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -270,19 +271,19 @@ fun AmountSheet(
                     style = Tare.type.number.copy(fontSize = Tare.type.title.fontSize * 1.3f),
                 )
                 Spacer(Modifier.weight(1f))
-                Macro.entries.forEachIndexed { i, m ->
-                    if (i > 0) Spacer(Modifier.width(12.dp))
-                    MacroStat(m, nutrients.of(m))
+                if (remainingKcal != null && mode == AmountMode.LOG) {
+                    val after = remainingKcal - nutrients.kcal
+                    Text(
+                        if (after >= 0) "${Fmt.kcal(after)} left after" else "${Fmt.kcal(-after)} over after",
+                        style = Tare.type.caption,
+                        color = if (after >= 0) colors.textMuted else colors.over,
+                    )
                 }
             }
-            if (remainingKcal != null && mode == AmountMode.LOG) {
-                val after = remainingKcal - nutrients.kcal
-                Text(
-                    if (after >= 0) "${Fmt.kcal(after)} kcal left after this" else "${Fmt.kcal(-after)} kcal over after this",
-                    style = Tare.type.caption,
-                    color = if (after >= 0) colors.textMuted else colors.over,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
+            Spacer(Modifier.height(6.dp))
+            // Wraps instead of squeezing when the system font is large.
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Macro.entries.forEach { m -> MacroStat(m, nutrients.of(m)) }
             }
         }
 
