@@ -14,11 +14,13 @@
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
 
-# Anthropic Java SDK: model classes are (de)serialized by Jackson via reflection.
--keep class com.anthropic.** { *; }
--keep class com.fasterxml.jackson.** { *; }
--keepattributes Signature, EnclosingMethod, RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+# Anthropic Java SDK ships its own consumer rules (META-INF/proguard/anthropic-java-core.pro)
+# for Jackson; only silence references to classes that don't exist on Android.
 -dontwarn com.fasterxml.jackson.**
 -dontwarn java.beans.**
 -dontwarn javax.annotation.**
 -dontwarn kotlin.reflect.jvm.internal.**
+# Only used by the SDK's class-based structured outputs (we pass a JSON schema instead).
+-dontwarn java.lang.reflect.AnnotatedParameterizedType
+-dontwarn java.lang.reflect.AnnotatedType
+-dontwarn com.github.victools.jsonschema.**

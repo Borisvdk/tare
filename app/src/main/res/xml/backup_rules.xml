@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Only listed paths are backed up. datastore/secrets.preferences_pb (the Keystore-encrypted
+     Claude API key) is deliberately absent: it can't be decrypted on another device. -->
 <full-backup-content>
     <include domain="database" path="." />
-    <include domain="sharedpref" path="." />
     <include domain="file" path="datastore/settings.preferences_pb" />
-    <!-- The Claude API key is encrypted with a device-bound Keystore key; never back it up. -->
-    <exclude domain="file" path="datastore/secrets.preferences_pb" />
 </full-backup-content>

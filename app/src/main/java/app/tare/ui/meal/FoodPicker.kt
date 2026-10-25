@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
@@ -60,7 +61,9 @@ fun FoodPickerDialog(
     var picked by remember { mutableStateOf<Food?>(null) }
     val focus = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
+    val listState = rememberLazyListState()
     LaunchedEffect(query) { search.query.value = query }
+    LaunchedEffect(results.query, results.local.firstOrNull()?.id) { listState.scrollToItem(0) }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     Dialog(
@@ -81,7 +84,7 @@ fun FoodPickerDialog(
                     modifier = Modifier.weight(1f).focusRequester(focusRequester),
                 )
             }
-            LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp)) {
+            LazyColumn(Modifier.weight(1f), state = listState, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp)) {
                 if (!results.isSearching) {
                     if (recent.isNotEmpty()) item(key = "h") { SectionHeader("Recent") }
                     items(recent, key = { it.id }) { food ->

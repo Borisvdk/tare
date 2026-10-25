@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # version code = commit count
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Unit, Robolectric and screenshot-render tests
+        run: ./gradlew :app:testDebugUnitTest :app:assembleDebug --console=plain
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: app/build/reports/tests/
+
+  release:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Restore signing key
+        env:
+          TARE_KEYSTORE_BASE64: ${{ secrets.TARE_KEYSTORE_BASE64 }}
+        # Fail loudly: an APK signed with any other key can't update the installed app.
+        run: |
+          echo "$TARE_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/tare-release.jks"
+          test -s "$RUNNER_TEMP/tare-release.jks" || { echo "::error::Signing key secret is missing"; exit 1; }
+      - name: Build signed release
+        env:
+          TARE_KEYSTORE_PATH: ${{ runner.temp }}/tare-release.jks
+          TARE_KEYSTORE_PASSWORD: ${{ secrets.TARE_KEYSTORE_PASSWORD }}
+          TARE_KEY_ALIAS: ${{ secrets.TARE_KEY_ALIAS }}
+          TARE_KEY_PASSWORD: ${{ secrets.TARE_KEY_PASSWORD }}
+        run: ./gradlew :app:assembleRelease --console=plain
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="0.1.$(git rev-list --count HEAD)"
+          apk="tare-$version.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$apk"
+          gh release create "v$version" "$apk" --title "Tare $version" --generate-notes --target "$GITHUB_SHA"
+      - name: Remove signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/tare-release.jks"

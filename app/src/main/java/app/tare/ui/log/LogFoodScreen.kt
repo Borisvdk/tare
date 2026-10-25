@@ -99,6 +99,9 @@ fun LogFoodScreen(route: Route.LogFood) {
     var quickAdd by remember { mutableStateOf(false) }
 
     LaunchedEffect(query) { viewModel.setQuery(query) }
+    // New results must start at the top; otherwise the list stays anchored to an old row
+    // and the best match ends up scrolled out of view.
+    LaunchedEffect(results.query, results.local.firstOrNull()?.id) { listState.scrollToItem(0) }
     LaunchedEffect(Unit) { if (route.focusSearch) focusRequester.requestFocus() }
     // Dismiss the keyboard once the user starts scrolling results.
     LaunchedEffect(listState) {

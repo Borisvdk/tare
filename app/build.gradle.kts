@@ -36,6 +36,8 @@ android {
         targetSdk = 36
         versionCode = commitCount
         versionName = "0.1.$commitCount"
+        // Phone (arm64) and emulator (x86_64) only; keeps ML Kit's native libs out of other ABIs.
+        ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
     }
 
     signingConfigs {
@@ -92,7 +94,7 @@ android {
     }
 
     packaging {
-        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        resources.excludes += listOf("/META-INF/{AL2.0,LGPL2.1}", "/META-INF/native-image/**")
     }
 }
 
