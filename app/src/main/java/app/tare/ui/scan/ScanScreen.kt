@@ -34,6 +34,7 @@ import androidx.compose.material.icons.rounded.FlashOff
 import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -58,6 +59,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.CancellationException
 import app.tare.data.diagnostics.CrashReports
 import app.tare.ui.Fmt
 import app.tare.ui.components.PrimaryButton
@@ -86,8 +91,26 @@ fun ScanScreen(route: Route.Scan) {
     val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
 
-    // Google's scanner takes over when our camera scanner crashed or failed on this phone.
+    // Google's scanner takes over when our camera scanner crashed or failed on this phone, or
+    // when it's chosen in Settings.
     var useGoogle by remember { mutableStateOf(CameraScannerGuard.isBroken(context)) }
+    // "Active" while this screen is in the foreground, so any crash or kill in that window
+    // (not a background kill) switches this phone to Google's scanner.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> CameraScannerGuard.active(context, true)
+                Lifecycle.Event.ON_STOP -> CameraScannerGuard.active(context, false)
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            CameraScannerGuard.active(context, false)
+        }
+    }
     var cameraError by remember { mutableStateOf<String?>(null) }
     var googleError by remember { mutableStateOf<String?>(null) }
     var preparingGoogle by remember { mutableStateOf(false) }
@@ -104,17 +127,25 @@ fun ScanScreen(route: Route.Scan) {
     // including after "Log & next". Backing out of it leaves the scanner.
     LaunchedEffect(useGoogle, state is ScanState.Scanning, googleError) {
         if (!useGoogle || state !is ScanState.Scanning || googleError != null) return@LaunchedEffect
-        preparingGoogle = true
-        val ready = prepareGoogleScanner(context)
-        preparingGoogle = false
-        if (!ready) {
-            googleError = "Google's scanner couldn't be downloaded. Check your connection and try again."
-            return@LaunchedEffect
-        }
-        when (val result = scanWithGoogle(context)) {
-            is GoogleScan.Code -> viewModel.onBarcode(result.value)
-            GoogleScan.Cancelled -> nav.back()
-            is GoogleScan.Failed -> googleError = result.message
+        try {
+            preparingGoogle = true
+            val ready = prepareGoogleScanner(context)
+            preparingGoogle = false
+            if (!ready) {
+                googleError = "Google's scanner couldn't be downloaded. Check your connection and try again."
+                return@LaunchedEffect
+            }
+            when (val result = scanWithGoogle(context)) {
+                is GoogleScan.Code -> viewModel.onBarcode(result.value)
+                GoogleScan.Cancelled -> nav.back()
+                is GoogleScan.Failed -> googleError = result.message
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            preparingGoogle = false
+            CrashReports.record(context, "Google's scanner failed", e)
+            googleError = e.message ?: e.javaClass.simpleName
         }
     }
 

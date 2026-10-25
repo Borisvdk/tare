@@ -57,6 +57,7 @@ import app.tare.data.settings.ThemeMode
 import app.tare.data.diagnostics.CrashReports
 import app.tare.domain.Targets
 import app.tare.ui.copyToClipboard
+import app.tare.ui.scan.CameraScannerGuard
 import app.tare.ui.Fmt
 import app.tare.ui.components.Card
 import app.tare.ui.components.PrimaryButton
@@ -163,6 +164,25 @@ fun SettingsScreen() {
                 },
                 onSelect = { scope.launch { graph.settings.setTheme(it) } },
                 modifier = Modifier.fillMaxWidth(),
+            )
+
+            SectionHeader("Barcode scanner")
+            var googleScanner by remember { mutableStateOf(CameraScannerGuard.isBroken(context)) }
+            Segmented(
+                options = listOf(false, true),
+                selected = googleScanner,
+                label = { if (it) "Google's scanner" else "Tare's camera" },
+                onSelect = {
+                    googleScanner = it
+                    CameraScannerGuard.useGoogle(context, it)
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                "Google's scanner opens full screen and works on any phone with Google Play. Tare switches to it by itself if its own camera fails.",
+                style = Tare.type.caption,
+                color = Tare.colors.textMuted,
+                modifier = Modifier.padding(start = 4.dp, top = 6.dp),
             )
 
             SectionHeader("Claude")

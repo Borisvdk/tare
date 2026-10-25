@@ -16,7 +16,10 @@ import java.time.Instant
  * handler, native crashes and ANRs are picked up from [ApplicationExitInfo] on the next start.
  */
 object CrashReports {
-    /** Whether the previous run of the app ended in a crash or ANR (set by [install]). */
+    /**
+     * Whether the previous run ended badly: a crash, an ANR, or being killed while on screen
+     * (some phones end a misbehaving app without a crash). Set by [install].
+     */
     var lastExitWasCrash = false
         private set
 
@@ -60,27 +63,46 @@ object CrashReports {
         prefs(context).edit().putLong(SEEN_AT, System.currentTimeMillis()).apply()
     }
 
-    // Native crashes (camera drivers, ML Kit) and ANRs never reach the Java handler, and
-    // crashes from before this handler existed (an older version) only show up here.
+    // Native crashes (camera drivers, ML Kit), ANRs and kills never reach the Java handler,
+    // and crashes from before this handler existed (an older version) only show up here.
     private fun collectExitInfo(context: Context) {
         val am = context.getSystemService(ActivityManager::class.java) ?: return
         val checkedAt = prefs(context).getLong(EXIT_CHECKED_AT, 0)
-        val reasons = setOf(ApplicationExitInfo.REASON_CRASH, ApplicationExitInfo.REASON_CRASH_NATIVE, ApplicationExitInfo.REASON_ANR)
         val history = am.getHistoricalProcessExitReasons(context.packageName, 0, 5)
-        lastExitWasCrash = history.maxByOrNull { it.timestamp }?.reason in reasons
-        val exits = history.filter { it.timestamp > checkedAt && it.reason in reasons }
+        lastExitWasCrash = history.maxByOrNull { it.timestamp }?.let(::endedBadly) == true
+        val exits = history.filter { it.timestamp > checkedAt && endedBadly(it) }
         prefs(context).edit().putLong(EXIT_CHECKED_AT, System.currentTimeMillis()).apply()
         val exit = exits.maxByOrNull { it.timestamp } ?: return
         // A Java crash the handler already wrote down, with its full stack trace.
         val own = File(context.filesDir, FILE)
         if (exit.reason == ApplicationExitInfo.REASON_CRASH && own.exists() && own.lastModified() >= exit.timestamp - 10_000) return
-        val kind = when (exit.reason) {
-            ApplicationExitInfo.REASON_ANR -> "App not responding"
-            ApplicationExitInfo.REASON_CRASH_NATIVE -> "Native crash"
-            else -> "Crash"
-        }
         val trace = runCatching { exit.traceInputStream?.use { readableText(it.readBytes()) } }.getOrNull().orEmpty()
-        write(context, "$kind: ${exit.description.orEmpty()}", trace, at = exit.timestamp)
+        val details = "Exit: ${reasonName(exit.reason)} · status ${exit.status} · importance ${exit.importance} · " +
+            "pss ${exit.pss / 1024} MB · rss ${exit.rss / 1024} MB\n${exit.description.orEmpty()}\n\n"
+        write(context, "${reasonName(exit.reason)}: ${exit.description.orEmpty()}", details + trace, at = exit.timestamp)
+    }
+
+    /** Crashes and ANRs always; other kills only while Tare was on screen, minus the user's own. */
+    private fun endedBadly(exit: ApplicationExitInfo): Boolean = when (exit.reason) {
+        ApplicationExitInfo.REASON_CRASH, ApplicationExitInfo.REASON_CRASH_NATIVE, ApplicationExitInfo.REASON_ANR -> true
+        ApplicationExitInfo.REASON_EXIT_SELF, ApplicationExitInfo.REASON_USER_REQUESTED, ApplicationExitInfo.REASON_USER_STOPPED,
+        ApplicationExitInfo.REASON_PACKAGE_UPDATED, ApplicationExitInfo.REASON_PACKAGE_STATE_CHANGE,
+        ApplicationExitInfo.REASON_PERMISSION_CHANGE,
+        -> false
+        else -> exit.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+    }
+
+    private fun reasonName(reason: Int): String = when (reason) {
+        ApplicationExitInfo.REASON_CRASH -> "Crash"
+        ApplicationExitInfo.REASON_CRASH_NATIVE -> "Native crash"
+        ApplicationExitInfo.REASON_ANR -> "App not responding"
+        ApplicationExitInfo.REASON_LOW_MEMORY -> "Killed for memory"
+        ApplicationExitInfo.REASON_SIGNALED -> "Killed by a signal"
+        ApplicationExitInfo.REASON_INITIALIZATION_FAILURE -> "Failed to start"
+        ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE -> "Killed for resource use"
+        ApplicationExitInfo.REASON_DEPENDENCY_DIED -> "A dependency died"
+        ApplicationExitInfo.REASON_FREEZER -> "Frozen and killed"
+        else -> "Closed by the system (reason $reason)"
     }
 
     // ANR traces are text; native tombstones are protobuf, whose strings (libraries, symbols,
