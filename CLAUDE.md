@@ -95,6 +95,13 @@ touches their real data, or deletes features.
 - Composables take state and callbacks. ViewModels come from `tareViewModel { graph -> … }`
   and expose `StateFlow`s. Repositories are the only code that touches DAOs or the network.
 - Numbers go through `Fmt` (`ui/Format.kt`). Never hand-format kcal or grams.
+- Feedback messages go through `LocalNotifier.current.show(message, "Undo") { … }`. It's
+  root-scoped (it survives the screen popping), short, and the newest message replaces the
+  current one. Don't call `SnackbarHostState` from screens.
+- Anything that saves or logs must ignore a second tap while it runs (see `EditorScaffold`,
+  `ScanScreen`). Double entries are the most likely real-world bug.
+- Long-lived ViewModels that depend on "today" must refresh it on resume
+  (`LifecycleResumeEffect` → `onResume()`), because the app stays open across midnight.
 - Copy: short, plain, friendly, no exclamation marks. Sentence case. Use "kcal" and "g".
 - New strings can be inline literals (English-only app); keep them consistent with DESIGN.md.
 - Writing files with backslashes from Bash heredocs on this Windows host collapses `\\` to
