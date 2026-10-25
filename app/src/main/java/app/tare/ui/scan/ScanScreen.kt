@@ -64,7 +64,7 @@ import app.tare.ui.log.AmountSheet
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.theme.Tare
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -76,7 +76,7 @@ fun ScanScreen(route: Route.Scan) {
     val state by viewModel.state.collectAsState()
     val remaining by viewModel.remainingKcal.collectAsState()
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -87,6 +87,7 @@ fun ScanScreen(route: Route.Scan) {
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { hasPermission = it }
     LaunchedEffect(Unit) { if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA) }
     var torch by remember { mutableStateOf(false) }
+    var logging by remember { mutableStateOf(false) }
 
     LaunchedEffect(state) {
         if (state is ScanState.Looking) haptics.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -141,10 +142,13 @@ fun ScanScreen(route: Route.Scan) {
             mode = AmountMode.LOG,
             remainingKcal = remaining,
             onConfirm = { result ->
-                scope.launch {
-                    val entry = viewModel.log(s.food, result.grams, result.portion, result.time)
-                    nav.back()
-                    snackbar.showSnackbar("Logged ${entry.name} · ${Fmt.kcal(entry.nutrients.kcal)} kcal")
+                if (!logging) {
+                    logging = true
+                    scope.launch {
+                        val entry = viewModel.log(s.food, result.grams, result.portion, result.time)
+                        nav.back()
+                        notify.show("Logged ${entry.name} · ${Fmt.kcal(entry.nutrients.kcal)} kcal")
+                    }
                 }
             },
             onDismiss = viewModel::reset,
@@ -169,7 +173,7 @@ fun ScanScreen(route: Route.Scan) {
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
-            SecondaryButton("Scan again", onClick = viewModel::reset, modifier = Modifier.fillMaxWidth())
+            SecondaryButton("Scan again", onClick = viewModel::rescan, modifier = Modifier.fillMaxWidth())
         }
         else -> Unit
     }

@@ -22,7 +22,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,8 +50,6 @@ import app.tare.ui.theme.Radii
 import app.tare.ui.theme.Tare
 import app.tare.ui.theme.TareTheme
 
-val LocalSnackbar = staticCompositionLocalOf<SnackbarHostState> { error("SnackbarHostState not provided") }
-
 /** App UI. [start] lets screenshot tests open a specific screen. */
 @Composable
 fun TareRoot(graph: AppGraph, start: Route = Route.Home) {
@@ -60,10 +58,12 @@ fun TareRoot(graph: AppGraph, start: Route = Route.Home) {
         val backStack = rememberNavBackStack(start)
         val navigator = remember(backStack) { Navigator(backStack) }
         val snackbar = remember { SnackbarHostState() }
+        val rootScope = rememberCoroutineScope()
+        val notifier = remember(snackbar) { Notifier(snackbar, rootScope) }
         CompositionLocalProvider(
             LocalAppGraph provides graph,
             LocalNavigator provides navigator,
-            LocalSnackbar provides snackbar,
+            LocalNotifier provides notifier,
         ) {
             Box(Modifier.fillMaxSize().background(Tare.colors.background)) {
                 NavDisplay(

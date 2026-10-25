@@ -83,12 +83,18 @@ class DescribeViewModel(private val graph: AppGraph, private val day: LocalDate)
 
     fun rename(title: String) = _state.update { if (it is DescribeState.Ready) it.copy(title = title) else it }
 
+    private var logging = false
+
+    /** Logs every row once; repeated taps while it runs return nothing. */
     suspend fun logAll(): List<LogEntry> {
         val ready = _state.value as? DescribeState.Ready ?: return emptyList()
+        if (logging) return emptyList()
+        logging = true
         val items = ready.rows.map { row -> Triple(graph.foods.saveRemote(row.food), row.grams, null) }
         val entries = graph.log.logBatch(items, day, ready.title)
         _state.value = DescribeState.Idle
         photo.value = null
+        logging = false
         return entries
     }
 

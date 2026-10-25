@@ -72,7 +72,7 @@ import app.tare.ui.log.AmountSheet
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.theme.Radii
 import app.tare.ui.theme.Tare
 import kotlinx.coroutines.launch
@@ -87,7 +87,7 @@ fun DescribeScreen(route: Route.Describe) {
     val hasKey by viewModel.hasApiKey.collectAsState()
     val remaining by viewModel.remainingKcal.collectAsState()
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
     val focus = LocalFocusManager.current
 
@@ -203,8 +203,9 @@ fun DescribeScreen(route: Route.Describe) {
                                 onClick = {
                                     scope.launch {
                                         val entries = viewModel.logAll()
+                                        if (entries.isEmpty()) return@launch
                                         nav.back()
-                                        snackbar.showSnackbar("Logged ${s.title} · ${Fmt.kcal(entries.sumOf { it.nutrients.kcal })} kcal")
+                                        notify.show("Logged ${s.title} · ${Fmt.kcal(entries.sumOf { it.nutrients.kcal })} kcal")
                                     }
                                 },
                                 enabled = s.rows.isNotEmpty(),

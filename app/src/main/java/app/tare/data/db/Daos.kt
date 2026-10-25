@@ -4,9 +4,11 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
+import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -43,11 +45,21 @@ interface FoodDao {
     )
     suspend fun searchCandidates(token: String, limit: Int): List<Food>
 
+    /** Candidates matching every token; built by [app.tare.data.food.FoodRepository.searchLocal]. */
+    @RawQuery(observedEntities = [Food::class])
+    suspend fun search(query: SupportSQLiteQuery): List<Food>
+
+    @Query("SELECT * FROM food WHERE barcode IN (:barcodes)")
+    suspend fun byBarcodes(barcodes: List<String>): List<Food>
+
     @Query("SELECT * FROM food WHERE hidden = 0 AND lastUsedAt IS NOT NULL ORDER BY lastUsedAt DESC LIMIT :limit")
     fun observeRecent(limit: Int): Flow<List<Food>>
 
     @Query("SELECT * FROM food WHERE hidden = 0 AND useCount > 0 ORDER BY useCount DESC, lastUsedAt DESC LIMIT :limit")
     fun observeFrequent(limit: Int): Flow<List<Food>>
+
+    @Query("SELECT * FROM food WHERE hidden = 0 AND favorite = 1 ORDER BY useCount DESC, name COLLATE NOCASE")
+    fun observeFavorites(): Flow<List<Food>>
 
     @Query("SELECT * FROM food WHERE hidden = 0 AND (source = 'CUSTOM' OR favorite = 1) ORDER BY name COLLATE NOCASE")
     fun observeCustomAndFavorites(): Flow<List<Food>>

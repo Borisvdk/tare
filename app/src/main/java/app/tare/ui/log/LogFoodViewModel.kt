@@ -32,6 +32,7 @@ data class CopySource(val part: DayPart, val entries: List<LogEntry>) {
 
 data class LogHubState(
     val yesterday: List<CopySource> = emptyList(),
+    val favorites: List<Food> = emptyList(),
     val recent: List<Food> = emptyList(),
     val meals: List<MealWithItems> = emptyList(),
     val dayTotals: Nutrients = Nutrients.Zero,
@@ -64,11 +65,13 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate) : ViewMo
         graph.meals.observeAll(),
         graph.log.observeDay(day),
         graph.settings.targets,
-        combine(baseline, yesterday, ::Pair),
-    ) { recent, meals, entries, targets, (base, yesterday) ->
+        combine(baseline, yesterday, graph.foods.favorites(), ::Triple),
+    ) { recent, meals, entries, targets, (base, yesterday, favorites) ->
         LogHubState(
             yesterday = yesterday,
-            recent = recent,
+            favorites = favorites,
+            // Favourites have their own section; don't list them twice.
+            recent = recent.filterNot { it.favorite },
             meals = meals,
             dayTotals = entries.map { it.nutrients }.sum(),
             targets = targets,

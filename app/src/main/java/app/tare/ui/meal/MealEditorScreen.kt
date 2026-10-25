@@ -51,7 +51,7 @@ import app.tare.ui.log.AmountSheet
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.theme.Tare
 import kotlinx.coroutines.launch
 
@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 fun MealEditorScreen(route: Route.MealEditor) {
     val viewModel = tareViewModel(key = "meal-${route.mealId}") { MealEditorViewModel(it, route.mealId) }
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
 
     EditorScaffold(
@@ -70,7 +70,7 @@ fun MealEditorScreen(route: Route.MealEditor) {
                 scope.launch {
                     viewModel.delete()
                     nav.back()
-                    snackbar.showSnackbar("Meal deleted")
+                    notify.show("Meal deleted")
                 }
             }
         },
@@ -80,7 +80,7 @@ fun MealEditorScreen(route: Route.MealEditor) {
             scope.launch {
                 viewModel.save()
                 nav.back()
-                snackbar.showSnackbar("Saved ${viewModel.name.trim()}")
+                notify.show("Saved ${viewModel.name.trim()}")
             }
         },
     ) {
@@ -171,12 +171,21 @@ fun EditorScaffold(
     onPrimary: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    // Saving pops the screen; ignore further taps until it does so nothing is saved twice.
+    var busy by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().background(Tare.colors.background).statusBarsPadding().imePadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, "Back", onBack, background = Color.Transparent)
             Spacer(Modifier.width(8.dp))
             Text(title, style = Tare.type.headline.copy(fontSize = Tare.type.headline.fontSize * 0.8f), color = Tare.colors.text, modifier = Modifier.weight(1f))
-            if (onDelete != null) RoundIconButton(Icons.Rounded.DeleteOutline, "Delete", onDelete, tint = Tare.colors.over)
+            if (onDelete != null) {
+                RoundIconButton(Icons.Rounded.DeleteOutline, "Delete", {
+                    if (!busy) {
+                        busy = true
+                        onDelete()
+                    }
+                }, tint = Tare.colors.over)
+            }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             content()
@@ -184,8 +193,13 @@ fun EditorScaffold(
         }
         PrimaryButton(
             primaryText,
-            onClick = onPrimary,
-            enabled = primaryEnabled,
+            onClick = {
+                if (!busy) {
+                    busy = true
+                    onPrimary()
+                }
+            },
+            enabled = primaryEnabled && !busy,
             modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp),
         )
     }

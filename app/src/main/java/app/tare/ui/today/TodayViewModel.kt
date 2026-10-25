@@ -145,7 +145,7 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
 
     suspend fun saveAsMeal(name: String, entries: List<LogEntry>): String = graph.meals.saveFromEntries(name, entries)
 
-    suspend fun food(id: String): Food? = graph.foods.get(id)
+    suspend fun food(id: String): Food? = graph.foods.resolve(id)
 
     fun toggleFavorite(food: Food) = viewModelScope.launch { graph.foods.setFavorite(food.id, !food.favorite) }
 

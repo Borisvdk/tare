@@ -28,7 +28,7 @@ import app.tare.ui.meal.TotalsCard
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.theme.Tare
 import kotlinx.coroutines.launch
 
@@ -72,7 +72,7 @@ class RecipeEditorViewModel(graph: AppGraph, private val recipeId: String?) : It
 fun RecipeEditorScreen(route: Route.RecipeEditor) {
     val viewModel = tareViewModel(key = "recipe-${route.recipeId}") { RecipeEditorViewModel(it, route.recipeId) }
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
 
     EditorScaffold(
@@ -83,7 +83,7 @@ fun RecipeEditorScreen(route: Route.RecipeEditor) {
                 scope.launch {
                     viewModel.delete()
                     nav.back()
-                    snackbar.showSnackbar("Recipe deleted")
+                    notify.show("Recipe deleted")
                 }
             }
         },
@@ -93,7 +93,7 @@ fun RecipeEditorScreen(route: Route.RecipeEditor) {
             scope.launch {
                 val recipe = viewModel.save()
                 nav.back()
-                snackbar.showSnackbar("Saved ${recipe.name}")
+                notify.show("Saved ${recipe.name}")
             }
         },
     ) {

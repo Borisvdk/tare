@@ -103,12 +103,15 @@ class LogRepository(
         return entries.zip(ids) { e, id -> e.copy(id = id) }
     }
 
+    /**
+     * Changes the amount of an existing entry by scaling its own snapshot, so a food edited
+     * (or re-estimated) since then never rewrites this entry's history.
+     */
     suspend fun updateAmount(entry: LogEntry, grams: Double, portion: Portion?) {
-        val food = entry.foodId?.let { foodDao.get(it) }
+        val old = entry.grams
         val nutrients = when {
-            food != null -> food.per100.forGrams(grams)
-            entry.grams != null && entry.grams > 0 -> entry.nutrients * (grams / entry.grams)
-            else -> entry.nutrients
+            old != null && old > 0 -> entry.nutrients * (grams / old)
+            else -> entry.foodId?.let { foodDao.get(it) }?.per100?.forGrams(grams) ?: entry.nutrients
         }
         dao.update(
             entry.copy(
@@ -118,7 +121,6 @@ class LogRepository(
                 nutrients = nutrients,
             ),
         )
-        if (food != null) foodDao.markUsed(food.id, now(), grams, portion?.label)
     }
 
     suspend fun update(entry: LogEntry) = dao.update(entry)

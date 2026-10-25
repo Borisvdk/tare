@@ -9,7 +9,10 @@ import app.tare.domain.Targets
 import app.tare.domain.TrendPoint
 import app.tare.domain.WeightPoint
 import app.tare.domain.weightTrend
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -59,14 +62,32 @@ data class ProgressState(
 }
 
 class ProgressViewModel(private val graph: AppGraph) : ViewModel() {
-    private val today: LocalDate = Instant.ofEpochMilli(graph.now()).atZone(ZoneId.systemDefault()).toLocalDate()
-    private val from = today.minusDays(13)
+    private fun currentDay(): LocalDate = Instant.ofEpochMilli(graph.now()).atZone(ZoneId.systemDefault()).toLocalDate()
 
-    val state: StateFlow<ProgressState> = combine(
-        graph.weights.observeAll(),
-        graph.log.observeTotals(from, today),
-        graph.settings.targets,
-    ) { weights, totals, targets ->
+    /** Re-read on resume so a screen kept alive past midnight logs weight for the right day. */
+    private val todayFlow = MutableStateFlow(currentDay())
+
+    fun onResume() {
+        todayFlow.value = currentDay()
+    }
+
+    val state: StateFlow<ProgressState> = todayFlow.flatMapLatest { today ->
+        val from = today.minusDays(13)
+        combine(
+            graph.weights.observeAll(),
+            graph.log.observeTotals(from, today),
+            graph.settings.targets,
+        ) { weights, totals, targets -> Triple(weights, totals, targets) }
+            .map { (weights, totals, targets) -> build(today, from, weights, totals, targets) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProgressState(currentDay()))
+
+    private fun build(
+        today: LocalDate,
+        from: LocalDate,
+        weights: List<WeightEntry>,
+        totals: Map<Long, Nutrients>,
+        targets: Targets,
+    ): ProgressState =
         ProgressState(
             today = today,
             weights = weights,
@@ -78,7 +99,6 @@ class ProgressViewModel(private val graph: AppGraph) : ViewModel() {
             targets = targets,
             loaded = true,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProgressState(today))
 
     fun logWeight(day: LocalDate, kg: Double) = viewModelScope.launch { graph.weights.log(day, kg) }
 

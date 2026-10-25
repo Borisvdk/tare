@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
@@ -29,7 +30,7 @@ fun rememberMediaInput(onPhoto: (ByteArray) -> Unit, onSpeech: (String) -> Unit 
     val context = LocalContext.current
     val currentOnPhoto by rememberUpdatedState(onPhoto)
     val currentOnSpeech by rememberUpdatedState(onSpeech)
-    var pendingUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         val uri = pendingUri

@@ -74,7 +74,7 @@ import app.tare.ui.components.pressScale
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.theme.Radii
 import app.tare.ui.theme.Tare
 import kotlinx.coroutines.launch
@@ -87,7 +87,7 @@ fun LogFoodScreen(route: Route.LogFood) {
     val hub by viewModel.hub.collectAsState()
     val results by viewModel.search.results.collectAsState()
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
     val focus = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
@@ -110,12 +110,9 @@ fun LogFoodScreen(route: Route.LogFood) {
 
     fun announce(entries: List<LogEntry>) {
         if (entries.isEmpty()) return
-        scope.launch {
-            val kcal = entries.sumOf { it.nutrients.kcal }
-            val label = if (entries.size == 1) entries.first().name else "${entries.size} items"
-            val result = snackbar.showSnackbar("Logged $label · ${Fmt.kcal(kcal)} kcal", actionLabel = "Undo")
-            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) viewModel.undo(entries)
-        }
+        val kcal = entries.sumOf { it.nutrients.kcal }
+        val label = if (entries.size == 1) entries.first().name else Fmt.items(entries.size)
+        notify.show("Logged $label · ${Fmt.kcal(kcal)} kcal", actionLabel = "Undo") { viewModel.undo(entries) }
     }
 
     fun quickLog(food: Food) {
@@ -188,12 +185,18 @@ fun LogFoodScreen(route: Route.LogFood) {
                             }
                         }
                     }
+                    if (hub.favorites.isNotEmpty()) {
+                        item(key = "h-favorites") { SectionHeader("Favourites") }
+                        items(hub.favorites, key = { "fav-" + it.id }) { food ->
+                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
+                        }
+                    }
                     if (hub.recent.isNotEmpty()) {
                         item(key = "h-recent") { SectionHeader("Recent") }
                         items(hub.recent, key = { "recent-" + it.id }) { food ->
                             FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
                         }
-                    } else {
+                    } else if (hub.favorites.isEmpty()) {
                         item(key = "hint") {
                             Text(
                                 "Search thousands of basic foods and millions of products, scan a barcode, or describe a whole meal and let Claude do the maths.",

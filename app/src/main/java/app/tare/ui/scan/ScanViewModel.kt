@@ -34,8 +34,12 @@ class ScanViewModel(private val graph: AppGraph, private val day: LocalDate) : V
         targets.kcal - entries.sumOf { it.nutrients.kcal }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    private var ignored: String? = null
+    private var ignoredUntil = 0L
+
     fun onBarcode(barcode: String) {
         if (_state.value != ScanState.Scanning) return
+        if (barcode == ignored && System.currentTimeMillis() < ignoredUntil) return
         _state.value = ScanState.Looking(barcode)
         viewModelScope.launch {
             _state.value = when (val result = graph.foods.lookupBarcode(barcode)) {
@@ -62,8 +66,22 @@ class ScanViewModel(private val graph: AppGraph, private val day: LocalDate) : V
         }
     }
 
+    /** Back to scanning. The code just handled is ignored for a moment so it doesn't re-fire. */
     fun reset() {
+        (_state.value as? ScanState.Found)?.food?.barcode?.let(::ignoreBriefly)
+        (_state.value as? ScanState.Missing)?.barcode?.let(::ignoreBriefly)
         _state.value = ScanState.Scanning
+    }
+
+    /** "Scan again": the user explicitly wants a fresh read. */
+    fun rescan() {
+        ignored = null
+        _state.value = ScanState.Scanning
+    }
+
+    private fun ignoreBriefly(barcode: String) {
+        ignored = barcode
+        ignoredUntil = System.currentTimeMillis() + 2_500
     }
 
     suspend fun log(food: Food, grams: Double, portion: Portion?, time: LocalTime?): LogEntry =
