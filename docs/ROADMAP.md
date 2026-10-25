@@ -22,7 +22,7 @@ reason.
 ## Shipped
 
 - Health Connect, read only: Renpho weigh-ins into the trend, Garmin calories burned as
-  "eaten vs burned" on Progress (PR #23).
+  "eaten vs burned" on Progress (PR #24).
 - Guided Claude key setup: claim Max plan API credits, create a key, paste; checked before
   saving (PR #22).
 - Targets follow calories: protein in g/kg of trend weight, fat as % of calories, carbs the
