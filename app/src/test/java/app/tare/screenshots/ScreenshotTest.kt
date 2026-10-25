@@ -36,6 +36,7 @@ import app.tare.ui.navigation.Navigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.progress.ProgressScreen
 import app.tare.ui.root.TareRoot
+import app.tare.ui.settings.TargetsSheet
 import app.tare.ui.theme.Tare
 import app.tare.ui.theme.TareTheme
 import com.github.takahirom.roborazzi.captureScreenRoboImage
@@ -188,6 +189,11 @@ class ScreenshotTest {
                 Box(Modifier.fillMaxSize().background(Tare.colors.background)) { content() }
             }
         }
+    }
+
+    @Test fun targetsSheet() {
+        seed(ThemeMode.DARK)
+        shoot("targets_sheet_dark", waitFor = "the rest") { tab(ThemeMode.DARK) { TargetsSheet(onDismiss = {}) } }
     }
 
     @Test fun settings() {

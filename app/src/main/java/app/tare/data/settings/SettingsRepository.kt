@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import app.tare.domain.MacroPlan
 import app.tare.domain.Targets
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -42,6 +44,15 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
         )
     }
 
+    /** How macros follow calories; null until targets are saved with a plan. */
+    val macroPlan: Flow<MacroPlan?> = store.data.map { p ->
+        if (p[PLAN_SAVED] != true) {
+            null
+        } else {
+            MacroPlan(proteinPerKg = p[PLAN_PROTEIN_PER_KG]?.takeIf { it > 0 }, fatPercent = p[PLAN_FAT_PERCENT]?.takeIf { it > 0 })
+        }
+    }
+
     /** False until the user has confirmed targets once; drives the setup card on Today. */
     val targetsConfirmed: Flow<Boolean> = store.data.map { it[TARGETS_CONFIRMED] ?: false }
 
@@ -65,13 +76,19 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
         store.edit { it[LAST_AUTO_BACKUP] = at }
     }
 
-    suspend fun setTargets(targets: Targets) {
+    suspend fun setTargets(targets: Targets, plan: MacroPlan? = null) {
         store.edit {
             it[TARGET_KCAL] = targets.kcal
             it[TARGET_PROTEIN] = targets.protein
             it[TARGET_CARBS] = targets.carbs
             it[TARGET_FAT] = targets.fat
             it[TARGETS_CONFIRMED] = true
+            if (plan != null) {
+                // 0 stands for "fixed grams".
+                it[PLAN_SAVED] = true
+                it[PLAN_PROTEIN_PER_KG] = plan.proteinPerKg ?: 0.0
+                it[PLAN_FAT_PERCENT] = plan.fatPercent ?: 0
+            }
         }
     }
 
@@ -100,5 +117,8 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
         val GENERIC_VERSION = intPreferencesKey("generic_dataset_version")
         val AUTO_BACKUP_URI = stringPreferencesKey("auto_backup_uri")
         val LAST_AUTO_BACKUP = longPreferencesKey("last_auto_backup")
+        val PLAN_SAVED = booleanPreferencesKey("macro_plan_saved")
+        val PLAN_PROTEIN_PER_KG = doublePreferencesKey("macro_protein_per_kg")
+        val PLAN_FAT_PERCENT = intPreferencesKey("macro_fat_percent")
     }
 }
