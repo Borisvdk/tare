@@ -170,4 +170,7 @@ class FoodRepository(
     suspend fun setFavorite(id: String, favorite: Boolean) = dao.setFavorite(id, favorite)
 
     suspend fun hide(id: String) = dao.hide(id, now())
+
+    /** Undo for [hide]. */
+    suspend fun unhide(id: String) = dao.unhide(id, now())
 }

@@ -25,6 +25,7 @@ import app.tare.ui.meal.EditorScaffold
 import app.tare.ui.meal.ItemsEditorViewModel
 import app.tare.ui.meal.ItemsSection
 import app.tare.ui.meal.TotalsCard
+import app.tare.ui.navigation.LocalAppGraph
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
@@ -71,6 +72,7 @@ class RecipeEditorViewModel(graph: AppGraph, private val recipeId: String?) : It
 @Composable
 fun RecipeEditorScreen(route: Route.RecipeEditor) {
     val viewModel = tareViewModel(key = "recipe-${route.recipeId}") { RecipeEditorViewModel(it, route.recipeId) }
+    val graph = LocalAppGraph.current
     val nav = LocalNavigator.current
     val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
@@ -83,7 +85,10 @@ fun RecipeEditorScreen(route: Route.RecipeEditor) {
                 scope.launch {
                     viewModel.delete()
                     nav.back()
-                    notify.show("Recipe deleted")
+                    val id = route.recipeId
+                    notify.show("Recipe deleted", actionLabel = "Undo") {
+                        if (id != null) graph.appScope.launch { graph.foods.unhide(id) }
+                    }
                 }
             }
         },

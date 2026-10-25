@@ -93,7 +93,14 @@ class MealRepository(
         save(null, name, items)
     }
 
-    suspend fun delete(id: String) = dao.delete(id)
+    /** Deletes a meal and returns it, so the caller can offer undo via [restore]. */
+    suspend fun delete(id: String): MealWithItems? {
+        val snapshot = dao.get(id)
+        dao.delete(id)
+        return snapshot
+    }
+
+    suspend fun restore(snapshot: MealWithItems) = dao.save(snapshot.meal, snapshot.items.map { it.item })
 }
 
 class RecipeRepository(

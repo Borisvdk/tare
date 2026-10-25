@@ -81,6 +81,9 @@ interface FoodDao {
     @Query("UPDATE food SET hidden = 1, updatedAt = :at WHERE id = :id")
     suspend fun hide(id: String, at: Long)
 
+    @Query("UPDATE food SET hidden = 0, updatedAt = :at WHERE id = :id")
+    suspend fun unhide(id: String, at: Long)
+
     @Query("SELECT COUNT(*) FROM food WHERE source = 'GENERIC'")
     suspend fun genericCount(): Int
 

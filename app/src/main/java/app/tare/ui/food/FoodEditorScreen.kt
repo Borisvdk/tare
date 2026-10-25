@@ -48,6 +48,7 @@ import app.tare.ui.components.Segmented
 import app.tare.ui.components.TareTextField
 import app.tare.ui.log.AmountMode
 import app.tare.ui.log.AmountSheet
+import app.tare.ui.navigation.LocalAppGraph
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
@@ -62,6 +63,7 @@ fun FoodEditorScreen(route: Route.FoodEditor) {
         FoodEditorViewModel(it, route.foodId, route.barcode, route.name)
     }
     val nav = LocalNavigator.current
+    val graph = LocalAppGraph.current
     val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
     var saved by remember { mutableStateOf<Food?>(null) }
@@ -85,8 +87,12 @@ fun FoodEditorScreen(route: Route.FoodEditor) {
             if (viewModel.original?.source == FoodSource.CUSTOM) {
                 RoundIconButton(Icons.Rounded.DeleteOutline, "Delete food", {
                     scope.launch {
+                        val id = viewModel.original?.id
                         viewModel.delete()
                         nav.back()
+                        notify.show("Food deleted", actionLabel = "Undo") {
+                            if (id != null) graph.appScope.launch { graph.foods.unhide(id) }
+                        }
                     }
                 }, tint = Tare.colors.over)
             }
