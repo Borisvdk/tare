@@ -102,8 +102,10 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate, initialP
         graph.settings.targets,
         combine(baseline, yesterday, graph.foods.favorites(), usual) { base, yesterday, favorites, usual -> Hub(base, yesterday, favorites, usual) },
     ) { recent, meals, entries, targets, (base, yesterday, favorites, usual) ->
-        // Favourites have their own section; don't list anything twice.
-        val shown = usual.filterNot { it.favorite }
+        // Favourites have their own section; don't list anything twice. (The live favourites,
+        // not the usual copies' flag, which only refreshes when something is logged.)
+        val favoriteIds = favorites.map { it.id }.toSet()
+        val shown = usual.filterNot { it.id in favoriteIds }
         val shownIds = shown.map { it.id }.toSet()
         LogHubState(
             yesterday = yesterday,
