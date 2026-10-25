@@ -20,3 +20,17 @@ fun searchTokens(query: String): List<String> =
 
 fun buildSearchText(name: String, brand: String?, aliases: String?): String =
     normalizeForSearch(listOfNotNull(name, brand, aliases?.replace('|', ' ')).joinToString(" "))
+
+private val MEAL_CONNECTORS = setOf("and", "with", "en", "met", "plus")
+
+/**
+ * True when a search reads like a description of a meal ("2 eggs and toast", "boterham met
+ * kaas") rather than the name of one food, so Describe is the better first suggestion.
+ */
+fun looksLikeAMeal(query: String): Boolean {
+    val tokens = searchTokens(query)
+    if (tokens.size < 2) return false
+    val hasNumber = tokens.any { t -> t.any(Char::isDigit) }
+    val hasConnector = tokens.any { it in MEAL_CONNECTORS } || query.contains(',')
+    return tokens.size >= 5 || (hasConnector && tokens.size >= 3) || (hasNumber && tokens.size >= 3)
+}

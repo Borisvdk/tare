@@ -2,6 +2,7 @@ package app.tare.domain
 
 import app.tare.data.db.Food
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Test
 
 class NutrientsTest {
@@ -131,5 +132,19 @@ class DayPartTest {
         assertThat(DayPart.of(java.time.LocalTime.of(11, 0))).isEqualTo(DayPart.AFTERNOON)
         assertThat(DayPart.of(java.time.LocalTime.of(17, 0))).isEqualTo(DayPart.EVENING)
         assertThat(DayPart.of(java.time.LocalTime.of(22, 0))).isEqualTo(DayPart.NIGHT)
+    }
+}
+
+class LooksLikeAMealTest {
+    @Test
+    fun mealDescriptions() {
+        listOf("2 eggs and toast", "boterham met kaas", "chicken, rice, broccoli", "200 g chicken breast", "a big bowl of yogurt with granola")
+            .forEach { assertWithMessage(it).that(looksLikeAMeal(it)).isTrue() }
+    }
+
+    @Test
+    fun foodNames() {
+        listOf("banaan", "greek yogurt", "chicken breast roasted", "skyr 0%", "white rice")
+            .forEach { assertWithMessage(it).that(looksLikeAMeal(it)).isFalse() }
     }
 }
