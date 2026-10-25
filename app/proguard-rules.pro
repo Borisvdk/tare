@@ -24,3 +24,8 @@
 -dontwarn java.lang.reflect.AnnotatedParameterizedType
 -dontwarn java.lang.reflect.AnnotatedType
 -dontwarn com.github.victools.jsonschema.**
+
+# ML Kit starts its components (barcode model, executors, shared prefs) from registrars named
+# in the manifest and created by reflection. R8 full mode drops constructors it never sees
+# called, so without this ML Kit comes up empty and both scanners crash in release builds only.
+-keep class * implements com.google.firebase.components.ComponentRegistrar { <init>(); }

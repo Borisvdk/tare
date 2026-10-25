@@ -120,5 +120,13 @@ touches their real data, or deletes features.
   search-a-licious, filtered to the Netherlands, with a worldwide fallback.
 - The Anthropic SDK ships its own R8 rules; don't add blanket `-keep` rules (they tripled the
   APK size).
+- **Release-only bugs:** R8 (full mode) only runs on release builds, and it broke ML Kit once
+  (registrars created by reflection lost their constructors; both scanners crashed on the phone
+  while every debug build worked). CI builds a release on every PR and runs
+  `scripts/check-release.sh`. For anything reflection-heavy (ML Kit, Play services, Health
+  Connect, serialization), also try the minified build on the emulator: `scripts/dev.sh release`
+  then `adb install -r -d app/build/outputs/apk/release/app-release.apk`.
+- Crash reports from the phone are R8-obfuscated. Each release has `tare-<version>-mapping.txt`
+  attached; look the frames up in it (`retrace`, or grep the class blocks).
 - `Food` ids are namespaced (`usda:`, `off:`, `custom:`, `recipe:`, `ai:`) so re-imports upsert
   instead of duplicating.

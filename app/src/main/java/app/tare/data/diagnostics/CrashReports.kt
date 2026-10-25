@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.ApplicationExitInfo
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import app.tare.BuildConfig
 import java.io.File
 import java.io.PrintWriter
@@ -43,6 +44,7 @@ object CrashReports {
 
     /** A failure that was caught but is worth a report (the camera not starting, say). */
     fun record(context: Context, title: String, error: Throwable) {
+        Log.w("Tare", title, error)
         val trace = StringWriter().also { error.printStackTrace(PrintWriter(it)) }.toString()
         write(context.applicationContext, title, trace)
         // It's shown where it happened; don't offer it again as a crash on the next start.

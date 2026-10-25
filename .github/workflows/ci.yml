@@ -25,6 +25,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - name: Unit, Robolectric and screenshot-render tests
         run: ./gradlew :app:testDebugUnitTest :app:assembleDebug --console=plain
+      # R8 only runs for release builds; build one (debug-signed here) and check what R8
+      # can silently break, so it fails the PR instead of the phone.
+      - name: Release build check
+        run: ./gradlew :app:assembleRelease --console=plain && scripts/check-release.sh
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v7
@@ -61,7 +65,7 @@ jobs:
           TARE_KEYSTORE_PASSWORD: ${{ secrets.TARE_KEYSTORE_PASSWORD }}
           TARE_KEY_ALIAS: ${{ secrets.TARE_KEY_ALIAS }}
           TARE_KEY_PASSWORD: ${{ secrets.TARE_KEY_PASSWORD }}
-        run: ./gradlew :app:assembleRelease --console=plain
+        run: ./gradlew :app:assembleRelease --console=plain && scripts/check-release.sh
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -69,7 +73,10 @@ jobs:
           version="0.1.$(git rev-list --count HEAD)"
           apk="tare-$version.apk"
           cp app/build/outputs/apk/release/app-release.apk "$apk"
-          gh release create "v$version" "$apk" --title "Tare $version" --generate-notes --target "$GITHUB_SHA"
+          # The R8 mapping turns a crash report's obfuscated stack trace back into code.
+          mapping="tare-$version-mapping.txt"
+          cp app/build/outputs/mapping/release/mapping.txt "$mapping"
+          gh release create "v$version" "$apk" "$mapping" --title "Tare $version" --generate-notes --target "$GITHUB_SHA"
       - name: Remove signing key
         if: always()
         run: rm -f "$RUNNER_TEMP/tare-release.jks"
