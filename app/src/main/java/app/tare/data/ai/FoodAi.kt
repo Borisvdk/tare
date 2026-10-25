@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import app.tare.data.settings.AiModel
+import app.tare.domain.Nutrients
 import com.anthropic.client.AnthropicClient
 import com.anthropic.client.okhttp.AnthropicOkHttpClient
 import com.anthropic.core.JsonValue
@@ -25,6 +26,7 @@ import kotlinx.serialization.json.Json
 import java.io.ByteArrayOutputStream
 import java.time.Duration
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 @Serializable
 data class EstimatedItem(
@@ -38,7 +40,12 @@ data class EstimatedItem(
     val fiberPer100g: Double = 0.0,
     /** "high" | "medium" | "low" */
     val confidence: String = "medium",
+    /** Ref of one of the user's own foods ("f3") when the item is that food, else empty. */
+    val myFood: String = "",
 )
+
+/** One of the user's frequent foods, offered to Claude under a short [ref]. */
+data class KnownFood(val ref: String, val name: String, val brand: String?, val per100: Nutrients, val unit: String)
 
 @Serializable
 data class MealEstimate(
@@ -84,11 +91,24 @@ class FoodAi(
 
     @Volatile private var cached: Pair<String, AnthropicClient>? = null
 
-    suspend fun estimateMeal(description: String, photo: ByteArray?): AiResult<MealEstimate> {
+    suspend fun estimateMeal(
+        description: String,
+        photo: ByteArray?,
+        myFoods: List<KnownFood> = emptyList(),
+    ): AiResult<MealEstimate> {
         val text = buildString {
+            if (myFoods.isNotEmpty()) {
+                append("My usual foods (ref | name | brand | per 100 g or ml):\n")
+                myFoods.forEach { f ->
+                    val n = f.per100
+                    append("${f.ref} | ${f.name} | ${f.brand.orEmpty()} | ")
+                    append("${n.kcal.roundToInt()} kcal, P ${n.protein.roundToInt()}, C ${n.carbs.roundToInt()}, F ${n.fat.roundToInt()} per 100 ${f.unit}\n")
+                }
+                append("\n")
+            }
             if (description.isNotBlank()) append("What I ate: ").append(description.trim())
             if (photo != null) {
-                if (isNotEmpty()) append("\n\n")
+                if (description.isNotBlank()) append("\n\n")
                 append("The photo shows what I ate. Estimate every item visible on the plate.")
             }
         }
@@ -229,6 +249,11 @@ class FoodAi(
             ("Volkoren brood", "Peanut butter"). The title is a 1–4 word name for the whole
             meal. Use the note for one short sentence about an assumption worth checking, or
             leave it empty.
+
+            The user may list their usual foods with a short ref. When an item clearly is one
+            of them (same food, and the same brand if one is given), set myFood to its ref and
+            copy its per-100 g values exactly; still estimate the grams eaten. Otherwise leave
+            myFood empty.
         """.trimIndent()
 
         val LABEL_SYSTEM = """
@@ -255,7 +280,7 @@ class FoodAi(
                         "additionalProperties" to false,
                         "required" to listOf(
                             "name", "grams", "isLiquid", "kcalPer100g", "proteinPer100g",
-                            "carbsPer100g", "fatPer100g", "fiberPer100g", "confidence",
+                            "carbsPer100g", "fatPer100g", "fiberPer100g", "confidence", "myFood",
                         ),
                         "properties" to mapOf(
                             "name" to mapOf("type" to "string"),
@@ -267,6 +292,7 @@ class FoodAi(
                             "fatPer100g" to number(),
                             "fiberPer100g" to number(),
                             "confidence" to mapOf("type" to "string", "enum" to listOf("high", "medium", "low")),
+                            "myFood" to mapOf("type" to "string"),
                         ),
                     ),
                 ),
