@@ -27,17 +27,4 @@ object TareIcons {
             }
         }.build()
     }
-
-    /** The Tare mark: zeroed dial with the needle at the top. */
-    val Mark: ImageVector by lazy {
-        ImageVector.Builder("TareMark", 24.dp, 24.dp, 24f, 24f).apply {
-            path(stroke = SolidColor(Color.Black), strokeLineWidth = 2.6f, strokeLineCap = StrokeCap.Round) {
-                moveTo(14.11f, 4.47f)
-                arcTo(8f, 8f, 0f, isMoreThanHalf = true, isPositiveArc = true, x1 = 9.89f, y1 = 4.47f)
-            }
-            path(stroke = SolidColor(Color.Black), strokeLineWidth = 2f, strokeLineCap = StrokeCap.Round) {
-                moveTo(12f, 1.8f); lineTo(12f, 7.2f)
-            }
-        }.build()
-    }
 }
