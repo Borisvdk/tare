@@ -11,8 +11,6 @@ reason.
 - [ ] **Search quality**: when a real search disappoints, add the query to
       `SearchQualityTest` and fix the ranking or aliases (60 queries pass today).
 
-- [ ] **Describe from the log hub's search**: when a query looks like a sentence ("2 eggs
-      and toast"), offer Describe first instead of under "Not it?".
 - [ ] **Copy a whole day**: long-press a day in the week strip → copy to today.
 
 ## Later
@@ -41,6 +39,7 @@ reason.
 - Progress compares the 7-day average with the week before.
 - Describe sends your 40 most-logged foods to Claude so matches reuse your exact product.
 - "Log & next" in the scanner for meals built from several packaged products.
+- Meal-like searches ("2 eggs and toast", "boterham met kaas") put Describe at the top.
 - 15 fixes from an independent code review (see PR #2).
 
 - v0.1: Today, log hub, barcode scan, Claude describe and label reading, saved meals,

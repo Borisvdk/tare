@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import app.tare.data.db.Food
 import app.tare.data.db.MealWithItems
+import app.tare.domain.looksLikeAMeal
 import app.tare.ui.Fmt
 import app.tare.ui.components.FoodRow
 import app.tare.ui.components.ListRow
@@ -40,6 +41,15 @@ fun LazyListScope.searchResults(
     onAskAi: ((String) -> Unit)? = null,
     onCreate: ((String) -> Unit)? = null,
 ) {
+    // "2 eggs and toast" is a meal, not a food name: lead with Describe.
+    val aiFirst = onAskAi != null && results.isSearching && looksLikeAMeal(results.query)
+    if (aiFirst && onAskAi != null) {
+        item(key = "ask-ai-top") {
+            FallbackRow(Icons.Rounded.AutoAwesome, "Describe “${results.query}”", "Claude splits it into items with amounts", Tare.colors.kcal) {
+                onAskAi(results.query)
+            }
+        }
+    }
     if (results.meals.isNotEmpty() && onMeal != null) {
         item(key = "h-meals") { SectionHeader("Meals") }
         items(results.meals, key = { "m-" + it.meal.id }) { meal ->
@@ -84,7 +94,7 @@ fun LazyListScope.searchResults(
         item(key = "fallbacks") {
             SectionHeader(if (results.local.isEmpty() && (results.remote as? RemoteState.Loaded)?.foods.isNullOrEmpty()) "No match" else "Not it?")
         }
-        if (onAskAi != null) {
+        if (onAskAi != null && !aiFirst) {
             item(key = "ask-ai") {
                 FallbackRow(Icons.Rounded.AutoAwesome, "Estimate “${results.query}” with Claude", "Works for whole meals too", Tare.colors.kcal) {
                     onAskAi(results.query)
