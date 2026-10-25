@@ -33,16 +33,24 @@ groceries from Albert Heijn and Jumbo, a mix of Dutch and English food names.
 
 - **Today:** calorie gauge (left / over), protein, carbs and fat against targets, week strip
   with daily rings, entries grouped by time of day (morning, afternoon, evening, night),
-  swipe to delete with undo, tap to edit, long-press to select (save as meal, copy to today,
-  change time, delete).
-- **Log hub:** search across bundled basic foods (USDA, with Dutch aliases), your foods,
-  recipes and saved meals, plus Open Food Facts products online. Shortcuts for scan,
-  describe and quick add. One-tap re-log from recents.
+  each with a `+` to log into it; swipe to delete with undo, tap to edit, long-press to
+  select (save as meal, copy to today, change time, delete). Past days can be copied to
+  today in one tap.
+- **Log hub:** a Morning/Afternoon/Evening/Night selector, then search across bundled basic
+  foods (USDA, with Dutch aliases), your foods, recipes and saved meals, plus Open Food
+  Facts products online. Shortcuts for scan, describe and quick add. "Same as yesterday"
+  cards, favourites and recents with one-tap re-log. Meal-like searches ("2 eggs and
+  toast") lead with Describe.
+- **Amount sheet:** number pad, food portions plus your own ("my bowl"), live macros and
+  what's left after logging.
 - **Barcode scanning:** on-device ML Kit and Open Food Facts lookup. For an unknown product:
   read the label with Claude, or type the values once.
-- **Describe with Claude:** type, dictate or photograph a meal and get editable items with
-  grams and macros, then log them all as one group. Bring your own API key; model is
+- **Describe with Claude:** type, dictate, photograph or share a meal and get editable items
+  with grams and macros, then log them all as one group. Your 40 most-logged foods are
+  offered to Claude so matches reuse your exact products. Bring your own API key; model is
   selectable.
+- **Ways in:** launcher shortcuts (scan, describe, log) and the share sheet ("Log with
+  Tare" for photos and text).
 - **Saved meals:** groups of foods logged together, scalable (½×, 1×, 1½×, 2×).
 - **Recipes:** ingredients plus cooked weight give per-100 g values, so you can log any
   portion by weight.
