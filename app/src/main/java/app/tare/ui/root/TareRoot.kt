@@ -19,6 +19,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import app.tare.data.diagnostics.CrashReports
+import app.tare.ui.copyToClipboard
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,6 +75,16 @@ fun TareRoot(graph: AppGraph, start: Route = Route.Home, deepLinks: MutableState
                         navigator.go(route)
                         deepLinks.value = null
                     }
+                }
+            }
+        }
+        val context = LocalContext.current
+        // A crash last time: offer the report once, so it can be pasted into a bug report.
+        LaunchedEffect(Unit) {
+            CrashReports.unseen(context)?.let { report ->
+                CrashReports.markSeen(context)
+                notifier.show("Tare closed unexpectedly last time", actionLabel = "Copy report", long = true) {
+                    copyToClipboard(context, "Tare crash report", report)
                 }
             }
         }
