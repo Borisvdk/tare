@@ -32,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,6 +49,7 @@ import app.tare.ui.components.MacroStat
 import app.tare.ui.components.NumberPad
 import app.tare.ui.components.PrimaryButton
 import app.tare.ui.components.RoundIconButton
+import app.tare.ui.components.SecondaryButton
 import app.tare.ui.components.SelectChip
 import app.tare.ui.components.TareSheet
 import app.tare.ui.components.TextAction
@@ -79,6 +82,8 @@ fun AmountSheet(
     onDelete: (() -> Unit)? = null,
     onToggleFavorite: (() -> Unit)? = null,
     onEditFood: (() -> Unit)? = null,
+    /** Scanner only: log and go straight back to scanning the next product. */
+    onConfirmAndNext: ((AmountResult) -> Unit)? = null,
 ) {
     val colors = Tare.colors
     val (defaultGrams, defaultLabel) = remember(food.id) { defaultAmount(food) }
@@ -243,6 +248,14 @@ fun AmountSheet(
                     onClick = { pickingTime = true },
                     color = colors.textMuted,
                     modifier = Modifier.padding(end = 6.dp),
+                )
+            }
+            if (onConfirmAndNext != null) {
+                SecondaryButton(
+                    "Log & next",
+                    onClick = { onConfirmAndNext(AmountResult(grams, portion, time)) },
+                    enabled = grams > 0,
+                    modifier = Modifier.padding(end = 8.dp).semantics { contentDescription = "Log and scan another" },
                 )
             }
             PrimaryButton(

@@ -92,6 +92,9 @@ class ScanViewModel(private val graph: AppGraph, private val day: LocalDate, pri
     fun sessionTime(): LocalTime? =
         part?.let { logTimeFor(it, day, Instant.ofEpochMilli(graph.now()).atZone(ZoneId.systemDefault())) }
 
+    /** App-scoped: the snackbar's Undo may be tapped after the scanner has closed. */
+    fun undo(entry: LogEntry) = graph.appScope.launch { graph.log.delete(listOf(entry)) }
+
     suspend fun log(food: Food, grams: Double, portion: Portion?, time: LocalTime?): LogEntry =
         graph.log.logFood(food, grams, portion, day, time ?: sessionTime())
 }

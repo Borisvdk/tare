@@ -156,6 +156,17 @@ class ScreenshotTest {
         }
     }
 
+    @Test fun amountSheetFromScanner() {
+        seed(ThemeMode.DARK, withDiary = false)
+        shoot("amount_sheet_scan_dark", waitFor = "Log & next") {
+            TareTheme(ThemeMode.DARK) {
+                CompositionLocalProvider(LocalAppGraph provides graph) {
+                    AmountSheet(food = skyr, mode = AmountMode.LOG, remainingKcal = 1240.0, onConfirm = {}, onDismiss = {}, onConfirmAndNext = {})
+                }
+            }
+        }
+    }
+
     @Test fun progress() {
         seed(ThemeMode.DARK)
         shoot("progress_dark", waitFor = "kg") { tab(ThemeMode.DARK) { ProgressScreen(PaddingValues(bottom = 24.dp)) } }
