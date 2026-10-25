@@ -59,7 +59,7 @@ import app.tare.ui.components.TareTextField
 import app.tare.ui.components.TextAction
 import app.tare.ui.navigation.LocalAppGraph
 import app.tare.ui.navigation.LocalNavigator
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.theme.Radii
 import app.tare.ui.theme.Tare
 import kotlinx.coroutines.launch
@@ -69,7 +69,7 @@ import java.time.LocalDate
 fun SettingsScreen() {
     val graph = LocalAppGraph.current
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val uri = LocalUriHandler.current
@@ -92,7 +92,7 @@ fun SettingsScreen() {
                     { "Backup saved · ${it.entries} entries, ${it.meals} meals" },
                     { "Backup failed: ${it.message}" },
                 )
-                snackbar.showSnackbar(message)
+                notify.show(message)
             }
         }
     }
@@ -164,7 +164,7 @@ fun SettingsScreen() {
                                 scope.launch {
                                     graph.secrets.setApiKey(keyDraft)
                                     keyDraft = ""
-                                    snackbar.showSnackbar("API key saved")
+                                    notify.show("API key saved")
                                 }
                             }, enabled = keyDraft.startsWith("sk-"))
                         }
@@ -247,7 +247,7 @@ fun SettingsScreen() {
                             { "Restored ${it.entries} entries, ${it.meals} meals, ${it.weights} weigh-ins" },
                             { "Import failed: ${it.message}" },
                         )
-                        snackbar.showSnackbar(message)
+                        notify.show(message)
                     }
                 })
             },

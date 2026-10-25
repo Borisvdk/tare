@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.util.zip.CRC32
 
 plugins {
     alias(libs.plugins.android.application)
@@ -17,6 +18,11 @@ val commitCount: Int = providers.environmentVariable("TARE_VERSION_CODE").orNull
         isIgnoreExitValue = true
     }.standardOutput.asText.get().trim().toIntOrNull()
     ?: 1
+
+// Re-import the bundled foods only when the dataset itself changes, not on every release.
+val genericDatasetVersion: Int = providers.fileContents(layout.projectDirectory.file("src/main/assets/generic_foods.tsv"))
+    .asBytes.map { bytes -> CRC32().apply { update(bytes) }.value.toInt() }
+    .getOrElse(0)
 
 // Release signing: env vars (CI) or an untracked keystore.properties (local).
 val keystoreProps = Properties().apply {
@@ -39,6 +45,7 @@ android {
         // Phone (arm64) and emulator (x86_64) only; keeps ML Kit's native libs out of other ABIs.
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         manifestPlaceholders["appLabel"] = "Tare"
+        buildConfigField("int", "GENERIC_DATASET_VERSION", genericDatasetVersion.toString())
     }
 
     signingConfigs {
@@ -94,6 +101,10 @@ android {
             }
         }
     }
+
+    // Room's MigrationTestHelper reads the exported schemas from assets. Robolectric tests see
+    // the debug variant's assets, so add them there (a few KB; never in release builds).
+    sourceSets.getByName("debug").assets.directories.add("$projectDir/schemas")
 
     packaging {
         resources.excludes += listOf("/META-INF/{AL2.0,LGPL2.1}", "/META-INF/native-image/**")

@@ -51,7 +51,7 @@ import app.tare.ui.log.AmountSheet
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.theme.Tare
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -62,9 +62,10 @@ fun FoodEditorScreen(route: Route.FoodEditor) {
         FoodEditorViewModel(it, route.foodId, route.barcode, route.name)
     }
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
     var saved by remember { mutableStateOf<Food?>(null) }
+    var busy by remember { mutableStateOf(false) }
     val media = rememberMediaInput(onPhoto = viewModel::readLabel)
     LaunchedEffect(Unit) { if (route.readLabel) media.takePhoto() }
 
@@ -178,17 +179,20 @@ fun FoodEditorScreen(route: Route.FoodEditor) {
         PrimaryButton(
             text = if (route.logDay != null) "Save and log" else "Save",
             onClick = {
+                if (busy) return@PrimaryButton
+                busy = true
                 scope.launch {
                     val food = viewModel.save()
                     if (route.logDay != null) {
                         saved = food
+                        busy = false
                     } else {
                         nav.back()
-                        snackbar.showSnackbar("Saved ${food.name}")
+                        notify.show("Saved ${food.name}")
                     }
                 }
             },
-            enabled = viewModel.canSave,
+            enabled = viewModel.canSave && !busy,
             modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp),
         )
     }
@@ -199,10 +203,12 @@ fun FoodEditorScreen(route: Route.FoodEditor) {
             food = food,
             mode = AmountMode.LOG,
             onConfirm = { result ->
+                if (busy) return@AmountSheet
+                busy = true
                 scope.launch {
                     val entry = viewModel.log(food, day, result.grams, result.portion, result.time)
                     nav.back()
-                    snackbar.showSnackbar("Logged ${entry.name} · ${Fmt.kcal(entry.nutrients.kcal)} kcal")
+                    notify.show("Logged ${entry.name} · ${Fmt.kcal(entry.nutrients.kcal)} kcal")
                 }
             },
             onDismiss = {

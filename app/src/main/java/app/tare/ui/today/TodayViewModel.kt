@@ -80,6 +80,9 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
 
     private val selectedDay = MutableStateFlow(today())
 
+    /** The day that was "today" when the user last looked; detects midnight while open. */
+    private var lastSeenToday = today()
+
     val state: StateFlow<TodayState> = combine(
         selectedDay,
         selectedDay.flatMapLatest { graph.log.observeDay(it) },
@@ -108,6 +111,18 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
         selectedDay.value = today()
     }
 
+    /**
+     * Called when the screen resumes. If the date changed since the user last looked and they
+     * were on "today", follow the new day; if they were browsing another day, leave it.
+     */
+    fun onResume() {
+        val now = today()
+        if (now != lastSeenToday) {
+            if (selectedDay.value == lastSeenToday) selectedDay.value = now
+            lastSeenToday = now
+        }
+    }
+
     fun updateAmount(entry: LogEntry, grams: Double, portion: Portion?, time: LocalTime?) = viewModelScope.launch {
         graph.log.updateAmount(entry, grams, portion)
         if (time != null) graph.log.get(entry.id)?.let { graph.log.setTime(listOf(it), time) }
@@ -130,7 +145,7 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
 
     suspend fun saveAsMeal(name: String, entries: List<LogEntry>): String = graph.meals.saveFromEntries(name, entries)
 
-    suspend fun food(id: String): Food? = graph.foods.get(id)
+    suspend fun food(id: String): Food? = graph.foods.resolve(id)
 
     fun toggleFavorite(food: Food) = viewModelScope.launch { graph.foods.setFavorite(food.id, !food.favorite) }
 

@@ -2,6 +2,7 @@ package app.tare.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,11 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import app.tare.data.db.Food
 import app.tare.domain.FoodSource
 import app.tare.ui.Fmt
@@ -138,6 +142,7 @@ fun FoodRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onQuickAdd: (() -> Unit)? = null,
+    showImage: Boolean = false,
 ) {
     val (grams, portion) = defaultAmount(food)
     ListRow(
@@ -145,10 +150,14 @@ fun FoodRow(
         subtitle = foodSubtitle(food, grams, portion),
         kcal = food.per100.forGrams(grams).kcal,
         modifier = modifier,
-        leading = if (food.favorite) {
-            { Icon(Icons.Rounded.Star, null, tint = Tare.colors.fat, modifier = Modifier.size(16.dp)) }
-        } else {
-            null
+        leading = when {
+            showImage -> {
+                { FoodImage(food.imageUrl, size = 40.dp) }
+            }
+            food.favorite -> {
+                { Icon(Icons.Rounded.Star, null, tint = Tare.colors.fat, modifier = Modifier.size(16.dp)) }
+            }
+            else -> null
         },
         trailingAction = onQuickAdd?.let { add ->
             {
@@ -163,6 +172,24 @@ fun FoodRow(
         },
         onClick = onClick,
     )
+}
+
+/** Product photo thumbnail; a quiet placeholder when there's no image. */
+@Composable
+fun FoodImage(url: String?, size: Dp, modifier: Modifier = Modifier) {
+    Box(
+        modifier.size(size).clip(Radii.chip).background(Tare.colors.surfaceRaised),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (url != null) {
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+    }
 }
 
 @Composable

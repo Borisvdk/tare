@@ -70,7 +70,7 @@ fun rankRemote(products: List<Pair<Food, RemoteSignals>>, query: String): List<F
                 else -> 0.0
             }
             score += ln(1.0 + signals.scans) * 6.0
-            if (signals.soldInNetherlands) score += 15.0
+            if (signals.soldInNetherlands) score += 25.0
             score -= name.length * 0.05
             food to score
         }

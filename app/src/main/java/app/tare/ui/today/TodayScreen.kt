@@ -36,8 +36,6 @@ import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -52,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -63,6 +62,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.domain.FoodSource
@@ -85,7 +85,7 @@ import app.tare.ui.log.AmountSheet
 import app.tare.ui.log.QuickAddSheet
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.settings.TargetsSheet
 import app.tare.ui.theme.Radii
 import app.tare.ui.theme.Tare
@@ -104,7 +104,7 @@ private val HEADER_HEIGHT = 64.dp
 fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, contentPadding: PaddingValues) {
     val state by viewModel.state.collectAsState()
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
 
@@ -115,6 +115,11 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
     var savingMeal by remember { mutableStateOf<List<LogEntry>?>(null) }
     var retiming by remember { mutableStateOf<List<LogEntry>?>(null) }
 
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
+
     LaunchedEffect(state.day) {
         onDayChange(state.day)
         selected = emptySet()
@@ -123,9 +128,8 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
     fun deleteWithUndo(entries: List<LogEntry>) {
         scope.launch {
             val removed = viewModel.delete(entries)
-            val label = if (removed.size == 1) removed.first().name else "${removed.size} items"
-            val result = snackbar.showSnackbar("Removed $label", actionLabel = "Undo", duration = SnackbarDuration.Short)
-            if (result == SnackbarResult.ActionPerformed) viewModel.restore(removed)
+            val label = if (removed.size == 1) removed.first().name else Fmt.items(removed.size)
+            notify.show("Removed $label", actionLabel = "Undo") { viewModel.restore(removed) }
         }
     }
 
@@ -158,7 +162,7 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                         onCopy = {
                             viewModel.copyToToday(selectedEntries)
                             selected = emptySet()
-                            scope.launch { snackbar.showSnackbar("Copied to today") }
+                            notify.show("Copied to today")
                         },
                         onRetime = { retiming = selectedEntries },
                         onDelete = {
@@ -264,7 +268,9 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                     viewModel.toggleFavorite(food)
                     editing = entry to food.copy(favorite = !food.favorite)
                 },
-                onEditFood = if (food.source == FoodSource.CUSTOM || food.source == FoodSource.OPEN_FOOD_FACTS) {
+                onEditFood = if (food.hidden) {
+                    null
+                } else if (food.source == FoodSource.CUSTOM || food.source == FoodSource.OPEN_FOOD_FACTS) {
                     {
                         editing = null
                         nav.go(Route.FoodEditor(foodId = food.id))
@@ -309,7 +315,7 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                     viewModel.saveAsMeal(name, entries)
                     savingMeal = null
                     selected = emptySet()
-                    snackbar.showSnackbar("Saved “$name” to your meals")
+                    notify.show("Saved “$name” to your meals")
                 }
             },
         )
@@ -344,7 +350,7 @@ private fun LazyListScope.sectionItems(
 ) {
     section.items.forEach { item ->
         when (item) {
-            is DayItem.Single -> item(key = item.key) {
+            is DayItem.Single -> item(key = "${section.part}-${item.key}") {
                 SwipeToDelete(onDelete = { onSwipeDelete(item.entry) }, modifier = Modifier.animateItem()) {
                     EntryRow(
                         entry = item.entry,
@@ -356,7 +362,7 @@ private fun LazyListScope.sectionItems(
             }
             is DayItem.Group -> {
                 val expanded = item.groupId in expandedGroups
-                item(key = item.key) {
+                item(key = "${section.part}-${item.key}") {
                     val allSelected = item.entries.all { it.id in selected }
                     ListRow(
                         title = item.name,
@@ -378,7 +384,7 @@ private fun LazyListScope.sectionItems(
                         onLongClick = { onLongPress(item.entries) },
                     )
                 }
-                item(key = item.key + "-children") {
+                item(key = "${section.part}-${item.key}-children") {
                     AnimatedVisibility(expanded, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
                         Column(Modifier.padding(start = 16.dp)) {
                             item.entries.forEach { entry ->
@@ -412,10 +418,11 @@ private fun EntryRow(entry: LogEntry, selected: Boolean, onClick: () -> Unit, on
 @Composable
 private fun SwipeToDelete(onDelete: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val state = rememberSwipeToDismissBoxState()
+    val currentOnDelete by rememberUpdatedState(onDelete)
     LaunchedEffect(state) {
         snapshotFlow { state.currentValue }.collect { value ->
             if (value == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
+                currentOnDelete()
                 state.snapTo(SwipeToDismissBoxValue.Settled)
             }
         }
@@ -437,7 +444,9 @@ private fun SwipeToDelete(onDelete: () -> Unit, modifier: Modifier = Modifier, c
             }
         },
     ) {
-        Box(Modifier.background(Tare.colors.background, Radii.row)) { content() }
+        // Square, opaque backing: rounded corners here let the red delete layer peek through
+        // between rows when nothing is being swiped.
+        Box(Modifier.background(Tare.colors.background)) { content() }
     }
 }
 

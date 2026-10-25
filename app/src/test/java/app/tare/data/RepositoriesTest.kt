@@ -5,6 +5,12 @@ import androidx.test.core.app.ApplicationProvider
 import app.tare.data.backup.BackupManager
 import app.tare.data.db.Food
 import app.tare.data.db.TareDatabase
+import app.tare.data.food.FoodRepository
+import app.tare.data.food.OpenFoodFactsClient
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respondError
+import io.ktor.http.HttpStatusCode
 import app.tare.data.log.LogRepository
 import app.tare.data.meal.DraftItem
 import app.tare.data.meal.MealRepository
@@ -89,12 +95,43 @@ class RepositoriesTest {
     }
 
     @Test
-    fun updatingAmountRecomputesFromFood() = runTest {
+    fun updatingAmountScalesTheSnapshot() = runTest {
         val entry = log.logFood(chicken, 172.0, chicken.portions.first(), day)
         log.updateAmount(entry, 86.0, chicken.portions.first())
         val updated = log.get(entry.id)!!
         assertThat(updated.nutrients.protein).isWithin(0.01).of(26.66)
         assertThat(updated.portionLabel).isEqualTo("breast")
+    }
+
+    @Test
+    fun editingAnOldEntryIgnoresLaterChangesToTheFood() = runTest {
+        val entry = log.logFood(rice, 200.0, null, day) // 260 kcal
+        db.foodDao().upsert(rice.copy(per100 = Nutrients(200.0))) // e.g. re-estimated or edited
+        log.updateAmount(log.get(entry.id)!!, 100.0, null)
+        assertThat(log.get(entry.id)!!.nutrients.kcal).isWithin(0.01).of(130.0)
+    }
+
+    @Test
+    fun searchMatchesEveryTokenEvenWhenOneIsCommon() = runTest {
+        val foods = FoodRepository(db.foodDao(), OpenFoodFactsClient(HttpClient(MockEngine { respondError(HttpStatusCode.ServiceUnavailable) })), now)
+        // 450 popular "cooked" foods would have pushed the beans out of a 400-row candidate list.
+        db.foodDao().upsertAll(
+            (1..450).map { i -> food("usda:c$i", "Something $i, cooked", Nutrients(100.0)).copy(popularity = 50) } +
+                food("usda:beans", "Beans, navy, mature seeds, cooked, boiled", Nutrients(140.0)),
+        )
+        assertThat(foods.searchLocal("beans cooked").map { it.id }).contains("usda:beans")
+    }
+
+    @Test
+    fun correctedProductsResolveToTheFork() = runTest {
+        val foods = FoodRepository(db.foodDao(), OpenFoodFactsClient(HttpClient(MockEngine { respondError(HttpStatusCode.ServiceUnavailable) })), now)
+        val product = food("off:871", "Kwark", Nutrients(50.0)).copy(source = FoodSource.OPEN_FOOD_FACTS, barcode = "871")
+        db.foodDao().upsert(product)
+        val fork = foods.saveCustom(product.copy(per100 = Nutrients(60.0, 10.0)))
+        assertThat(fork.id).startsWith("custom:")
+        assertThat(db.foodDao().get(product.id)!!.hidden).isTrue()
+        assertThat(foods.resolve(product.id)!!.id).isEqualTo(fork.id)
+        assertThat(foods.lookupBarcode("871")).isEqualTo(app.tare.data.food.BarcodeResult.Found("871", db.foodDao().get(fork.id)!!))
     }
 
     @Test

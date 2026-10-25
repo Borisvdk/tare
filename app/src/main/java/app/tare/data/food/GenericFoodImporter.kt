@@ -33,21 +33,25 @@ class GenericFoodImporter(
         } catch (_: Exception) {
             return@withContext
         }
-        val used = dao.usedGeneric().associateBy { it.id }
-        val foods = stream.use { parseGenericFoods(it, now()) }.map { food ->
-            used[food.id]?.let {
-                food.copy(
-                    useCount = it.useCount,
-                    lastUsedAt = it.lastUsedAt,
-                    lastGrams = it.lastGrams,
-                    lastPortionLabel = it.lastPortionLabel,
-                    favorite = it.favorite,
-                    hidden = it.hidden,
-                    createdAt = it.createdAt,
-                )
-            } ?: food
+        val parsed = stream.use { parseGenericFoods(it, now()) }
+        // Read usage inside the transaction so a log made during the import isn't overwritten.
+        db.withTransaction {
+            val used = dao.usedGeneric().associateBy { it.id }
+            val foods = parsed.map { food ->
+                used[food.id]?.let {
+                    food.copy(
+                        useCount = it.useCount,
+                        lastUsedAt = it.lastUsedAt,
+                        lastGrams = it.lastGrams,
+                        lastPortionLabel = it.lastPortionLabel,
+                        favorite = it.favorite,
+                        hidden = it.hidden,
+                        createdAt = it.createdAt,
+                    )
+                } ?: food
+            }
+            foods.chunked(500).forEach { dao.upsertAll(it) }
         }
-        db.withTransaction { foods.chunked(500).forEach { dao.upsertAll(it) } }
         settings.setGenericDatasetVersion(datasetVersion)
     }
 

@@ -68,7 +68,8 @@ case "${1:-help}" in
     ;;
   install | run)
     gradle :app:assembleDebug
-    "$ADB" install -r app/build/outputs/apk/debug/app-debug.apk
+    # -d: version codes follow commit count, so switching branches can "downgrade".
+    "$ADB" install -r -d app/build/outputs/apk/debug/app-debug.apk
     "$ADB" shell am start -n "$PKG/app.tare.MainActivity"
     ;;
   launch) "$ADB" shell am start -n "$PKG/app.tare.MainActivity" ;;
@@ -83,7 +84,12 @@ case "${1:-help}" in
     [ $# -ge 2 ] || { echo "usage: dev.sh tap <text or content-desc>"; exit 1; }
     nodes=$(ui_nodes)
     # awk, not `grep -iF`: Git Bash's grep aborts on that flag combination.
-    hit=$(printf '%s\n' "$nodes" | awk -F'\t' -v q="$2" 'index(tolower($1), tolower(q)) { print; exit }')
+    # Exact (case-insensitive) labels first, then labels containing the text. An optional third
+    # argument picks the nth match, e.g. `tap Banana 2` when the search field also says "banana".
+    hit=$(printf '%s\n' "$nodes" | awk -F'\t' -v q="$2" -v n="${3:-1}" '
+      tolower($1) == tolower(q) { exact[++e] = $0 }
+      index(tolower($1), tolower(q)) { part[++p] = $0 }
+      END { if (e >= n) print exact[n]; else if (p >= n) print part[n] }')
     [ -n "$hit" ] || { echo "No element matching '$2'"; exit 1; }
     x=$(printf '%s' "$hit" | cut -f2)
     y=$(printf '%s' "$hit" | cut -f3)
@@ -113,7 +119,7 @@ scripts/dev.sh <command>
   reset        Clear the debug app's data
   screen [f]   Save a device screenshot (default .scratch/screen.png)
   ui           List visible elements: label, x, y
-  tap <text>   Tap the first element whose text/description contains <text>
+  tap <text> [n]  Tap the nth (default 1st) element labelled <text> (exact first, then contains)
   type <text>  Type text into the focused field
   back         Press back
   dark|light   Switch the device theme

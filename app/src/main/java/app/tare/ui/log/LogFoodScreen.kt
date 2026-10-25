@@ -74,7 +74,7 @@ import app.tare.ui.components.pressScale
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
-import app.tare.ui.root.LocalSnackbar
+import app.tare.ui.root.LocalNotifier
 import app.tare.ui.theme.Radii
 import app.tare.ui.theme.Tare
 import kotlinx.coroutines.launch
@@ -87,7 +87,7 @@ fun LogFoodScreen(route: Route.LogFood) {
     val hub by viewModel.hub.collectAsState()
     val results by viewModel.search.results.collectAsState()
     val nav = LocalNavigator.current
-    val snackbar = LocalSnackbar.current
+    val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
     val focus = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
@@ -110,12 +110,9 @@ fun LogFoodScreen(route: Route.LogFood) {
 
     fun announce(entries: List<LogEntry>) {
         if (entries.isEmpty()) return
-        scope.launch {
-            val kcal = entries.sumOf { it.nutrients.kcal }
-            val label = if (entries.size == 1) entries.first().name else "${entries.size} items"
-            val result = snackbar.showSnackbar("Logged $label · ${Fmt.kcal(kcal)} kcal", actionLabel = "Undo")
-            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) viewModel.undo(entries)
-        }
+        val kcal = entries.sumOf { it.nutrients.kcal }
+        val label = if (entries.size == 1) entries.first().name else Fmt.items(entries.size)
+        notify.show("Logged $label · ${Fmt.kcal(kcal)} kcal", actionLabel = "Undo") { viewModel.undo(entries) }
     }
 
     fun quickLog(food: Food) {
@@ -166,6 +163,18 @@ fun LogFoodScreen(route: Route.LogFood) {
                             }
                         }
                     }
+                    if (hub.yesterday.isNotEmpty()) {
+                        item(key = "h-yesterday") { SectionHeader("Same as yesterday") }
+                        item(key = "yesterday") {
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                items(hub.yesterday, key = { it.part.name }) { source ->
+                                    CopyCard(source) {
+                                        scope.launch { announce(viewModel.copy(source)) }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if (hub.meals.isNotEmpty()) {
                         item(key = "h-meals") { SectionHeader("Meals") }
                         item(key = "meals") {
@@ -176,12 +185,18 @@ fun LogFoodScreen(route: Route.LogFood) {
                             }
                         }
                     }
+                    if (hub.favorites.isNotEmpty()) {
+                        item(key = "h-favorites") { SectionHeader("Favourites") }
+                        items(hub.favorites, key = { "fav-" + it.id }) { food ->
+                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
+                        }
+                    }
                     if (hub.recent.isNotEmpty()) {
                         item(key = "h-recent") { SectionHeader("Recent") }
                         items(hub.recent, key = { "recent-" + it.id }) { food ->
                             FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
                         }
-                    } else {
+                    } else if (hub.favorites.isEmpty()) {
                         item(key = "hint") {
                             Text(
                                 "Search thousands of basic foods and millions of products, scan a barcode, or describe a whole meal and let Claude do the maths.",
@@ -291,6 +306,25 @@ private fun MealCard(meal: MealWithItems, onClick: () -> Unit) {
             Text(Fmt.items(meal.items.size), style = Tare.type.caption, color = Tare.colors.textMuted)
             Spacer(Modifier.height(12.dp))
             KcalFigure(meal.nutrients.kcal)
+        }
+    }
+}
+
+@Composable
+private fun CopyCard(source: CopySource, onClick: () -> Unit) {
+    Card(Modifier.width(172.dp), padding = PaddingValues(16.dp), onClick = onClick) {
+        Column {
+            Text(source.part.label, style = Tare.type.bodyStrong, color = Tare.colors.text)
+            Text(
+                source.entries.map { it.groupName ?: it.name }.distinct().joinToString(", "),
+                style = Tare.type.caption,
+                color = Tare.colors.textMuted,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                minLines = 2,
+            )
+            Spacer(Modifier.height(10.dp))
+            KcalFigure(source.kcal)
         }
     }
 }

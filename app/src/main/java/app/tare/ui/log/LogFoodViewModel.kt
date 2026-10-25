@@ -19,10 +19,20 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import app.tare.ui.today.DayPart
+import java.time.Instant
+import java.time.ZoneId
 import java.time.LocalDate
 import java.time.LocalTime
 
+/** One time-of-day block from yesterday that can be copied to the current day in one tap. */
+data class CopySource(val part: DayPart, val entries: List<LogEntry>) {
+    val kcal: Double get() = entries.sumOf { it.nutrients.kcal }
+}
+
 data class LogHubState(
+    val yesterday: List<CopySource> = emptyList(),
+    val favorites: List<Food> = emptyList(),
     val recent: List<Food> = emptyList(),
     val meals: List<MealWithItems> = emptyList(),
     val dayTotals: Nutrients = Nutrients.Zero,
@@ -43,15 +53,25 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate) : ViewMo
 
     val search = FoodSearch(graph, viewModelScope, includeMeals = true)
 
+    private val yesterday = graph.log.observeDay(day.minusDays(1)).map { entries ->
+        val zone = ZoneId.systemDefault()
+        entries.groupBy { DayPart.of(Instant.ofEpochMilli(it.loggedAt).atZone(zone).toLocalTime()) }
+            .toSortedMap()
+            .map { (part, list) -> CopySource(part, list) }
+    }
+
     val hub: StateFlow<LogHubState> = combine(
         graph.foods.recent(30),
         graph.meals.observeAll(),
         graph.log.observeDay(day),
         graph.settings.targets,
-        baseline,
-    ) { recent, meals, entries, targets, base ->
+        combine(baseline, yesterday, graph.foods.favorites(), ::Triple),
+    ) { recent, meals, entries, targets, (base, yesterday, favorites) ->
         LogHubState(
-            recent = recent,
+            yesterday = yesterday,
+            favorites = favorites,
+            // Favourites have their own section; don't list them twice.
+            recent = recent.filterNot { it.favorite },
             meals = meals,
             dayTotals = entries.map { it.nutrients }.sum(),
             targets = targets,
@@ -81,6 +101,8 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate) : ViewMo
     suspend fun logQuick(name: String, nutrients: Nutrients): LogEntry {
         return graph.log.logQuick(name, nutrients, day)
     }
+
+    suspend fun copy(source: CopySource): List<LogEntry> = graph.log.copyTo(source.entries, day)
 
     fun undo(entries: List<LogEntry>) = viewModelScope.launch { graph.log.delete(entries) }
 

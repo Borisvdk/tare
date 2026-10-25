@@ -76,7 +76,7 @@ fun LazyListScope.searchResults(
         is RemoteState.Loaded -> if (remote.foods.isNotEmpty()) {
             item(key = "h-remote") { SectionHeader("Products") }
             items(remote.foods, key = { "r-" + it.id }) { food ->
-                FoodRow(food, onClick = { onFood(food) }, modifier = Modifier.animateItem())
+                FoodRow(food, onClick = { onFood(food) }, modifier = Modifier.animateItem(), showImage = true)
             }
         }
     }

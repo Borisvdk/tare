@@ -69,6 +69,6 @@ class AppGraph(
     val ai: FoodAi by lazy { FoodAi(apiKey = { secrets.apiKey() }, model = { settings.aiModel.first() }) }
 
     val genericImporter: GenericFoodImporter by lazy {
-        GenericFoodImporter(context.assets, db, settings, BuildConfig.VERSION_CODE, now)
+        GenericFoodImporter(context.assets, db, settings, BuildConfig.GENERIC_DATASET_VERSION, now)
     }
 }

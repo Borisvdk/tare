@@ -38,6 +38,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import app.tare.data.db.WeightEntry
 import app.tare.ui.Fmt
 import app.tare.ui.components.AmountInputState
@@ -63,6 +64,10 @@ fun ProgressScreen(contentPadding: PaddingValues) {
     var range by rememberSaveable { mutableStateOf(Range.QUARTER) }
     var weighing by remember { mutableStateOf<WeightEntry?>(null) }
     var newWeight by remember { mutableStateOf(false) }
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
 
     LazyColumn(
         Modifier.fillMaxSize(),

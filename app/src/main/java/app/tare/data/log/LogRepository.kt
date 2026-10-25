@@ -103,12 +103,15 @@ class LogRepository(
         return entries.zip(ids) { e, id -> e.copy(id = id) }
     }
 
+    /**
+     * Changes the amount of an existing entry by scaling its own snapshot, so a food edited
+     * (or re-estimated) since then never rewrites this entry's history.
+     */
     suspend fun updateAmount(entry: LogEntry, grams: Double, portion: Portion?) {
-        val food = entry.foodId?.let { foodDao.get(it) }
+        val old = entry.grams
         val nutrients = when {
-            food != null -> food.per100.forGrams(grams)
-            entry.grams != null && entry.grams > 0 -> entry.nutrients * (grams / entry.grams)
-            else -> entry.nutrients
+            old != null && old > 0 -> entry.nutrients * (grams / old)
+            else -> entry.foodId?.let { foodDao.get(it) }?.per100?.forGrams(grams) ?: entry.nutrients
         }
         dao.update(
             entry.copy(
@@ -118,7 +121,6 @@ class LogRepository(
                 nutrients = nutrients,
             ),
         )
-        if (food != null) foodDao.markUsed(food.id, now(), grams, portion?.label)
     }
 
     suspend fun update(entry: LogEntry) = dao.update(entry)
@@ -137,14 +139,15 @@ class LogRepository(
         dao.insertAll(entries)
     }
 
-    suspend fun copyTo(entries: List<LogEntry>, day: LocalDate) {
+    /** Copies entries to [day] at the same time of day. Returns the new rows (for undo). */
+    suspend fun copyTo(entries: List<LogEntry>, day: LocalDate): List<LogEntry> {
         val groupIds = entries.mapNotNull { it.groupId }.distinct().associateWith { UUID.randomUUID().toString() }
-        dao.insertAll(
-            entries.map { e ->
-                val time = Instant.ofEpochMilli(e.loggedAt).atZone(zone()).toLocalTime()
-                e.copy(id = 0, day = day.toEpochDay(), loggedAt = timestamp(day, time), groupId = e.groupId?.let(groupIds::get))
-            },
-        )
+        val copies = entries.map { e ->
+            val time = Instant.ofEpochMilli(e.loggedAt).atZone(zone()).toLocalTime()
+            e.copy(id = 0, day = day.toEpochDay(), loggedAt = timestamp(day, time), groupId = e.groupId?.let(groupIds::get))
+        }
+        val ids = dao.insertAll(copies)
+        return copies.zip(ids) { e, id -> e.copy(id = id) }
     }
 
     private fun entryFor(
