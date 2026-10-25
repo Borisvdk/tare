@@ -38,6 +38,7 @@ android {
         versionName = "0.1.$commitCount"
         // Phone (arm64) and emulator (x86_64) only; keeps ML Kit's native libs out of other ABIs.
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+        manifestPlaceholders["appLabel"] = "Tare"
     }
 
     signingConfigs {
@@ -56,6 +57,7 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            manifestPlaceholders["appLabel"] = "Tare dev"
         }
         release {
             isMinifyEnabled = true
