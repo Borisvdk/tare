@@ -217,6 +217,25 @@ class FoodRepository(
 
     suspend fun setFavorite(id: String, favorite: Boolean) = dao.setFavorite(id, favorite)
 
+    /**
+     * Stars or unstars [food] and returns the new state. A product straight from Open Food Facts
+     * isn't stored yet, so it's saved first.
+     */
+    suspend fun toggleFavorite(food: Food): Boolean = withContext(Dispatchers.IO) {
+        val stored = dao.get(food.id) ?: saveRemote(food)
+        val favorite = !stored.favorite
+        dao.setFavorite(stored.id, favorite)
+        favorite
+    }
+
+    /** Stars every food in [ids] (skipping missing ones) and returns the ids that changed. */
+    suspend fun favoriteAll(ids: Collection<String>): List<String> = withContext(Dispatchers.IO) {
+        ids.mapNotNull { id -> resolve(id)?.takeIf { !it.favorite } }
+            .distinctBy { it.id }
+            .onEach { dao.setFavorite(it.id, true) }
+            .map { it.id }
+    }
+
     suspend fun hide(id: String) = dao.hide(id, now())
 
     /** Undo for [hide]. */
