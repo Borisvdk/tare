@@ -1,0 +1,87 @@
+package app.tare.data.settings
+
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import app.tare.domain.Targets
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+
+val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+enum class ThemeMode { SYSTEM, DARK, LIGHT }
+
+/** Claude models offered in settings. The first entry is the default. */
+enum class AiModel(val id: String, val label: String, val blurb: String) {
+    OPUS("claude-opus-5-5", "Claude Opus 5.5", "Most accurate estimates"),
+    SONNET("claude-sonnet-5-5", "Claude Sonnet 5.5", "Faster, about half the cost"),
+    HAIKU("claude-haiku-5-5", "Claude Haiku 5.5", "Fastest and cheapest"),
+    ;
+
+    companion object {
+        fun fromId(id: String?): AiModel = entries.firstOrNull { it.id == id } ?: OPUS
+    }
+}
+
+class SettingsRepository(private val store: DataStore<Preferences>) {
+
+    val targets: Flow<Targets> = store.data.map { p ->
+        val d = Targets()
+        Targets(
+            kcal = p[TARGET_KCAL] ?: d.kcal,
+            protein = p[TARGET_PROTEIN] ?: d.protein,
+            carbs = p[TARGET_CARBS] ?: d.carbs,
+            fat = p[TARGET_FAT] ?: d.fat,
+        )
+    }
+
+    /** False until the user has confirmed targets once; drives the setup card on Today. */
+    val targetsConfirmed: Flow<Boolean> = store.data.map { it[TARGETS_CONFIRMED] ?: false }
+
+    val theme: Flow<ThemeMode> = store.data.map { p ->
+        p[THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM
+    }
+
+    val aiModel: Flow<AiModel> = store.data.map { AiModel.fromId(it[AI_MODEL]) }
+
+    suspend fun setTargets(targets: Targets) {
+        store.edit {
+            it[TARGET_KCAL] = targets.kcal
+            it[TARGET_PROTEIN] = targets.protein
+            it[TARGET_CARBS] = targets.carbs
+            it[TARGET_FAT] = targets.fat
+            it[TARGETS_CONFIRMED] = true
+        }
+    }
+
+    suspend fun setTheme(mode: ThemeMode) {
+        store.edit { it[THEME] = mode.name }
+    }
+
+    suspend fun setAiModel(model: AiModel) {
+        store.edit { it[AI_MODEL] = model.id }
+    }
+
+    suspend fun genericDatasetVersion(): Int = store.data.first()[GENERIC_VERSION] ?: 0
+
+    suspend fun setGenericDatasetVersion(version: Int) {
+        store.edit { it[GENERIC_VERSION] = version }
+    }
+
+    private companion object {
+        val TARGET_KCAL = intPreferencesKey("target_kcal")
+        val TARGET_PROTEIN = intPreferencesKey("target_protein")
+        val TARGET_CARBS = intPreferencesKey("target_carbs")
+        val TARGET_FAT = intPreferencesKey("target_fat")
+        val TARGETS_CONFIRMED = booleanPreferencesKey("targets_confirmed")
+        val THEME = stringPreferencesKey("theme")
+        val AI_MODEL = stringPreferencesKey("ai_model")
+        val GENERIC_VERSION = intPreferencesKey("generic_dataset_version")
+    }
+}
