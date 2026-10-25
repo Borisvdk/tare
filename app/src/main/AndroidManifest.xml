@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- In-app updates from GitHub Releases; after the first one, updates can skip the prompt. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
     <!-- Health Connect, read-only: weigh-ins (e.g. Renpho) and calories burned (e.g. Garmin). -->
     <uses-permission android:name="android.permission.health.READ_WEIGHT" />
     <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
@@ -79,6 +82,10 @@
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity-alias>
+
+        <receiver
+            android:name=".data.update.InstallResultReceiver"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

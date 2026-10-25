@@ -21,6 +21,10 @@ reason.
 
 ## Shipped
 
+- In-app updates: Tare checks GitHub Releases, shows what's new on Today, and installs the
+  update after checking it's signed with the release key (PR #26).
+- Scanner: any bad exit while scanning switches to Google's scanner; Settings switch; reports
+  name why Android ended the app (PR #25).
 - New logo, ▸0◂ (a scale's settled-at-zero sign around a serif zero): coral launcher icon,
   themed-icon layer, and a splash where the triangles slide onto the zero. Built by
   `tools/logo/build.py`; brand SVGs in `docs/brand/` (PR #23).

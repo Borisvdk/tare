@@ -22,7 +22,7 @@ import javax.crypto.spec.GCMParameterSpec
 val Context.secretsDataStore: DataStore<Preferences> by preferencesDataStore(name = "secrets")
 
 /**
- * Stores the Claude API key encrypted with an AES-GCM key that lives in the Android
+ * Stores the Claude API key (and the GitHub token for updates) encrypted with an AES-GCM key that lives in the Android
  * Keystore. The ciphertext is useless off this device, which is why it's excluded from backup.
  */
 class SecretStore(private val store: DataStore<Preferences>) {
@@ -35,6 +35,18 @@ class SecretStore(private val store: DataStore<Preferences>) {
         store.edit {
             val trimmed = key?.trim()
             if (trimmed.isNullOrEmpty()) it.remove(API_KEY) else it[API_KEY] = encrypt(trimmed)
+        }
+    }
+
+    val hasGithubToken: Flow<Boolean> = store.data.map { it[GITHUB_TOKEN] != null }
+
+    /** Read-only GitHub token for in-app updates from the private repository. */
+    suspend fun githubToken(): String? = store.data.first()[GITHUB_TOKEN]?.let(::decrypt)
+
+    suspend fun setGithubToken(token: String?) {
+        store.edit {
+            val trimmed = token?.trim()
+            if (trimmed.isNullOrEmpty()) it.remove(GITHUB_TOKEN) else it[GITHUB_TOKEN] = encrypt(trimmed)
         }
     }
 
@@ -67,6 +79,7 @@ class SecretStore(private val store: DataStore<Preferences>) {
 
     private companion object {
         val API_KEY = stringPreferencesKey("claude_api_key")
+        val GITHUB_TOKEN = stringPreferencesKey("github_token")
         const val KEYSTORE = "AndroidKeyStore"
         const val ALIAS = "tare_secrets"
         const val TRANSFORMATION = "AES/GCM/NoPadding"

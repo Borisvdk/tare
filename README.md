@@ -28,7 +28,9 @@ A fast, calm calorie tracker for Android. Log food in seconds and see only what 
 
 ## Install on your phone
 
-Releases are built and signed by CI on every merge to `main`.
+Releases are built and signed by CI on every merge to `main`. Once installed, Tare updates
+itself: paste the same read-only token in Settings → Updates and new versions show up on Today
+with an Update button.
 
 1. Install [Obtainium](https://github.com/ImranR98/Obtainium).
 2. The repository is private, so create a GitHub fine-grained token with **read-only Contents**

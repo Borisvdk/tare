@@ -97,6 +97,20 @@ Health Connect requires before it grants anything.
 - Debug builds have `HealthSeedReceiver` (`app/src/debug`) to fill the emulator with test
   data; see its KDoc for the adb commands.
 
+## In-app updates
+
+`data/update/`: `UpdateRepository` lists GitHub releases of the private repo with a read-only
+token the owner pastes in Settings (kept in `SecretStore`, never backed up). Tags are
+`v0.1.<commit count>` and the commit count is the version code, so the tag says what's newer.
+"What's new" is the PR titles from GitHub's generated notes of every newer release. The APK
+asset answers with a redirect to signed storage, fetched without the token. `ApkCheck` makes
+sure the download is this app, newer, and signed with the same key; `UpdateInstaller`
+installs it with `PackageInstaller` (`InstallResultReceiver` shows Android's confirmation).
+After Tare has installed itself once, `UPDATE_PACKAGES_WITHOUT_USER_ACTION` lets later updates
+skip the prompt. `Updater` holds the state for Settings and the Today banner and checks at most
+every 3 hours on resume. Debug builds (a different app id) don't update; `UpdateTestReceiver`
+(debug only) runs a local APK through the same check and installer.
+
 ## Backups
 
 - **Daily automatic backup** (`data/backup/AutoBackup.kt`): the user picks a folder once
