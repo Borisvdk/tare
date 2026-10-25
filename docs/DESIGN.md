@@ -72,8 +72,8 @@ headlines only (screen titles such as "Today", empty states). Tokens are in `ui/
 - **One primary action per screen**, bottom-anchored and coral.
 - **Sheets for quick decisions** (amount, quick add, meal log, targets); full screens for
   editing (food, meal, recipe).
-- **Undo instead of confirm** for anything reversible (delete entry, quick log). Confirm
-  only for irreversible actions (import replaces data).
+- **Undo instead of confirm** for anything reversible (delete entry, quick log), via
+  `LocalNotifier`. Confirm only for irreversible actions (import replaces data).
 - **Numbers:** `Fmt.kcal` ("1,240"), `Fmt.grams` (one decimal under 10 g), `Fmt.amount`
   (no trailing zeros).
 - **Motion:** spring animations on the gauge and bars, slide and fade between screens, and
