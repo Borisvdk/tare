@@ -1,6 +1,7 @@
 package app.tare.data.db
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -16,8 +17,12 @@ import kotlinx.serialization.json.Json
  */
 @Database(
     entities = [Food::class, LogEntry::class, Meal::class, MealItem::class, RecipeIngredient::class, WeightEntry::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
+    autoMigrations = [
+        // 2: weight.source, so weigh-ins imported from Health Connect never overwrite typed ones.
+        AutoMigration(from = 1, to = 2),
+    ],
 )
 @TypeConverters(Converters::class)
 abstract class TareDatabase : RoomDatabase() {

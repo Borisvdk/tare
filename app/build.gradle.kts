@@ -161,6 +161,7 @@ dependencies {
     implementation(libs.androidx.camera.mlkit.vision)
     implementation(libs.mlkit.barcode)
     implementation(libs.gms.code.scanner)
+    implementation(libs.androidx.health.connect)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)

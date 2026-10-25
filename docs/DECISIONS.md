@@ -46,3 +46,14 @@ shippable. Commit count gives a strictly increasing version code with no manual 
 
 The button on a kitchen scale that zeroes out everything that doesn't count. It matches the
 design philosophy (show only what matters) and the audience (people who weigh food).
+
+## 2026-10-25: Health Connect, read only
+
+The owner weighs in with a Renpho scale and wears a Garmin. Neither has an API for a personal
+app, but both write to Health Connect, so Tare reads weight and total calories burned from
+there and never writes. Weigh-ins are imported into Tare's own `weight` table (new `source`
+column, schema v2) so the trend works offline and lands in backups; a weight typed in Tare
+always wins its day. Calories burned are read when Progress opens and only shown as a
+comparison: targets still never change by themselves. Days Health Connect fills with its own
+resting estimate (no data origin) are skipped.
+

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only additions: test data for Health Connect on the emulator. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
+    <uses-permission android:name="android.permission.health.WRITE_TOTAL_CALORIES_BURNED" />
+
+    <application>
+        <receiver
+            android:name="app.tare.debug.HealthSeedReceiver"
+            android:exported="true" />
+    </application>
+</manifest>

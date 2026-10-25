@@ -1,5 +1,6 @@
 package app.tare.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -138,7 +139,14 @@ data class WeightEntry(
     @PrimaryKey val day: Long,
     val kg: Double,
     val loggedAt: Long,
-)
+    /** [WeightEntry.MANUAL] or [WeightEntry.HEALTH_CONNECT]; a weight typed in Tare wins its day. */
+    @ColumnInfo(defaultValue = MANUAL) val source: String = MANUAL,
+) {
+    companion object {
+        const val MANUAL = "manual"
+        const val HEALTH_CONNECT = "health_connect"
+    }
+}
 
 data class MealItemWithFood(
     @Embedded val item: MealItem,
