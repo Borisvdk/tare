@@ -444,7 +444,9 @@ private fun SwipeToDelete(onDelete: () -> Unit, modifier: Modifier = Modifier, c
             }
         },
     ) {
-        Box(Modifier.background(Tare.colors.background, Radii.row)) { content() }
+        // Square, opaque backing: rounded corners here let the red delete layer peek through
+        // between rows when nothing is being swiped.
+        Box(Modifier.background(Tare.colors.background)) { content() }
     }
 }
 

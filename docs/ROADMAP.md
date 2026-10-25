@@ -9,7 +9,6 @@ reason.
 - [ ] **Verify Claude end to end with a real key** on the phone: describe text, plate photo,
       label photo. Tune the prompts on real Dutch meals (portion sizes, AH/Jumbo products).
 - [ ] **Edit time on log**: remember the last time picked for past-day logging.
-- [ ] **Favourites row** in the log hub above recents.
 - [ ] **Pinned quick items**: long-press a recent food to pin it with a fixed amount for
       true one-tap logging.
 - [ ] **Search quality pass**: collect queries where the right food isn't first and adjust
@@ -31,6 +30,8 @@ reason.
   `images.openfoodfacts.org` was unreachable from the dev machine on 2026-10-25, so check
   on the phone).
 - Today follows the date after midnight when the app resumes.
+- Favourites section in the log hub, above Recent.
+- 15 fixes from an independent code review (see PR #2).
 
 - v0.1: Today, log hub, barcode scan, Claude describe and label reading, saved meals,
   recipes, custom foods, weight trend, intake chart, targets, backup, signed releases through
