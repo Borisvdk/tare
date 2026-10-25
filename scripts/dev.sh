@@ -5,9 +5,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export MSYS_NO_PATHCONV=1 # stop Git Bash rewriting /sdcard paths
 
-# --- JDK: Gradle needs 17+. Fall back to Android Studio's bundled JBR on Windows. -----------
+# --- JDK: 21+ (Robolectric needs 21 for Android 16). Falls back to Android Studio's JBR. ---
 java_major() { "$1" -version 2>&1 | head -1 | sed -E 's/.*version "([0-9]+).*/\1/'; }
-if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ] && [ "$(java_major "$JAVA_HOME/bin/java")" -ge 17 ]; then
+if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ] && [ "$(java_major "$JAVA_HOME/bin/java")" -ge 21 ]; then
   :
 elif [ -x "/c/Program Files/Android/Android Studio/jbr/bin/java" ]; then
   export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"

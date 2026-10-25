@@ -30,8 +30,9 @@ matters. Read [docs/PRODUCT.md](docs/PRODUCT.md) before adding features and
 
 ## Commands
 
-Everything goes through `scripts/dev.sh`. It finds the JDK (Android Studio's bundled JBR on
-Windows) and the SDK for you.
+Everything goes through `scripts/dev.sh`. It finds a JDK 21+ (Android Studio's bundled JBR on
+Windows; the Temurin 17 in `JAVA_HOME` is too old for Robolectric's Android 16) and the SDK for
+you. Check exit codes, and never chain a commit after tests with `;`.
 
 | Command | What it does |
 |---|---|
