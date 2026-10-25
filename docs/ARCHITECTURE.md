@@ -80,6 +80,23 @@ refusal fallbacks. Photos are downscaled to 1568 px JPEG. Two prompts:
 
 AI items become `ai:` foods keyed by name, so they show up in recents and search.
 
+## Health Connect
+
+`data/health/`: `HealthSource` (interface; `HealthConnectSource` is the real one, tests use
+`FakeHealthSource`) and `HealthRepository`. Read-only permissions: weight, total calories
+burned and history (older than 30 days). `HealthPrivacyActivity` is the rationale screen
+Health Connect requires before it grants anything.
+
+- **Weigh-ins** are imported on resume (at most every 10 minutes, a year back once history
+  access exists): the first weigh-in of each local day, into `weight` with
+  `source = health_connect`. A `manual` row for that day is never overwritten.
+- **Calories burned** come from `aggregateGroupByPeriod` per day and are read when Progress
+  resumes, up to yesterday. Groups without a data origin are Health Connect's own resting
+  estimate and are dropped. Health Connect only totals apps in its priority list for
+  activity; an app normally lands there when the user allows it to write.
+- Debug builds have `HealthSeedReceiver` (`app/src/debug`) to fill the emulator with test
+  data; see its KDoc for the adb commands.
+
 ## Backups
 
 - **Daily automatic backup** (`data/backup/AutoBackup.kt`): the user picks a folder once

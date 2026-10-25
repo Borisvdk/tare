@@ -273,6 +273,9 @@ fun SettingsScreen() {
                 }
             }
 
+            SectionHeader("Health Connect")
+            HealthConnectCard()
+
             SectionHeader("Data")
             Card(Modifier.fillMaxWidth(), padding = PaddingValues(18.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

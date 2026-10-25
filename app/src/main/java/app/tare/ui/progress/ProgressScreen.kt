@@ -85,6 +85,7 @@ fun ProgressScreen(contentPadding: PaddingValues) {
         }
         item(key = "weight") { WeightCard(state, range, onRange = { range = it }, onLog = { newWeight = true }) }
         item(key = "intake") { IntakeCard(state) }
+        state.balance()?.let { balance -> item(key = "balance") { BalanceCard(balance) } }
         if (state.weights.isNotEmpty()) {
             item(key = "h-weighins") { SectionHeader("Weigh-ins") }
             items(state.weights.asReversed().take(30), key = { it.day }) { entry ->
@@ -261,6 +262,42 @@ private fun IntakeCard(state: ProgressState) {
                     )
                 }
             }
+            if (state.burned.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Text("Short lines: calories burned · dashed: your target", style = Tare.type.caption, color = colors.textFaint)
+            }
+        }
+    }
+}
+
+/** Eaten vs burned (Health Connect), as a plain average: no verdicts, no auto-adjusting. */
+@Composable
+private fun BalanceCard(balance: EnergyBalance) {
+    val colors = Tare.colors
+    Card(Modifier.fillMaxWidth(), padding = PaddingValues(20.dp)) {
+        Column {
+            Text("Eaten vs burned · last 7 days", style = Tare.type.label, color = colors.textMuted)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                buildAnnotatedString {
+                    withStyle(SpanStyle(color = colors.text)) {
+                        append((if (balance.difference < 0) "−" else "+") + Fmt.kcal(kotlin.math.abs(balance.difference)))
+                    }
+                    withStyle(SpanStyle(color = colors.textMuted, fontSize = Tare.type.title.fontSize)) { append(" kcal / day") }
+                },
+                style = Tare.type.number,
+            )
+            Text(
+                "You ate ${Fmt.kcal(balance.eaten)} and burned ${Fmt.kcal(balance.burned)} kcal a day on average" +
+                    (if (balance.days < 7) ", over the ${balance.days} days with both." else "."),
+                style = Tare.type.caption,
+                color = colors.textMuted,
+            )
+            Text(
+                "Burned comes from Health Connect. Watches estimate it, so treat it as a guide; your weight trend has the final say.",
+                style = Tare.type.caption,
+                color = colors.textFaint,
+            )
         }
     }
 }
@@ -271,7 +308,8 @@ private fun IntakeBars(state: ProgressState, modifier: Modifier = Modifier) {
     val target = state.targets.kcal.toDouble()
     Canvas(modifier) {
         val bars = state.chart
-        val maxValue = max(target * 1.25, bars.maxOfOrNull { it.nutrients.kcal } ?: 0.0).coerceAtLeast(1.0)
+        val burnedMax = bars.maxOfOrNull { state.burned[it.day] ?: 0.0 } ?: 0.0
+        val maxValue = maxOf(target * 1.25, bars.maxOfOrNull { it.nutrients.kcal } ?: 0.0, burnedMax * 1.05).coerceAtLeast(1.0)
         val slot = size.width / bars.size
         val barWidth = min(slot * 0.56f, 18.dp.toPx())
         bars.forEachIndexed { i, d ->
@@ -284,6 +322,14 @@ private fun IntakeBars(state: ProgressState, modifier: Modifier = Modifier) {
             } else {
                 drawRoundRect(color, Offset(cx - barWidth / 2, size.height - h), Size(barWidth, h), CornerRadius(barWidth / 2))
             }
+        }
+        // What the watch says was burned: a short line across each day's bar.
+        bars.forEachIndexed { i, d ->
+            val burned = state.burned[d.day] ?: return@forEachIndexed
+            val cx = slot * i + slot / 2
+            val by = (size.height * (1 - burned / maxValue)).toFloat()
+            val half = min(slot * 0.42f, 14.dp.toPx())
+            drawLine(colors.text, Offset(cx - half, by), Offset(cx + half, by), 2.dp.toPx(), cap = StrokeCap.Round)
         }
         val ty = (size.height * (1 - target / maxValue)).toFloat()
         drawLine(colors.textMuted, Offset(0f, ty), Offset(size.width, ty), 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f)))

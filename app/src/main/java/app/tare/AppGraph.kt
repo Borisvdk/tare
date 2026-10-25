@@ -7,6 +7,9 @@ import app.tare.data.db.TareDatabase
 import app.tare.data.food.FoodRepository
 import app.tare.data.food.GenericFoodImporter
 import app.tare.data.food.OpenFoodFactsClient
+import app.tare.data.health.HealthConnectSource
+import app.tare.data.health.HealthRepository
+import app.tare.data.health.HealthSource
 import app.tare.data.log.LogRepository
 import app.tare.data.meal.MealRepository
 import app.tare.data.meal.RecipeRepository
@@ -39,6 +42,8 @@ class AppGraph(
     private val databaseFactory: (Context) -> TareDatabase = TareDatabase::build,
     /** Tests pass a mock-engine client so nothing reaches the network. */
     private val httpFactory: (() -> HttpClient)? = null,
+    /** Tests pass a fake so nothing talks to Health Connect. */
+    private val healthFactory: ((Context) -> HealthSource)? = null,
 ) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -68,6 +73,9 @@ class AppGraph(
     val recipes: RecipeRepository by lazy { RecipeRepository(db, now) }
     val weights: WeightRepository by lazy { WeightRepository(db.weightDao(), now) }
     val backup: BackupManager by lazy { BackupManager(db, settings, now) }
+    val health: HealthRepository by lazy {
+        HealthRepository(healthFactory?.invoke(context) ?: HealthConnectSource(context), db.weightDao(), settings, now)
+    }
     val ai: FoodAi by lazy { FoodAi(apiKey = { secrets.apiKey() }, model = { settings.aiModel.first() }) }
 
     /** Reads a content Uri (e.g. a photo shared from the gallery); null if it's gone or unreadable. */

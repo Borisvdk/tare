@@ -22,6 +22,8 @@ A fast, calm calorie tracker for Android. Log food in seconds and see only what 
 - **Recipes by cooked weight**, so a portion of the pot is exact.
 - **Weight trend** that smooths out daily water swings, and a week-over-week intake glance.
 - **Launcher shortcuts** (long-press the icon): scan, describe, log.
+- **Health Connect**: weigh-ins from your scale app (Renpho) and calories burned from your
+  watch (Garmin), read only.
 - Local-first, with a **daily automatic backup** to a folder you choose.
 
 ## Install on your phone

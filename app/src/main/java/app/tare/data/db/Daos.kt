@@ -230,6 +230,15 @@ interface RecipeDao {
 
 @Dao
 interface WeightDao {
+    @Query("SELECT * FROM weight WHERE day BETWEEN :from AND :to")
+    suspend fun between(from: Long, to: Long): List<WeightEntry>
+
+    @Upsert
+    suspend fun upsertAll(entries: List<WeightEntry>)
+
+    @Query("SELECT COUNT(*) FROM weight WHERE source = :source")
+    fun observeCount(source: String): Flow<Int>
+
     @Query("SELECT * FROM weight ORDER BY day")
     fun observeAll(): Flow<List<WeightEntry>>
 
