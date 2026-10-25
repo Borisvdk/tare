@@ -169,6 +169,22 @@ class FlowTest {
     }
 
     @Test
+    fun copyYesterdayToToday() {
+        runBlocking {
+            graph.log.logFood(banana, 118.0, banana.portions.first(), today.minusDays(1), LocalTime.of(8, 0))
+            graph.log.logQuick("Pizza", Nutrients(800.0), today.minusDays(1), LocalTime.of(19, 0))
+        }
+        compose.setContent { TareRoot(graph) }
+        compose.waitForText("24")
+        compose.onNodeWithText("24").performClick()
+        compose.waitUntil(5_000) { compose.onAllNodes(hasContentDescription("Copy this day to today")).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithContentDescription("Copy this day to today").performClick()
+
+        waitForEntries(2)
+        assertThat(entries().map { it.name }).containsExactly("Banana", "Pizza")
+    }
+
+    @Test
     fun saveSelectedEntriesAsAMeal() {
         runBlocking { graph.log.logFood(banana, 118.0, banana.portions.first(), today, LocalTime.of(9, 0)) }
         compose.setContent { TareRoot(graph) }

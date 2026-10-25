@@ -175,7 +175,16 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                     DayHeader(
                         day = state.day,
                         today = state.today,
+                        canCopy = state.entries.isNotEmpty(),
                         onToday = viewModel::goToToday,
+                        onCopyToToday = {
+                            scope.launch {
+                                val copies = viewModel.copyDayToToday()
+                                notify.show("Copied ${Fmt.items(copies.size)} to today", actionLabel = "Undo") {
+                                    viewModel.undoCopy(copies)
+                                }
+                            }
+                        },
                         onSettings = { nav.go(Route.Settings) },
                     )
                 }
@@ -460,7 +469,14 @@ private fun SwipeToDelete(onDelete: () -> Unit, modifier: Modifier = Modifier, c
 }
 
 @Composable
-private fun DayHeader(day: LocalDate, today: LocalDate, onToday: () -> Unit, onSettings: () -> Unit) {
+private fun DayHeader(
+    day: LocalDate,
+    today: LocalDate,
+    canCopy: Boolean,
+    onToday: () -> Unit,
+    onCopyToToday: () -> Unit,
+    onSettings: () -> Unit,
+) {
     Row(
         Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp, start = 4.dp).height(HEADER_HEIGHT),
         verticalAlignment = Alignment.CenterVertically,
@@ -470,6 +486,10 @@ private fun DayHeader(day: LocalDate, today: LocalDate, onToday: () -> Unit, onS
             Text(Fmt.daySubtitle(day), style = Tare.type.caption, color = Tare.colors.textMuted)
         }
         if (day != today) {
+            if (canCopy && day.isBefore(today)) {
+                RoundIconButton(Icons.Rounded.ContentCopy, "Copy this day to today", onCopyToToday, background = Tare.colors.surface)
+                Spacer(Modifier.width(8.dp))
+            }
             TextAction("Today", onClick = onToday)
             Spacer(Modifier.width(4.dp))
         }
