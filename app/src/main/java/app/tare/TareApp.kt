@@ -1,6 +1,8 @@
 package app.tare
 
 import android.app.Application
+import app.tare.data.diagnostics.CrashReports
+import app.tare.ui.scan.CameraScannerGuard
 import app.tare.ui.root.DeepLinks
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -15,6 +17,8 @@ class TareApp : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+        CrashReports.install(this)
+        CameraScannerGuard.onAppStart(this, CrashReports.lastExitWasCrash)
         graph = AppGraph(this)
         graph.appScope.launch { graph.genericImporter.importIfNeeded() }
         DeepLinks.publishShortcuts(this)

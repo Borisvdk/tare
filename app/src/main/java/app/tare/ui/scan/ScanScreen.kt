@@ -11,7 +11,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -54,6 +58,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import app.tare.data.diagnostics.CrashReports
 import app.tare.ui.Fmt
 import app.tare.ui.components.PrimaryButton
 import app.tare.ui.components.RoundIconButton
@@ -81,21 +86,75 @@ fun ScanScreen(route: Route.Scan) {
     val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
 
+    // Google's scanner takes over when our camera scanner crashed or failed on this phone.
+    var useGoogle by remember { mutableStateOf(CameraScannerGuard.isBroken(context)) }
+    var cameraError by remember { mutableStateOf<String?>(null) }
+    var googleError by remember { mutableStateOf<String?>(null) }
+    var preparingGoogle by remember { mutableStateOf(false) }
+
     var hasPermission by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
     }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { hasPermission = it }
-    LaunchedEffect(Unit) { if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA) }
+    LaunchedEffect(useGoogle) { if (!useGoogle && !hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA) }
     var torch by remember { mutableStateOf(false) }
     var logging by remember { mutableStateOf(false) }
+
+    // Google's scanner is a full-screen activity: open it whenever we're ready for a barcode,
+    // including after "Log & next". Backing out of it leaves the scanner.
+    LaunchedEffect(useGoogle, state is ScanState.Scanning, googleError) {
+        if (!useGoogle || state !is ScanState.Scanning || googleError != null) return@LaunchedEffect
+        preparingGoogle = true
+        val ready = prepareGoogleScanner(context)
+        preparingGoogle = false
+        if (!ready) {
+            googleError = "Google's scanner couldn't be downloaded. Check your connection and try again."
+            return@LaunchedEffect
+        }
+        when (val result = scanWithGoogle(context)) {
+            is GoogleScan.Code -> viewModel.onBarcode(result.value)
+            GoogleScan.Cancelled -> nav.back()
+            is GoogleScan.Failed -> googleError = result.message
+        }
+    }
 
     LaunchedEffect(state) {
         if (state is ScanState.Looking) haptics.performHapticFeedback(HapticFeedbackType.Confirm)
     }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
-        if (hasPermission) {
-            BarcodeCamera(onBarcode = viewModel::onBarcode, torch = torch, modifier = Modifier.fillMaxSize())
+        if (useGoogle) {
+            ScannerMessage(
+                title = when {
+                    googleError != null -> "Scanner unavailable"
+                    preparingGoogle -> "Getting Google's scanner ready…"
+                    else -> "Using Google's scanner"
+                },
+                body = googleError ?: "The camera scanner stopped working on this phone last time, so Tare opens Google's instead.",
+            ) {
+                if (googleError != null) PrimaryButton("Try again", onClick = { googleError = null })
+                SecondaryButton("Try Tare's camera again", onClick = {
+                    CameraScannerGuard.reset(context)
+                    googleError = null
+                    useGoogle = false
+                })
+                SecondaryButton("Search instead", onClick = { nav.replace(Route.LogFood(route.day, focusSearch = true, part = route.part)) })
+            }
+        } else if (cameraError != null) {
+            ScannerMessage(title = "The camera didn't start", body = cameraError.orEmpty()) {
+                PrimaryButton("Use Google's scanner", onClick = { useGoogle = true })
+                SecondaryButton("Search instead", onClick = { nav.replace(Route.LogFood(route.day, focusSearch = true, part = route.part)) })
+            }
+        } else if (hasPermission) {
+            BarcodeCamera(
+                onBarcode = viewModel::onBarcode,
+                onError = { error ->
+                    CrashReports.record(context, "Camera didn't start", error)
+                    cameraError = error.message ?: error.javaClass.simpleName
+                },
+                torch = torch,
+                modifier = Modifier.fillMaxSize(),
+            )
             Viewfinder(busy = state is ScanState.Looking)
         } else {
             Column(
@@ -116,16 +175,18 @@ fun ScanScreen(route: Route.Scan) {
         ) {
             RoundIconButton(Icons.Rounded.Close, "Close", { nav.back() }, background = Color.Black.copy(alpha = 0.45f), tint = Color.White)
             Spacer(Modifier.weight(1f))
-            RoundIconButton(
-                if (torch) Icons.Rounded.FlashOn else Icons.Rounded.FlashOff,
-                if (torch) "Torch off" else "Torch on",
-                { torch = !torch },
-                background = Color.Black.copy(alpha = 0.45f),
-                tint = if (torch) Tare.colors.fat else Color.White,
-            )
+            if (!useGoogle && cameraError == null) {
+                RoundIconButton(
+                    if (torch) Icons.Rounded.FlashOn else Icons.Rounded.FlashOff,
+                    if (torch) "Torch off" else "Torch on",
+                    { torch = !torch },
+                    background = Color.Black.copy(alpha = 0.45f),
+                    tint = if (torch) Tare.colors.fat else Color.White,
+                )
+            }
         }
 
-        Text(
+        if (cameraError == null && (!useGoogle || state is ScanState.Looking)) Text(
             when (val s = state) {
                 is ScanState.Looking -> "Looking up ${s.barcode}…"
                 else -> "Point at a barcode"
@@ -190,6 +251,21 @@ fun ScanScreen(route: Route.Scan) {
             SecondaryButton("Scan again", onClick = viewModel::rescan, modifier = Modifier.fillMaxWidth())
         }
         else -> Unit
+    }
+}
+
+/** Centred explanation with actions, shown instead of the camera. */
+@Composable
+private fun BoxScope.ScannerMessage(title: String, body: String, actions: @Composable ColumnScope.() -> Unit) {
+    Column(
+        Modifier.align(Alignment.Center).padding(32.dp).widthIn(max = 360.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(title, style = Tare.type.title, color = Color.White, textAlign = TextAlign.Center)
+        Text(body, style = Tare.type.body, color = Color.White.copy(alpha = 0.7f), textAlign = TextAlign.Center)
+        Spacer(Modifier.height(6.dp))
+        actions()
     }
 }
 

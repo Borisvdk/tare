@@ -49,7 +49,9 @@ import app.tare.BuildConfig
 import app.tare.data.backup.AutoBackup
 import app.tare.data.settings.AiModel
 import app.tare.data.settings.ThemeMode
+import app.tare.data.diagnostics.CrashReports
 import app.tare.domain.Targets
+import app.tare.ui.copyToClipboard
 import app.tare.ui.Fmt
 import app.tare.ui.components.Card
 import app.tare.ui.components.PrimaryButton
@@ -269,6 +271,13 @@ fun SettingsScreen() {
                 color = Tare.colors.textFaint,
                 modifier = Modifier.padding(horizontal = 4.dp),
             )
+            val crashReport = remember { CrashReports.last(context) }
+            if (crashReport != null) {
+                TextAction("Copy last problem report", color = Tare.colors.textMuted, onClick = {
+                    copyToClipboard(context, "Tare problem report", crashReport)
+                    notify.show("Report copied")
+                })
+            }
             Spacer(Modifier.height(32.dp))
         }
     }

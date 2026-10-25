@@ -15,10 +15,10 @@ import kotlinx.coroutines.launch
  */
 @Stable
 class Notifier(private val host: SnackbarHostState, private val scope: CoroutineScope) {
-    fun show(message: String, actionLabel: String? = null, onAction: () -> Unit = {}) {
+    fun show(message: String, actionLabel: String? = null, long: Boolean = false, onAction: () -> Unit = {}) {
         scope.launch {
             host.currentSnackbarData?.dismiss()
-            val result = host.showSnackbar(message, actionLabel = actionLabel, duration = SnackbarDuration.Short)
+            val result = host.showSnackbar(message, actionLabel = actionLabel, duration = if (long) SnackbarDuration.Long else SnackbarDuration.Short)
             if (result == SnackbarResult.ActionPerformed) onAction()
         }
     }
