@@ -1,5 +1,6 @@
 package app.tare.ui.settings
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,6 +46,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import app.tare.BuildConfig
+import app.tare.data.backup.AutoBackup
 import app.tare.data.settings.AiModel
 import app.tare.data.settings.ThemeMode
 import app.tare.domain.Targets
@@ -97,6 +99,23 @@ fun SettingsScreen() {
         }
     }
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { pendingImport = it }
+    val backupFolder by graph.settings.autoBackupFolder.collectAsState(initial = null)
+    val lastBackup by graph.settings.lastAutoBackup.collectAsState(initial = null)
+    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { tree ->
+        if (tree != null) {
+            // Keep access across reboots; the backup worker writes here without the UI.
+            context.contentResolver.takePersistableUriPermission(
+                tree,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+            scope.launch {
+                graph.settings.setAutoBackupFolder(tree.toString())
+                AutoBackup.schedule(context)
+                AutoBackup.runNow(context)
+                notify.show("Daily backup turned on")
+            }
+        }
+    }
 
     Column(Modifier.fillMaxSize().background(Tare.colors.background).statusBarsPadding().imePadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -198,10 +217,41 @@ fun SettingsScreen() {
             Card(Modifier.fillMaxWidth(), padding = PaddingValues(18.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "Everything lives on this phone and is included in Android's automatic backup. Export a file now and then for extra safety.",
+                        "Everything lives on this phone. Turn on the daily backup to a folder that syncs (Google Drive, for example) so a lost phone doesn't mean a lost diary.",
                         style = Tare.type.caption,
                         color = Tare.colors.textMuted,
                     )
+                    val folder = backupFolder
+                    if (folder == null) {
+                        PrimaryButton(
+                            "Back up daily to a folder",
+                            onClick = { folderPicker.launch(null) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text("Daily backup on", style = Tare.type.bodyStrong, color = Tare.colors.carbs)
+                                Text(
+                                    folderLabel(folder) + " · " + (lastBackup?.let { "last ${Fmt.backupTime(it)}" } ?: "first backup pending"),
+                                    style = Tare.type.caption,
+                                    color = Tare.colors.textMuted,
+                                )
+                            }
+                            TextAction("Turn off", color = Tare.colors.textMuted, onClick = {
+                                scope.launch {
+                                    graph.settings.setAutoBackupFolder(null)
+                                    AutoBackup.cancel(context)
+                                    runCatching {
+                                        context.contentResolver.releasePersistableUriPermission(
+                                            Uri.parse(folder),
+                                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                                        )
+                                    }
+                                }
+                            })
+                        }
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         SecondaryButton("Export", onClick = { exporter.launch("tare-backup-${LocalDate.now()}.json") }, modifier = Modifier.weight(1f))
                         SecondaryButton("Import", onClick = { importer.launch(arrayOf("application/json", "*/*")) }, modifier = Modifier.weight(1f))
@@ -255,3 +305,7 @@ fun SettingsScreen() {
         )
     }
 }
+
+/** "Documents/Tare" from a SAF tree Uri like content://…/tree/primary%3ADocuments%2FTare. */
+private fun folderLabel(tree: String): String =
+    Uri.decode(tree.substringAfterLast("/tree/")).substringAfter(':').ifBlank { "Selected folder" }

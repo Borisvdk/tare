@@ -50,8 +50,8 @@ groceries from Albert Heijn and Jumbo, a mix of Dutch and English food names.
   Editing a scanned product forks it into your own version.
 - **Progress:** smoothed weight trend (exponential moving average) with raw weigh-ins, and
   14-day intake bars with a 7-day average.
-- **Settings:** targets, theme, Claude key and model, JSON export/import. Android auto
-  backup covers the database.
+- **Settings:** targets, theme, Claude key and model, a daily automatic backup to a folder
+  of your choice, and JSON export/import.
 
 ## Non-goals
 

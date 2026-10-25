@@ -33,6 +33,7 @@ reason.
   hub and a `+` per section on Today. (Covers "edit time on log".)
 - Launcher shortcuts (scan, describe, log) and share-to-Tare for photos and text.
 - End-to-end UI flow tests on the JVM (`FlowTest`) and a 60-query search-quality suite.
+- Daily automatic backup to a folder you pick (e.g. one that syncs to Google Drive).
 - Undo when deleting meals, recipes and custom foods.
 - Progress compares the 7-day average with the week before.
 - Describe sends your 40 most-logged foods to Claude so matches reuse your exact product.

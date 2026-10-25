@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.tare.domain.Targets
@@ -50,6 +51,20 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
 
     val aiModel: Flow<AiModel> = store.data.map { AiModel.fromId(it[AI_MODEL]) }
 
+    /** Folder (SAF tree Uri) that receives the daily backup, or null when turned off. */
+    val autoBackupFolder: Flow<String?> = store.data.map { it[AUTO_BACKUP_URI] }
+
+    /** Epoch millis of the last successful automatic backup. */
+    val lastAutoBackup: Flow<Long?> = store.data.map { it[LAST_AUTO_BACKUP] }
+
+    suspend fun setAutoBackupFolder(uri: String?) {
+        store.edit { if (uri == null) it.remove(AUTO_BACKUP_URI) else it[AUTO_BACKUP_URI] = uri }
+    }
+
+    suspend fun setLastAutoBackup(at: Long) {
+        store.edit { it[LAST_AUTO_BACKUP] = at }
+    }
+
     suspend fun setTargets(targets: Targets) {
         store.edit {
             it[TARGET_KCAL] = targets.kcal
@@ -83,5 +98,7 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
         val THEME = stringPreferencesKey("theme")
         val AI_MODEL = stringPreferencesKey("ai_model")
         val GENERIC_VERSION = intPreferencesKey("generic_dataset_version")
+        val AUTO_BACKUP_URI = stringPreferencesKey("auto_backup_uri")
+        val LAST_AUTO_BACKUP = longPreferencesKey("last_auto_backup")
     }
 }

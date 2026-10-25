@@ -63,5 +63,17 @@ object Fmt {
 
     fun shortDay(day: LocalDate): String = day.format(shortDayFormat)
 
+    /** "today 03:12", "yesterday 03:12", "Tue 21 Oct". */
+    fun backupTime(epochMillis: Long, zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): String {
+        val at = java.time.Instant.ofEpochMilli(epochMillis).atZone(zone)
+        val days = ChronoUnit.DAYS.between(at.toLocalDate(), LocalDate.now(zone))
+        val time = at.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm", locale))
+        return when (days) {
+            0L -> "today $time"
+            1L -> "yesterday $time"
+            else -> shortDay(at.toLocalDate())
+        }
+    }
+
     fun weekdayLetter(day: LocalDate): String = day.format(DateTimeFormatter.ofPattern("EEEEE", locale))
 }
