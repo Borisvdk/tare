@@ -20,18 +20,23 @@ import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -51,6 +56,9 @@ import app.tare.ui.components.PrimaryButton
 import app.tare.ui.components.RoundIconButton
 import app.tare.ui.components.SecondaryButton
 import app.tare.ui.components.SelectChip
+import app.tare.ui.components.TareTextField
+import app.tare.ui.navigation.LocalAppGraph
+import kotlinx.coroutines.launch
 import app.tare.ui.components.TareSheet
 import app.tare.ui.components.TextAction
 import app.tare.ui.components.defaultAmount
@@ -89,7 +97,13 @@ fun AmountSheet(
     val (defaultGrams, defaultLabel) = remember(food.id) { defaultAmount(food) }
     val startGrams = initialGrams ?: defaultGrams
     val startLabel = if (initialGrams != null) initialPortionLabel else defaultLabel
+    // Local copy so a portion added or removed here shows up immediately.
+    var portions by remember(food.id) { mutableStateOf(food.portions.sortedByDescending { it.custom }) }
     var portion by remember(food.id) { mutableStateOf(food.portions.firstOrNull { it.label == startLabel }) }
+    var naming by remember { mutableStateOf(false) }
+    var removing by remember { mutableStateOf<Portion?>(null) }
+    val graph = LocalAppGraph.current
+    val scope = rememberCoroutineScope()
     val input = rememberAmountInput(
         initial = portion?.let { startGrams / it.grams } ?: startGrams,
         key = food.id,
@@ -176,8 +190,38 @@ fun AmountSheet(
 
         Spacer(Modifier.height(14.dp))
 
-        // Units
-        if (food.portions.isNotEmpty()) {
+        // Units: grams, the food's portions, your own portions (long-press to remove), and
+        // "+ Save" to turn the amount you just typed into a portion of your own.
+        val canSavePortion = portion == null && grams > 0
+        if (naming) {
+            var name by remember { mutableStateOf("") }
+            val amount = grams
+            val focus = remember { FocusRequester() }
+            LaunchedEffect(Unit) { focus.requestFocus() }
+            fun save() {
+                val label = name.trim()
+                if (label.isEmpty()) return
+                naming = false
+                scope.launch {
+                    val updated = graph.foods.addPortion(food.copy(portions = portions), Portion(label, amount, custom = true))
+                    portions = updated.portions.sortedByDescending { it.custom }
+                    portion = portions.firstOrNull { it.label == label }
+                    input.set(1.0)
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TareTextField(
+                    value = name,
+                    onValueChange = { name = it.take(24) },
+                    placeholder = "Name ${Fmt.amount(amount)} ${food.unit}, e.g. my bowl",
+                    onIme = ::save,
+                    modifier = Modifier.weight(1f).focusRequester(focus),
+                )
+                TextAction("Save", onClick = ::save)
+                TextAction("Cancel", onClick = { naming = false }, color = colors.textMuted)
+            }
+            Spacer(Modifier.height(14.dp))
+        } else if (portions.isNotEmpty() || canSavePortion) {
             Row(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -186,13 +230,22 @@ fun AmountSheet(
                     if (portion != null) input.set(grams.takeIf { it > 0 }?.let { Math.round(it).toDouble() })
                     portion = null
                 })
-                food.portions.forEach { p ->
+                // Right next to the unit so it's visible while typing, not scrolled off-screen.
+                if (canSavePortion) {
+                    SelectChip("+ Save ${Fmt.amount(grams)} ${food.unit}", selected = false, onClick = { naming = true })
+                }
+                portions.forEach { p ->
                     SelectChip(
                         "${p.label} · ${Fmt.amount(p.grams)} ${food.unit}",
                         selected = portion == p,
                         onClick = {
                             if (portion != p) input.set(1.0)
                             portion = p
+                        },
+                        onLongClick = if (p.custom) {
+                            { removing = p }
+                        } else {
+                            null
                         },
                     )
                 }
@@ -269,6 +322,35 @@ fun AmountSheet(
                 modifier = Modifier.weight(1f),
             )
         }
+    }
+
+    removing?.let { p ->
+        AlertDialog(
+            onDismissRequest = { removing = null },
+            containerColor = colors.surface,
+            title = { Text("Remove “${p.label}”?", style = Tare.type.title, color = colors.text) },
+            text = {
+                Text(
+                    "Your ${Fmt.amount(p.grams)} ${food.unit} portion goes away. Past entries keep their amounts.",
+                    style = Tare.type.body,
+                    color = colors.textMuted,
+                )
+            },
+            confirmButton = {
+                TextAction("Remove", color = colors.over, onClick = {
+                    removing = null
+                    scope.launch {
+                        val updated = graph.foods.removePortion(food.copy(portions = portions), p.label)
+                        portions = updated.portions.sortedByDescending { it.custom }
+                        if (portion == p) {
+                            input.set(grams.takeIf { it > 0 }?.let { Math.round(it).toDouble() })
+                            portion = null
+                        }
+                    }
+                })
+            },
+            dismissButton = { TextAction("Cancel", onClick = { removing = null }, color = colors.textMuted) },
+        )
     }
 
     if (pickingTime) {

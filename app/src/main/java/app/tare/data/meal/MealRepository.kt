@@ -13,6 +13,7 @@ import app.tare.domain.FoodSource
 import app.tare.domain.Nutrients
 import app.tare.domain.Portion
 import app.tare.domain.buildSearchText
+import app.tare.domain.mergeCustomPortions
 import app.tare.domain.normalizeForSearch
 import app.tare.domain.searchTokens
 import app.tare.domain.sum
@@ -128,10 +129,13 @@ class RecipeRepository(
         val rawWeight = ingredients.sumOf { it.grams }
         val weight = (yieldGrams?.takeIf { it > 0 } ?: rawWeight).coerceAtLeast(1.0)
         val servingCount = servings?.takeIf { it > 0 }
-        val portions = buildList {
-            if (servingCount != null) add(Portion("serving", weight / servingCount))
-            add(Portion("whole recipe", weight))
-        }
+        val portions = mergeCustomPortions(
+            buildList {
+                if (servingCount != null) add(Portion("serving", weight / servingCount))
+                add(Portion("whole recipe", weight))
+            },
+            existing?.portions.orEmpty(),
+        )
         val recipe = Food(
             id = existing?.id ?: "recipe:${UUID.randomUUID()}",
             source = FoodSource.RECIPE,

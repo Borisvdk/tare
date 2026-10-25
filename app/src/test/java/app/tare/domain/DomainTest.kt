@@ -148,3 +148,16 @@ class LooksLikeAMealTest {
             .forEach { assertWithMessage(it).that(looksLikeAMeal(it)).isFalse() }
     }
 }
+
+class CustomPortionsTest {
+    @Test
+    fun customPortionsSurviveAndWinOnClashes() {
+        val fresh = listOf(Portion("medium", 118.0), Portion("cup", 150.0))
+        val existing = listOf(Portion("medium", 118.0), Portion("my bowl", 350.0, custom = true), Portion("Cup", 200.0, custom = true))
+        assertThat(mergeCustomPortions(fresh, existing)).containsExactly(
+            Portion("medium", 118.0),
+            Portion("my bowl", 350.0, custom = true),
+            Portion("Cup", 200.0, custom = true),
+        ).inOrder()
+    }
+}

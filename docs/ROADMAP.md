@@ -34,6 +34,8 @@ reason.
 - Launcher shortcuts (scan, describe, log) and share-to-Tare for photos and text.
 - End-to-end UI flow tests on the JVM (`FlowTest`) and a 60-query search-quality suite.
 - Daily automatic backup to a folder you pick (e.g. one that syncs to Google Drive).
+- Your own portions ("my bowl" = 350 g): type grams, tap "+ Save", name it; long-press to
+  remove. They survive dataset re-imports, product refreshes and edits.
 - Undo when deleting meals, recipes and custom foods.
 - Progress compares the 7-day average with the week before.
 - Describe sends your 40 most-logged foods to Claude so matches reuse your exact product.

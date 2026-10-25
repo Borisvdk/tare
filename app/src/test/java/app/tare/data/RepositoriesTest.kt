@@ -123,6 +123,27 @@ class RepositoriesTest {
     }
 
     @Test
+    fun customPortionsPersistThroughProductRefreshes() = runTest {
+        val foods = FoodRepository(db.foodDao(), OpenFoodFactsClient(HttpClient(MockEngine { respondError(HttpStatusCode.ServiceUnavailable) })), now)
+        val product = food("off:42", "Skyr", Nutrients(60.0, 11.0)).copy(source = FoodSource.OPEN_FOOD_FACTS, portions = listOf(Portion("serving", 150.0)))
+        // Adding a portion to a product that only came from search saves it first.
+        foods.addPortion(product, Portion("my bowl", 250.0))
+        // A later refresh from Open Food Facts must not drop it.
+        foods.saveRemote(product)
+        assertThat(db.foodDao().get("off:42")!!.portions)
+            .containsExactly(Portion("serving", 150.0), Portion("my bowl", 250.0, custom = true))
+        // And it shows up in backups even if the food was never logged.
+        assertThat(db.foodDao().allForBackup().map { it.id }).contains("off:42")
+    }
+
+    @Test
+    fun genericFoodsWithOwnPortionsAreKeptForReimport() = runTest {
+        val foods = FoodRepository(db.foodDao(), OpenFoodFactsClient(HttpClient(MockEngine { respondError(HttpStatusCode.ServiceUnavailable) })), now)
+        foods.addPortion(rice, Portion("my bowl", 300.0))
+        assertThat(db.foodDao().usedGeneric().map { it.id }).contains(rice.id)
+    }
+
+    @Test
     fun correctedProductsResolveToTheFork() = runTest {
         val foods = FoodRepository(db.foodDao(), OpenFoodFactsClient(HttpClient(MockEngine { respondError(HttpStatusCode.ServiceUnavailable) })), now)
         val product = food("off:871", "Kwark", Nutrients(50.0)).copy(source = FoodSource.OPEN_FOOD_FACTS, barcode = "871")

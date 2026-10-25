@@ -9,6 +9,7 @@ import app.tare.domain.FoodSource
 import app.tare.domain.Nutrients
 import app.tare.domain.Portion
 import app.tare.domain.buildSearchText
+import app.tare.domain.mergeCustomPortions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
@@ -40,6 +41,7 @@ class GenericFoodImporter(
             val foods = parsed.map { food ->
                 used[food.id]?.let {
                     food.copy(
+                        portions = mergeCustomPortions(food.portions, it.portions),
                         useCount = it.useCount,
                         lastUsedAt = it.lastUsedAt,
                         lastGrams = it.lastGrams,

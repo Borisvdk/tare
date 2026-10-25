@@ -13,6 +13,7 @@ import app.tare.domain.FoodSource
 import app.tare.domain.Nutrients
 import app.tare.domain.Portion
 import app.tare.domain.buildSearchText
+import app.tare.domain.mergeCustomPortions
 import app.tare.ui.Fmt
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -121,7 +122,8 @@ class FoodEditorViewModel(
 
     suspend fun save(): Food {
         val at = graph.now()
-        val portions = serving?.let { listOf(Portion(servingLabel.trim().ifBlank { "serving" }, it)) }.orEmpty()
+        val servingPortion = serving?.let { listOf(Portion(servingLabel.trim().ifBlank { "serving" }, it)) }.orEmpty()
+        val portions = mergeCustomPortions(servingPortion, original?.portions.orEmpty())
         val base = original
         val draft = Food(
             id = base?.id.orEmpty(),
