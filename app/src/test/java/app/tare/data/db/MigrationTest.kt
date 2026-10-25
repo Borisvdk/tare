@@ -46,6 +46,22 @@ class MigrationTest {
         db.close()
     }
 
+    @Test
+    fun version2AddsWeightSourceAndKeepsWeighIns() {
+        assumeFalse(System.getProperty("os.name").startsWith("Windows"))
+        helper.createDatabase(DB, 1).apply {
+            execSQL("INSERT INTO weight (day, kg, loggedAt) VALUES (20000, 82.4, 0)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 2, true)
+        db.query("SELECT kg, source FROM weight WHERE day = 20000").use { c ->
+            c.moveToFirst()
+            assertThat(c.getDouble(0)).isEqualTo(82.4)
+            assertThat(c.getString(1)).isEqualTo("manual")
+        }
+        db.close()
+    }
+
     private companion object {
         const val DB = "migration-test.db"
     }

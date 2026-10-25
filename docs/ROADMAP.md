@@ -14,7 +14,6 @@ reason.
 ## Later
 
 - Home-screen widget with calories left (the owner said it's not needed for now).
-- Health Connect (not needed for now).
 - NEVO (Dutch food composition database) as a second generic source; needs a licence
   request form, so ask the owner first.
 - Barcode scanning without the network (cache the most-scanned OFF products).
@@ -22,6 +21,18 @@ reason.
 
 ## Shipped
 
+- Health Connect, read only: Renpho weigh-ins into the trend, Garmin calories burned as
+  "eaten vs burned" on Progress (PR #23).
+- Guided Claude key setup: claim Max plan API credits, create a key, paste; checked before
+  saving (PR #22).
+- Targets follow calories: protein in g/kg of trend weight, fat as % of calories, carbs the
+  rest, with a guide to good ranges (PR #21).
+- Easier favourites: long-press any food to star it; star logged entries from Today's
+  selection bar, which now stays pinned while scrolling (PR #20).
+- Inline dictation in Describe: mic inside the field, live words, Dutch, keeps listening
+  through pauses (PR #19).
+- Scanner crash on the Poco F8 Ultra made survivable: caught camera errors, Google's scanner
+  as fallback, on-device crash reports to copy (PR #18).
 - "Usually in the morning/afternoon/…" in the log hub: foods you had in that part of the day
   on 2+ of the last 28 days, at your usual amount there, until you've logged them today.
 - Search survives typos ("bnaan", "brocolli", "chiken breast"); guesses are labelled and

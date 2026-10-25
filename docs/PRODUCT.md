@@ -22,7 +22,7 @@ count.
    so the right food is usually the first row.
 5. **Trust the user's numbers.** Targets are set by hand and never changed by the app.
 6. **Local first.** Instant, works offline, nothing leaves the phone except Open Food Facts
-   lookups and (opt-in) Claude requests.
+   lookups and (opt-in) Claude requests. Health Connect (opt-in) is read on the phone itself.
 
 ## Who
 
@@ -50,6 +50,9 @@ groceries from Albert Heijn and Jumbo, a mix of Dutch and English food names.
   with grams and macros, then log them all as one group. Your 40 most-logged foods are
   offered to Claude so matches reuse your exact products. Bring your own API key; model is
   selectable.
+- **Health Connect (opt-in, read only):** weigh-ins from a scale app (Renpho) flow into the
+  weight trend; calories burned from a watch (Garmin) show on Progress as "eaten vs burned"
+  and as marks on the 14-day chart. A comparison only: targets never change by themselves.
 - **Ways in:** launcher shortcuts (scan, describe, log) and the share sheet ("Log with
   Tare" for photos and text).
 - **Saved meals:** groups of foods logged together, scalable (½×, 1×, 1½×, 2×).

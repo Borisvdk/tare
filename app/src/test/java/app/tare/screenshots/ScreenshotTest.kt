@@ -16,6 +16,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.tare.AppGraph
 import app.tare.data.db.Food
 import app.tare.data.db.TareDatabase
+import app.tare.data.health.FakeHealthSource
 import app.tare.data.meal.DraftItem
 import app.tare.data.settings.ThemeMode
 import app.tare.domain.FoodSource
@@ -83,6 +84,8 @@ class ScreenshotTest {
             now = { now },
             databaseFactory = { TareDatabase.inMemory(it) },
             httpFactory = { HttpClient(MockEngine { respondError(HttpStatusCode.ServiceUnavailable) }) },
+            // A watch's calories burned for the last two weeks, for Progress.
+            healthFactory = { FakeHealthSource(burned = (1L..14L).associate { today.minusDays(it) to 2450 + 220 * sin(it * 1.3) }) },
         )
     }
 

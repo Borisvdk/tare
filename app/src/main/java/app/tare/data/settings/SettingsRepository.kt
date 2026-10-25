@@ -65,6 +65,20 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
     /** Folder (SAF tree Uri) that receives the daily backup, or null when turned off. */
     val autoBackupFolder: Flow<String?> = store.data.map { it[AUTO_BACKUP_URI] }
 
+    /** Epoch millis of the last weigh-in import from Health Connect. */
+    val lastHealthSync: Flow<Long?> = store.data.map { it[LAST_HEALTH_SYNC] }
+
+    suspend fun setLastHealthSync(at: Long) {
+        store.edit { it[LAST_HEALTH_SYNC] = at }
+    }
+
+    /** True once a year of weigh-ins has been read (needs Health Connect's history access). */
+    val healthHistoryImported: Flow<Boolean> = store.data.map { it[HEALTH_HISTORY_IMPORTED] ?: false }
+
+    suspend fun setHealthHistoryImported() {
+        store.edit { it[HEALTH_HISTORY_IMPORTED] = true }
+    }
+
     /** Epoch millis of the last successful automatic backup. */
     val lastAutoBackup: Flow<Long?> = store.data.map { it[LAST_AUTO_BACKUP] }
 
@@ -117,6 +131,8 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
         val GENERIC_VERSION = intPreferencesKey("generic_dataset_version")
         val AUTO_BACKUP_URI = stringPreferencesKey("auto_backup_uri")
         val LAST_AUTO_BACKUP = longPreferencesKey("last_auto_backup")
+        val LAST_HEALTH_SYNC = longPreferencesKey("last_health_sync")
+        val HEALTH_HISTORY_IMPORTED = booleanPreferencesKey("health_history_imported")
         val PLAN_SAVED = booleanPreferencesKey("macro_plan_saved")
         val PLAN_PROTEIN_PER_KG = doublePreferencesKey("macro_protein_per_kg")
         val PLAN_FAT_PERCENT = intPreferencesKey("macro_fat_percent")

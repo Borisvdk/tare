@@ -21,6 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import app.tare.data.diagnostics.CrashReports
+import kotlinx.coroutines.launch
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import app.tare.ui.copyToClipboard
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -87,6 +89,12 @@ fun TareRoot(graph: AppGraph, start: Route = Route.Home, deepLinks: MutableState
                     copyToClipboard(context, "Tare crash report", report)
                 }
             }
+        }
+        // New weigh-ins from the scale app (via Health Connect) whenever Tare comes back; the
+        // repository skips this if it ran a few minutes ago or isn't connected.
+        LifecycleResumeEffect(graph) {
+            graph.appScope.launch { runCatching { graph.health.syncWeights() } }
+            onPauseOrDispose { }
         }
         CompositionLocalProvider(
             LocalAppGraph provides graph,
