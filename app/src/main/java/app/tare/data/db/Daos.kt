@@ -117,6 +117,9 @@ interface LogDao {
     @Query("SELECT * FROM log_entry ORDER BY day, loggedAt")
     suspend fun all(): List<LogEntry>
 
+    @Query("SELECT IFNULL(MAX(id), 0) FROM log_entry")
+    suspend fun maxId(): Long
+
     @Query("DELETE FROM log_entry")
     suspend fun clear()
 }

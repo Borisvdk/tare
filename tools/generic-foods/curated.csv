@@ -1,0 +1,884 @@
+fdc_id,display_name,aliases,popularity
+173944,Banana,banaan|bananen,98
+171688,Apple,appel|appels|apple with skin,95
+171689,"Apple, peeled",geschilde appel|appel zonder schil,25
+169097,Orange,sinaasappel|sinaasappels|sinaasappelen|jaffa,80
+169105,Mandarin,mandarijn|mandarijnen|tangerine|mandarin orange,70
+168195,Clementine,clementine|clementines|clementientje,55
+169118,Pear,peer|peren|conference peer|doyenne,70
+174683,Grapes,druiven|druif|witte druiven|blauwe druiven|grape,75
+167762,Strawberries,aardbei|aardbeien|strawberry,85
+167755,Raspberries,framboos|frambozen|raspberry,60
+171711,Blueberries,blauwe bessen|blauwe bes|bosbessen|blueberry,80
+173946,Blackberries,braam|bramen|blackberry,40
+171719,Cherries,kers|kersen|zoete kersen|cherry,50
+173954,"Cherries, sour",zure kersen|morellen|krieken|sour cherry,15
+168153,Kiwi,kiwi|kiwifruit|groene kiwi,65
+168211,"Kiwi, gold",gele kiwi|gold kiwi|sungold,30
+169910,Mango,mango|mango's,55
+169124,Pineapple,ananas,55
+167765,Watermelon,watermeloen,55
+169092,"Melon, cantaloupe",meloen|cantaloupe|kanteloepmeloen|galia meloen|charentais,45
+169911,"Melon, honeydew",honingmeloen|meloen|honeydew,35
+169928,Peach,perzik|perziken,45
+169914,Nectarine,nectarine|nectarines,40
+169949,Plum,pruim|pruimen,40
+171697,Apricot,abrikoos|abrikozen,25
+173021,Fig,vijg|vijgen|verse vijgen,20
+171705,Avocado,avocado|avocado's,75
+167746,Lemon,citroen|citroenen,35
+167747,Lemon juice,citroensap|vers citroensap,30
+168155,Lime,limoen|limoenen,25
+168156,Lime juice,limoensap,12
+173033,Grapefruit,grapefruit|pompelmoes,30
+169134,Pomegranate,granaatappel|granaatappelpitjes|pomegranate seeds,30
+169926,Papaya,papaja|papaya,20
+169108,Passion fruit,passievrucht|maracuja|granadilla,20
+169086,Lychee,lychee|lychees|litchi,15
+169941,Persimmon,kaki|kakifruit|sharonfruit|sharon fruit,15
+173964,"Currants, red",rode bessen|aalbessen|witte bessen|redcurrants,15
+173963,"Currants, black",zwarte bessen|cassis|blackcurrants,10
+173030,Gooseberries,kruisbessen|gooseberry,8
+167758,Rhubarb,rabarber,12
+170169,"Coconut, fresh",kokos|kokosnoot|vers kokos|coconut meat,15
+173044,Guava,guave|guava,8
+168163,Quince,kweepeer,5
+168177,Asian pear,nashi|nashipeer,8
+167754,Pomelo,pomelo,8
+168215,"Plantain, raw",bakbanaan|plantain|groene banaan,12
+173950,"Blueberries, frozen",diepvries blauwe bessen|bevroren blauwe bessen,30
+168173,"Strawberries, frozen",diepvries aardbeien|bevroren aardbeien,25
+168209,"Raspberries, frozen",diepvries frambozen|bevroren frambozen,20
+171710,"Blackberries, frozen",diepvries bramen,8
+174665,"Figs, dried",gedroogde vijgen|vijgen,25
+168191,"Dates, Medjool",medjool dadels|dadels|dadel,40
+171726,"Dates, Deglet Noor",dadels|dadel|gedroogde dadels,30
+168165,Raisins,rozijnen|rozijn|raisin,50
+168164,"Raisins, golden (sultanas)",sultanas|sultanarozijnen|golden raisins,20
+171724,"Currants, dried",krenten|zante currants|dried currants,30
+168162,Prunes,gedroogde pruimen|pruimedanten|prune,30
+173941,"Apricots, dried",gedroogde abrikozen|abrikozen,30
+171723,"Cranberries, dried",gedroogde cranberries|cranberries|craisins,35
+171722,Cranberries,veenbessen|veenbes|cranberry,10
+169091,"Mango, dried",gedroogde mango,20
+171691,"Apple, dried",gedroogde appel|appelringen,12
+173032,"Goji berries, dried",gojibessen|goji,15
+171696,"Applesauce, sweetened",appelmoes|appelmoes gezoet,45
+171695,"Applesauce, unsweetened",appelmoes zonder suiker|appelmoes ongezoet,35
+169930,"Peaches, canned in juice",perziken uit blik|perzik op sap,15
+169111,"Peaches, canned in light syrup",perziken op siroop,15
+169126,"Pineapple, canned in juice",ananas uit blik|ananas op sap|ananasschijven,25
+169106,"Mandarin oranges, canned in juice",mandarijnen uit blik|mandarijntjes,20
+173027,"Fruit cocktail, canned, light syrup",vruchtencocktail|fruitcocktail,15
+169094,"Olives, black",zwarte olijven|olijven|olives,35
+169096,"Olives, green",groene olijven|olijven,35
+169100,Orange juice,sinaasappelsap|jus d'orange|sinas sap|orange juice,70
+169098,"Orange juice, fresh",vers sinaasappelsap|verse jus|vers geperst|jus d'orange,45
+167771,Apple juice,appelsap|appel sap,65
+173042,Grape juice,druivensap,20
+169947,Pineapple juice,ananassap,15
+168117,"Cranberry juice, unsweetened",cranberrysap|cranberry sap,10
+167787,Pomegranate juice,granaatappelsap,8
+170026,"Potato, raw",aardappel|aardappelen|aardappels|piepers|krieltjes|potato,90
+170440,"Potato, boiled",gekookte aardappelen|gekookte aardappel|aardappelen gekookt|boiled potatoes|krieltjes,90
+170438,"Potato, boiled in skin",aardappel in de schil|gekookte aardappel met schil|schilaardappel,35
+170093,"Potato, baked, with skin",gepofte aardappel|ovenaardappel|jacket potato|baked potato,45
+168555,"Mashed potatoes, with milk and butter",aardappelpuree|puree|stamppot|mashed potato,55
+170031,"Potatoes, roasted, frozen",aardappelpartjes|ovenaardappelen|aardappeltjes uit de oven,20
+169264,"French fries, oven-baked",ovenfriet|oven frites|ovenpatat|patat|friet,55
+168442,"French fries, frozen, uncooked",diepvriespatat|diepvries friet|frites diepvries,25
+170036,Hash browns,rösti|rosti|hash brown|aardappelrösti,15
+168482,"Sweet potato, raw",zoete aardappel|bataat|sweet potato,45
+168483,"Sweet potato, baked",zoete aardappel gebakken|zoete aardappel oven|bataat,40
+168484,"Sweet potato, boiled",zoete aardappel gekookt,25
+167606,"Sweet potato fries, frozen",zoete aardappel friet|zoete aardappelfrietjes,20
+170393,"Carrot, raw",wortel|wortels|wortelen|peen|winterpeen|carrot|carrots,85
+168568,Baby carrots,worteltjes|snackworteltjes|baby wortels,30
+170394,"Carrot, boiled",gekookte wortel|wortel gekookt|worteltjes gekookt|peen gekookt,50
+170379,"Broccoli, raw",broccoli,70
+169967,"Broccoli, boiled",broccoli gekookt|gekookte broccoli,75
+169986,"Cauliflower, raw",bloemkool,50
+170397,"Cauliflower, boiled",bloemkool gekookt|gekookte bloemkool,55
+168462,"Spinach, raw",spinazie|babyspinazie|baby spinach|spinach,65
+168463,"Spinach, boiled",spinazie gekookt|gekookte spinazie,45
+169288,"Spinach, frozen, boiled",diepvries spinazie|spinazie diepvries|bladspinazie,30
+169248,"Lettuce, iceberg",ijsbergsla|ijsberg|sla|iceberg lettuce,60
+169247,"Lettuce, romaine",romaine|romaine sla|bindsla|cos lettuce|sla,45
+168429,"Lettuce, butterhead",kropsla|botersla|sla,35
+169249,"Lettuce, green leaf",eikenbladsla|lollo bionda|pluksla|melange sla|sla,35
+169219,Lamb's lettuce,veldsla|corn salad|mache,40
+169387,Arugula,rucola|rocket|raketsla,45
+168412,Endive,andijvie|krulandijvie|frisee|escarole,40
+170404,Belgian endive,witlof|witloof|chicory,35
+168564,Radicchio,radicchio|roodlof,8
+168421,"Kale, raw",boerenkool|kale,40
+169238,"Kale, boiled",boerenkool gekookt|boerenkool,40
+169975,"Cabbage, white, raw",witte kool|wittekool|kool|cabbage,30
+169976,"Cabbage, white, boiled",witte kool gekookt|kool gekookt,25
+169977,"Red cabbage, raw",rode kool|rodekool,30
+169978,"Red cabbage, boiled",rode kool gekookt|rodekool gekookt,35
+170388,"Savoy cabbage, raw",savooiekool,15
+170389,"Savoy cabbage, boiled",savooiekool gekookt,15
+169979,"Chinese cabbage (napa), raw",chinese kool|napa kool|napa cabbage,15
+170390,"Bok choy, raw",paksoi|pak choi|bok choy,20
+170391,"Bok choy, boiled",paksoi gekookt|pak choi gekookt,10
+170383,"Brussels sprouts, raw",spruitjes|spruiten,30
+169971,"Brussels sprouts, boiled",spruitjes gekookt|spruitjes,45
+169961,"Green beans, raw",sperziebonen|boontjes|haricots verts|prinsessenbonen|snijbonen|green beans,50
+169141,"Green beans, boiled",sperziebonen gekookt|boontjes gekookt|sperziebonen,55
+170419,"Peas, green, raw",doperwten|erwten|erwtjes|peas,20
+170017,"Peas, frozen, boiled",doperwten gekookt|erwtjes|diepvries erwten,45
+170016,"Peas, frozen",doperwten diepvries|diepvries erwtjes,20
+170018,"Peas and carrots, boiled",erwten en wortelen|erwtjes en worteltjes|doperwten en worteltjes,25
+170010,Snow peas / sugar snap peas,peultjes|sugarsnaps|sugar snaps|snow peas|peulen,35
+169998,"Sweet corn, raw",maïs|mais|suikermais|corn,20
+169999,"Sweet corn, boiled",maiskolf|mais gekookt|corn on the cob,30
+169214,"Sweet corn, canned, drained",mais uit blik|maiskorrels|mais,45
+170457,Tomato,tomaat|tomaten|cherrytomaatjes|snoeptomaatjes|trostomaten|cherry tomatoes,85
+170051,"Tomatoes, canned",tomaten uit blik|gepelde tomaten|tomatenblokjes|tomatenstukjes|canned tomatoes,40
+170459,Tomato paste,tomatenpuree|tomatenconcentraat|tomato paste,45
+170460,Passata (tomato puree),passata|gezeefde tomaten|tomato puree,40
+170054,"Tomato sauce, canned",tomatensaus|tomato sauce,20
+168567,Sun-dried tomatoes,zongedroogde tomaten,15
+169384,"Sun-dried tomatoes in oil, drained",zongedroogde tomaten in olie,15
+168409,Cucumber,komkommer|cucumber,80
+170108,"Bell pepper, red",paprika|rode paprika|bell pepper|red pepper,70
+170427,"Bell pepper, green",groene paprika|paprika,40
+169383,"Bell pepper, yellow",gele paprika|paprika,40
+170000,Onion,ui|uien|gele ui|rode ui|onion,75
+170004,"Onion, sautéed",gebakken ui|gebakken uien|gebakken uitjes,25
+170005,Spring onion,lente-ui|lenteui|bosui|scallions|green onion,35
+170499,Shallot,sjalot|sjalotten|shallots,25
+169246,"Leek, raw",prei,40
+168426,"Leek, boiled",prei gekookt,25
+169230,Garlic,knoflook|knoflookteen|garlic,55
+169231,"Ginger, fresh",gember|verse gember|gemberwortel|ginger root,30
+169251,"Mushrooms, white, raw",champignons|champignon|witte champignons|paddenstoelen|mushrooms,65
+169253,"Mushrooms, white, stir-fried",gebakken champignons|champignons gebakken,35
+168434,"Mushrooms, chestnut (cremini)",kastanjechampignons|bruine champignons|cremini,30
+169255,"Mushrooms, portobello",portobello|portobello champignon,20
+169242,"Mushrooms, shiitake",shiitake,15
+168580,"Mushrooms, oyster",oesterzwammen|oesterzwam,15
+168422,"Mushrooms, chanterelle",cantharellen|cantharel|hanenkam,5
+169291,"Zucchini, raw",courgette|zucchini,55
+169292,"Zucchini, boiled",courgette gekookt,25
+169228,"Eggplant, raw",aubergine|eggplant,35
+169229,"Eggplant, boiled",aubergine gekookt,15
+168389,"Asparagus, raw",asperges|asperge|groene asperges|witte asperges,30
+168390,"Asparagus, boiled",asperges gekookt|witte asperges|groene asperges,30
+169988,Celery,bleekselderij|selderij|stengel selderij|celery,30
+170400,"Celeriac, raw",knolselderij|celeriac,20
+169987,"Celeriac, boiled",knolselderij gekookt,15
+169385,Fennel,venkel|fennel,20
+169145,"Beetroot, raw",rode biet|rode bieten|bieten|beet,30
+169146,"Beetroot, boiled",rode bieten gekookt|gekookte bieten|rode biet,35
+170480,"Beetroot, pickled",zoetzure bieten|bietjes zuur|pickled beets,8
+169276,Radish,radijs|radijsjes|radish,30
+170465,Turnip,raap|meiraap|knolraap|turnip,8
+168454,Rutabaga,koolraap|swede|rutabaga,5
+170417,"Parsnip, raw",pastinaak|parsnip,15
+170009,"Parsnip, boiled",pastinaak gekookt,10
+168448,"Pumpkin, raw",pompoen|pumpkin,30
+168449,"Pumpkin, boiled",pompoen gekookt,20
+169295,"Butternut squash, raw",flespompoen|butternut|pompoen,30
+169296,"Butternut squash, baked",butternut gebakken|flespompoen oven,20
+169205,Artichoke,artisjok|artichoke,8
+169260,Okra,okra|oker|bamia,5
+169957,Bean sprouts,taugé|tauge|taugee|mung bean sprouts,40
+168424,Kohlrabi,koolrabi,5
+169991,Swiss chard,snijbiet|chard|warmoes,8
+170068,Watercress,waterkers,8
+168407,Garden cress,tuinkers|sterrenkers|kers,8
+170416,"Parsley, fresh",peterselie|verse peterselie|parsley,25
+172232,"Basil, fresh",basilicum|verse basilicum|basil,25
+169997,"Coriander, fresh",koriander|verse koriander|cilantro,20
+172233,"Dill, fresh",dille|verse dille,10
+173474,"Mint, fresh",munt|pepermunt|verse munt|mint,15
+169994,Chives,bieslook|chives,15
+168576,Jalapeño,jalapeno|jalapeño|jalapenos,15
+170106,"Chili pepper, red",rode peper|spaanse peper|chilipeper|chili pepper,25
+170497,"Chili pepper, green",groene peper|groene chilipeper,8
+168558,"Pickles, dill",zure augurk|zure bom|augurk|dill pickle|gherkin,25
+169378,"Pickles, sweet",augurken|zoetzure augurken|augurkjes|augurk,30
+169279,Sauerkraut,zuurkool|sauerkraut,35
+172238,Capers,kappertjes|capers,12
+168411,"Edamame, cooked",edamame|sojabonen,30
+170472,"Mixed vegetables, frozen, boiled",gemengde groenten|diepvriesgroenten|wokgroenten|roerbakgroenten|mixed vegetables,35
+170471,"Mixed vegetables, frozen",diepvries groenten|wokgroenten|groentemix,25
+169236,Jerusalem artichoke,aardpeer|topinambour,5
+168458,"Seaweed, nori (laver)",nori|zeewier|laver,10
+170496,"Seaweed, wakame",wakame|zeewier,8
+170495,"Spirulina, dried",spirulina|spirulinapoeder,8
+170545,Tomato juice,tomatensap|tomato juice,20
+170063,Vegetable juice,groentesap|vegetable juice|v8,8
+171077,"Chicken breast, raw",kipfilet|kip|kippenborst|kippenfilet|chicken fillet|chicken breast,98
+171477,"Chicken breast, roasted",kipfilet|kip|kipfilet gebakken|gebakken kipfilet|gebraden kipfilet|chicken breast cooked,95
+171534,"Chicken breast, grilled",kipfilet gegrild|gegrilde kipfilet|grilled chicken|kip gegrild,80
+171078,"Chicken breast, pan-fried",kipfilet gebakken in de pan|gebakken kip|kipfilet in olie gebakken,40
+173627,"Chicken thigh, raw",kippendij|kippendijen|dijfilet|kipdij|kipdijfilet|chicken thigh,70
+172388,"Chicken thigh, roasted",kippendij|dijfilet gebakken|kipdij gebakken|kippendijfilet,65
+172385,"Chicken thigh with skin, raw",kippendij met vel|kippendij met huid,25
+173625,"Chicken thigh with skin, roasted",kippendij met vel|kippendij met huid gebakken,30
+173614,"Chicken drumstick, raw",drumstick|kippenpoot|onderpoot|kippenboutje,30
+172376,"Chicken drumstick, roasted",drumstick|drumsticks|kippenpoot gebakken,35
+173612,"Chicken drumstick with skin, roasted",drumstick met vel|kippenpootjes|drumsticks,40
+172390,"Chicken wing, raw",kippenvleugel|kippenvleugels|kipvleugels|chicken wings,25
+173630,"Chicken wings, roasted",kippenvleugels|kipvleugels|chicken wings|wings,45
+173617,"Chicken leg with skin, roasted",kippenbout|kippenbouten|hele poot|chicken leg,30
+172380,"Chicken leg, roasted",kippenbout zonder vel|kippenbout,20
+171052,"Chicken, meat only, raw",kippenvlees|kip|kip rauw,25
+171054,"Chicken, meat only, roasted",kippenvlees|kip|gebraden kip|kip gebakken|roast chicken,50
+171450,"Chicken, meat and skin, roasted",hele kip|gebraden kip|braadkip|kip met vel,35
+171518,"Chicken breast, rotisserie",grillkip|kip van het spit|rotisserie kip|rotisserie chicken,30
+171116,"Chicken, ground, raw",kipgehakt|gehakt kip|kip gehakt,30
+171117,"Chicken, ground, cooked",kipgehakt gebakken,20
+171060,"Chicken liver, raw",kippenlever|kippenlevertjes|chicken liver,12
+174491,"Chicken liver, pan-fried",kippenlevertjes gebakken|kippenlever gebakken,12
+172112,Chicken nuggets,kipnuggets|nuggets|chicken nuggets,45
+171514,"Chicken tenders, breaded",kipschnitzel|krokante kipstukjes|chicken strips|kipkrokant|kipreepjes gepaneerd,25
+174515,"Turkey breast, raw",kalkoenfilet|kalkoen|turkey breast,40
+174516,"Turkey breast, roasted",kalkoenfilet|kalkoen gebakken|kalkoen,40
+171481,"Turkey, meat only, roasted",kalkoen|gebraden kalkoen|kalkoenvlees,25
+171505,"Turkey, ground, raw",kalkoengehakt|gehakt kalkoen,20
+172411,"Duck, meat only, roasted",eend|gebraden eend|eendenvlees,12
+171511,"Duck breast, skinless, broiled",eendenborst|eendenfilet|magret,12
+171510,"Duck breast with skin, roasted",eendenborst met vel|magret de canard,12
+171796,"Ground beef, 15% fat, raw",rundergehakt|gehakt|minced beef|mince|ground beef,85
+174034,"Ground beef, 15% fat, cooked",rundergehakt gebakken|gehakt gebakken|gebakken gehakt,70
+174036,"Ground beef, 20% fat, raw",gehakt|rundergehakt|half om half|half-om-half gehakt|minced beef,60
+171799,"Ground beef, 20% fat, cooked",gehakt gebakken|half om half gebakken,45
+174030,"Ground beef, 10% fat, raw",mager rundergehakt|mager gehakt|lean mince,50
+171794,"Ground beef, 10% fat, cooked",mager rundergehakt gebakken|mager gehakt gebakken,35
+171790,"Ground beef, 5% fat, raw",tartaar|extra mager rundergehakt|biefstuk tartaar,40
+174028,"Ground beef, 5% fat, cooked",tartaar gebakken|extra mager gehakt gebakken,25
+174033,"Beef burger patty, 15% fat, pan-fried",hamburger|burger|hamburger vlees|beef patty,45
+171757,"Beef steak (round), raw",biefstuk|kogelbiefstuk|rundvlees|beef steak,60
+168649,"Beef steak (round), grilled",biefstuk gebakken|biefstuk|kogelbiefstuk gebakken,60
+174055,"Sirloin steak, raw",lendebiefstuk|sirloin|lende|rosbief rauw,35
+168634,"Sirloin steak, broiled",lendebiefstuk gebakken|sirloin steak,35
+172143,"Ribeye steak, raw",entrecote|rib-eye|ribeye|ribstuk,35
+172142,"Ribeye steak, grilled",entrecote gebakken|rib-eye|ribeye steak,35
+171767,"Beef tenderloin, raw",ossenhaas|tournedos|filet mignon|haas,30
+170641,"Beef tenderloin steak, grilled",ossenhaas gebakken|tournedos|filet mignon,30
+174776,"Flank steak, raw",bavette|flank steak|vangsteak,12
+174774,"Flank steak, broiled",bavette gebakken|flank steak,12
+168642,"T-bone steak, raw",t-bone|t-bone steak,8
+171206,"Beef stew meat, raw",stoofvlees|runderlappen|sukadelappen|riblappen|hachee vlees|draadjesvlees|stew beef,40
+171203,"Beef stew meat, braised",stoofvlees|hachee|draadjesvlees|runderstoof|sukade gestoofd,40
+170612,"Beef brisket, braised",runderborst|brisket|borst,10
+174760,"Beef, lean, raw",rundvlees|rund|beef,35
+170208,"Beef, lean, cooked",rundvlees gebakken|rundvlees|rund,30
+169451,"Beef liver, raw",runderlever|lever|beef liver,12
+168627,"Beef liver, pan-fried",runderlever gebakken|gebakken lever,12
+170602,"Corned beef, canned",corned beef|cornedbeef,20
+170204,Pastrami,pastrami,20
+174570,"Roast beef, deli slices",rosbief|rosbief beleg|roast beef|rosbief plakjes,40
+170604,Dried beef,rookvlees|gedroogd rundvlees|bresaola|chipped beef,30
+167536,Beef jerky,jerky|beef jerky|gedroogd vlees,20
+168249,"Pork tenderloin, raw",varkenshaas|varkenshaasje|haasje|pork tenderloin,55
+168250,"Pork tenderloin, roasted",varkenshaas gebakken|varkenshaas,50
+168251,"Pork loin, boneless, raw",varkensfilet|varkensschnitzel|schnitzel|fricandeau|pork loin|filet lapje,50
+168294,"Pork loin, boneless, pan-fried",varkensfilet gebakken|schnitzel gebakken|varkensschnitzel gebakken,45
+168238,"Pork chop, raw",karbonade|varkenskarbonade|pork chop|haaskarbonade|ribkarbonade,35
+168292,"Pork chop, pan-fried",karbonade gebakken|varkenskarbonade gebakken,35
+167849,"Pork shoulder steak, raw",varkensnek|procureur|schouderkarbonade|nekkarbonade,30
+167850,"Pork shoulder steak, braised",procureur gestoofd|pulled pork|varkensnek gestoofd,25
+167812,"Pork belly, raw",buikspek|speklap|speklappen|pork belly|spek,30
+167853,"Spareribs, raw",spareribs|ribs|krabbetjes,20
+167854,"Spareribs, braised",spareribs|ribs|krabbetjes,30
+167902,"Ground pork, raw",varkensgehakt|gehakt varken,35
+167903,"Ground pork, cooked",varkensgehakt gebakken,25
+168224,"Pork leg, lean, raw",hamlappen|fricandeau|varkensvlees mager,20
+168225,"Pork leg, lean, roasted",varkensgebraad|fricandeau gebraden|hamlappen gebakken,15
+167810,"Pork, raw",varkensvlees|varken|pork,30
+168233,"Pork loin roast, lean",varkensrollade|varkensgebraad|rollade|varkenslende,20
+168277,"Bacon, raw",spek|bacon|ontbijtspek|baconreepjes|spekjes,50
+168322,"Bacon, pan-fried",bacon gebakken|gebakken spek|gebakken bacon|krokante bacon,55
+173864,"Ham, sliced",ham|beenham|hamplakken|gekookte ham|ham beleg|kookham,75
+173863,"Ham, sliced, lean",achterham|magere ham|ham beleg mager|schouderham,60
+173870,Liverwurst,leverworst|liverwurst|braunschweiger|leverworst beleg,30
+172930,Liver pâté,paté|pate|leverpastei|leverpaté|liver pate,30
+172928,Chicken liver pâté,kippenleverpaté|kippenlever paté,8
+174582,Salami,salami|salami beleg|cervelaat|boerenmetworst,55
+174603,"Salami, Italian",italiaanse salami|salami milano|salame,20
+172940,Cervelat (summer sausage),cervelaatworst|cervelaat|zomerworst,20
+174575,Pepperoni,pepperoni|pizza salami,25
+173859,Chorizo,chorizo,25
+174585,Smoked sausage,rookworst|worst|smoked sausage|gelderse rookworst,55
+171620,"Bratwurst, cooked",braadworst|bratwurst|braadworstjes,40
+173875,Frankfurter (hot dog sausage),knakworst|knakworstjes|knakworsten|frankfurter|hotdog worst|wiener,50
+171624,"Frankfurter, chicken",kipknakworst|kip knakworstjes,12
+171631,"Italian sausage, raw",italiaanse worst|salsiccia,12
+174578,"Pork sausage, pan-fried",saucijs|saucijzen|verse worst|varkensworst,30
+172934,"Pork sausage, raw",saucijs|saucijzenvlees|verse worst,15
+174573,Mortadella,mortadella,15
+172013,Bologna,boterhamworst|gekookte worst|bologna,25
+171618,Blood sausage,bloedworst|black pudding|zwarte pens,12
+172941,"Turkey breast, deli slices",kalkoenfilet beleg|kalkoen beleg|turkey slices|gerookte kalkoen,40
+173874,"Chicken breast, deli slices",kipfilet beleg|gerookte kipfilet|kipfilet vleeswaren|kip beleg|chicken slices,50
+171638,"Meatballs, frozen",gehaktballen|gehaktbal|balletjes|soepballetjes|meatballs,35
+174571,"Luncheon meat, canned (Spam)",spam|luncheon meat|lunchworst,8
+174370,"Lamb, ground, raw",lamsgehakt,15
+174311,"Lamb leg, raw",lamsbout|lamsvlees|lam,15
+174312,"Lamb leg, roasted",lamsbout|gebraden lamsbout|lamsvlees,20
+172489,"Lamb chops (loin), broiled",lamskoteletjes|lamskarbonade|lamsrack|lamskotelet|lamb chops,20
+172480,"Lamb, cooked",lamsvlees|lam|lamb,15
+172643,"Veal cutlet, raw",kalfsoester|kalfsschnitzel|kalfsvlees|kalf|veal,20
+174880,"Veal cutlet, grilled",kalfsoester gebakken|kalfsvlees,15
+175271,"Veal schnitzel, breaded, pan-fried",wiener schnitzel|kalfsschnitzel gepaneerd|schnitzel gepaneerd,25
+174358,"Veal liver, pan-fried",kalfslever gebakken,8
+172521,"Rabbit, raw",konijn|konijnenvlees|rabbit,12
+174346,"Rabbit, stewed",konijn gestoofd|gestoofd konijn,12
+173855,"Venison, raw",hert|hertenvlees|ree|reevlees|wild|venison,12
+175085,"Venison, roasted",hertenvlees|hertenbiefstuk|reebiefstuk|ree,12
+175167,"Salmon, raw",zalm|zalmfilet|salmon|kweekzalm,80
+175168,"Salmon, cooked",zalm gebakken|zalmfilet gebakken|gegrilde zalm|zalm,75
+173686,"Salmon, wild, raw",wilde zalm|wild salmon,15
+171985,Smoked salmon,gerookte zalm|zalm gerookt|lox|smoked salmon,55
+173693,"Salmon, canned",zalm uit blik|zalm in blik,10
+171955,"Cod, raw",kabeljauw|kabeljauwfilet|cod|skrei,55
+171956,"Cod, cooked",kabeljauw gebakken|kabeljauw,45
+175129,"Pollock, raw",koolvis|alaska koolvis|pollak|pollock|saithe,35
+174237,"Pollock, cooked",koolvis gebakken|alaska koolvis,25
+171964,"Haddock, raw",schelvis|haddock,15
+174198,"Haddock, cooked",schelvis gebakken,12
+174196,"Plaice / sole, raw",schol|tong|scholfilet|schar|bot|sole|plaice|flounder,30
+174197,"Plaice / sole, cooked",schol gebakken|tong gebakken|scholfilet,25
+175176,"Tilapia, raw",tilapia,20
+175177,"Tilapia, cooked",tilapia gebakken,15
+174186,"Catfish, raw",pangasius|meerval|catfish|basa,20
+175153,"Trout, raw",forel|trout,20
+172004,"Trout, cooked",forel gebakken|gerookte forel,15
+175116,"Herring, raw",haring|hollandse nieuwe|maatjes|maatjesharing|herring,45
+175118,"Herring, pickled",zure haring|rolmops|pickled herring,25
+173668,"Herring, kippered (smoked)",bokking|gerookte haring|kipper,12
+175119,"Mackerel, raw",makreel|mackerel,25
+175120,"Mackerel, cooked",makreel gebakken|gerookte makreel|makreelfilet,30
+175139,"Sardines, canned in oil",sardines|sardientjes|sardines in olie,30
+175140,Sardines in tomato sauce,sardines in tomatensaus,12
+173709,"Tuna, canned in water",tonijn|tonijn in water|tonijn uit blik|tuna,70
+173708,"Tuna, canned in oil, drained",tonijn in olie|tonijn uit blik in olie,50
+175159,"Tuna, fresh, raw",verse tonijn|tonijnsteak|ahi|tonijn rauw,25
+172006,"Tuna steak, cooked",tonijnsteak gebakken|tonijn gebakken,20
+175160,Tuna salad,tonijnsalade|tuna salad,20
+174194,"Eel, cooked",paling|gerookte paling|aal|eel,12
+174183,"Anchovies, canned in oil",ansjovis|ansjovisfilets|anchovies,15
+174201,"Halibut, cooked",heilbot gebakken,8
+175142,"Sea bass, raw",zeebaars|zeebaarsfilet|sea bass,20
+173694,"Sea bass, cooked",zeebaars gebakken,15
+175179,"Shrimp, raw",garnalen|gamba's|gamba|scampi|rauwe garnalen|prawns|shrimp,55
+175180,"Shrimp, cooked",garnalen|gekookte garnalen|hollandse garnalen|grijze garnalen|noordzeegarnalen|gamba's,55
+171970,"Shrimp, breaded and fried",gefrituurde garnalen|tempura garnalen|gepaneerde garnalen,10
+174216,"Mussels, raw",mosselen|mossel|mussels,25
+174217,"Mussels, cooked",mosselen|gekookte mosselen|mosselen gestoomd,35
+174223,"Squid, raw",inktvis|pijlinktvis|calamari|squid,15
+171982,"Squid, fried (calamari)",calamares|calamari|gefrituurde inktvis|inktvisringen,20
+174249,"Octopus, cooked",octopus|octopus gekookt,8
+174220,"Scallops, raw",coquilles|sint-jakobsschelpen|scallops,10
+174209,"Lobster, cooked",kreeft|lobster,8
+174205,"Crab, cooked",krab|krabvlees|crab,10
+173702,Crab sticks (surimi),surimi|krabsticks|crab sticks|imitation crab,25
+175172,"Oysters, raw",oesters|oester|oysters,10
+174214,"Clams, raw",venusschelpen|kokkels|clams|vongole,8
+174195,Fish sticks,vissticks|fish fingers|fish sticks,40
+174190,"Cod, dried and salted",bakkeljauw|klipvis|stokvis|bacalao,5
+171287,"Egg, whole, raw",ei|eieren|eitje|egg|eggs,98
+173424,"Egg, whole, boiled",gekookt ei|gekookte eieren|hardgekookt ei|zachtgekookt ei|eitje gekookt|boiled egg,90
+173423,"Egg, whole, fried",gebakken ei|spiegelei|gebakken eieren|uitsmijter|fried egg,80
+172187,"Egg, scrambled",roerei|scrambled eggs,75
+172186,"Egg, poached",gepocheerd ei|poached egg,25
+172185,Omelette,omelet|omelette,50
+172183,"Egg white, raw",eiwit|eiwitten|egg white|egg whites,55
+172184,"Egg yolk, raw",eigeel|eidooier|dooier|egg yolk,35
+172191,Quail egg,kwartelei|kwarteleitjes|quail eggs,8
+172217,"Milk, whole",volle melk|melk|whole milk|milk,90
+171267,"Milk, 2% fat",halfvolle melk|melk|semi-skimmed milk|2% milk,80
+170872,"Milk, 1% fat",halfvolle melk|1% melk|1% milk|low fat milk,50
+171269,"Milk, skim",magere melk|taptemelk|ondermelk|skim milk|skimmed milk,70
+170874,Buttermilk,karnemelk|buttermilk,50
+170879,Chocolate milk,chocolademelk|chocomel|choco melk|chocolate milk,50
+170880,"Chocolate milk, reduced fat",chocolademelk halfvol|chocomel light|halfvolle chocolademelk,20
+171277,Hot chocolate (made with milk),warme chocolademelk|warme chocomel|hot chocolate|cacao,30
+171278,Goat milk,geitenmelk|goat milk,8
+171276,Evaporated milk,koffiemelk|volle koffiemelk|evaporated milk,40
+171302,"Evaporated milk, 2% fat",halfvolle koffiemelk|koffiemelk halfvol,25
+171275,"Condensed milk, sweetened",gecondenseerde melk|gezoete gecondenseerde melk|sweetened condensed milk,12
+170877,"Milk powder, nonfat",magere melkpoeder|melkpoeder,8
+170904,"Kefir, plain",kefir,20
+171284,"Yogurt, plain, whole milk",volle yoghurt|yoghurt|yogurt|yoghurt naturel,85
+170886,"Yogurt, plain, low fat",halfvolle yoghurt|yoghurt|low fat yogurt|yoghurt naturel halfvol,75
+170887,"Yogurt, plain, skim",magere yoghurt|yoghurt 0%|fat free yogurt|vetvrije yoghurt,65
+171304,"Greek yogurt, plain, whole milk",griekse yoghurt|turkse yoghurt|greek yogurt|griekse yoghurt vol,75
+170894,"Greek yogurt, plain, nonfat",magere kwark|kwark|skyr|griekse yoghurt 0%|greek yogurt 0%|magere griekse yoghurt,80
+170903,"Greek yogurt, plain, low fat",halfvolle kwark|griekse yoghurt 2%|light griekse yoghurt,45
+170889,"Yogurt, fruit, low fat",vruchtenyoghurt|fruityoghurt|fruit yogurt|yoghurt met fruit,40
+170888,"Yogurt, vanilla, low fat",vanilleyoghurt|vanille yoghurt,25
+170905,"Greek yogurt, fruit, whole milk",griekse yoghurt met fruit,15
+168788,Vanilla pudding (made with 2% milk),vla|vanillevla|vanille vla|vanillepudding|custard,45
+168780,Chocolate pudding (made with 2% milk),chocoladevla|chocolade vla|chocoladepudding,35
+169608,"Vanilla pudding, ready-to-eat",pudding|vanillepudding kant-en-klaar,12
+168778,"Chocolate pudding, ready-to-eat",chocoladepudding kant-en-klaar|chocolate pudding,12
+171241,Gouda cheese,kaas|goudse kaas|gouda|jong belegen|belegen|oude kaas|jonge kaas|boerenkaas|cheese,90
+173419,Edam cheese,edammer|edammer kaas|edam,45
+173414,Cheddar cheese,cheddar|cheddar kaas,40
+170845,"Mozzarella, whole milk",mozzarella|buffelmozzarella|verse mozzarella,55
+171244,"Mozzarella, part-skim, low-moisture",geraspte mozzarella|pizzakaas|mozzarella light,30
+170848,Parmesan cheese,parmezaan|parmezaanse kaas|parmigiano|parmigiano reggiano|grana padano|parmesan,55
+171247,"Parmesan, grated",geraspte parmezaan|parmezaan geraspt,25
+173420,Feta cheese,feta|fetakaas|witte kaas|salade kaas,50
+172177,Brie,brie,35
+172178,Camembert,camembert,30
+173435,"Goat cheese, soft",geitenkaas|zachte geitenkaas|chevre|chèvre,40
+173433,"Goat cheese, semi-soft",jonge geitenkaas|geitenkaas,20
+172197,"Goat cheese, hard",belegen geitenkaas|harde geitenkaas|oude geitenkaas,15
+172175,Blue cheese,blauwe kaas|gorgonzola|roquefort|danish blue|stilton,25
+171251,Swiss cheese (Emmental),emmentaler|emmental|zwitserse kaas|leerdammer|maasdammer|swiss cheese,35
+171242,Gruyère,gruyere|gruyère,15
+171249,Pecorino Romano,pecorino|romano|pecorino romano,10
+173418,Cream cheese,roomkaas|smeerkaas|philadelphia|cream cheese|roomkaas naturel,50
+169079,"Cream cheese, low fat",light roomkaas|roomkaas light|light smeerkaas,25
+172179,Cottage cheese,huttenkase|hüttenkäse|cottage cheese|korrelkaas,50
+172182,"Cottage cheese, 2% fat",huttenkase light|hüttenkäse light|cottage cheese light,25
+173417,"Cottage cheese, 1% fat",huttenkase mager|cottage cheese mager,20
+170851,"Ricotta, whole milk",ricotta,25
+171248,"Ricotta, part-skim",ricotta light,12
+171290,Processed cheese slices,smeltkaas|kaasplakjes|american cheese|burgerkaas|cheddar plakjes,25
+171254,Processed cheese spread,smeerkaas|smeltkaas|kaasspread,20
+170859,"Cream, heavy whipping",slagroom|room|whipping cream|double cream|slagroom ongeklopt,50
+170858,"Cream, light whipping",slagroom light|room 30%,12
+170857,"Cream, light (coffee cream)",koffieroom|kookroom|light cream|single cream|room,30
+170860,"Whipped cream, aerosol",spuitbus slagroom|spuitroom|whipped cream|slagroom spuitbus,30
+171257,Sour cream,zure room|sour cream,40
+173443,"Sour cream, light",zure room light|light zure room,10
+173410,"Butter, salted",boter|roomboter|gezouten boter|butter,80
+173430,"Butter, unsalted",ongezouten boter|roomboter|boter|unsalted butter,60
+171314,Ghee,ghee|geklaarde boter|clarified butter,15
+167575,"Ice cream, vanilla",ijs|roomijs|vanille-ijs|vanilleijs|schepijs|ice cream,55
+168809,"Ice cream, chocolate",chocolade-ijs|chocoladeijs|ijs,35
+168810,"Ice cream, strawberry",aardbeienijs|ijs,20
+167572,"Ice cream, vanilla, light",light ijs|ijs light,15
+167576,"Soft-serve ice cream, vanilla",softijs|soft ice|softijsje,20
+168105,Frozen yogurt,frozen yoghurt|froyo,15
+172456,Soy milk,sojamelk|sojadrink|soja drink|soy milk|alpro soja,45
+175215,"Soy milk, unsweetened",sojamelk ongezoet|sojadrink ongezoet|soja zonder suiker,35
+174832,"Almond milk, unsweetened",amandelmelk|amandeldrink|almond milk|amandeldrink ongezoet,40
+168751,"Almond milk, sweetened",amandelmelk gezoet|amandeldrink vanille,15
+171942,Rice milk,rijstmelk|rijstdrink|rice milk,12
+174116,Coconut milk drink,kokosdrink|kokosmelk drink|coconut drink,12
+172475,"Tofu, firm",tofu|tahoe|stevige tofu|tofu naturel,45
+172476,"Tofu, regular",tofu|zachte tofu,12
+172449,"Tofu, silken",zijden tofu|silken tofu|zachte tofu,12
+172451,"Tofu, fried",gebakken tofu|tahoe goreng|tofu gebakken,15
+169756,"White rice, dry",rijst|witte rijst|basmati|basmatirijst|jasmijnrijst|pandanrijst|langkorrelrijst|rice,90
+169757,"White rice, cooked",rijst|witte rijst gekookt|gekookte rijst|basmati gekookt|jasmijnrijst gekookt|rice cooked,95
+169703,"Brown rice, dry",zilvervliesrijst|bruine rijst|volkorenrijst|brown rice,55
+169704,"Brown rice, cooked",zilvervliesrijst gekookt|bruine rijst gekookt|volkorenrijst gekookt,60
+169758,"Parboiled rice, dry",parboiled rijst|snelkookrijst,35
+169759,"Parboiled rice, cooked",parboiled rijst gekookt,30
+168931,"Short-grain rice, dry",risottorijst|arborio|sushirijst|rijst kort,20
+168932,"Short-grain rice, cooked",sushirijst gekookt|risotto rijst gekookt,15
+168897,"Wild rice, cooked",wilde rijst gekookt,8
+168927,"Pasta, dry",pasta|spaghetti|macaroni|penne|fusilli|tagliatelle|farfalle|deegwaren|noodles,95
+168928,"Pasta, cooked",pasta gekookt|spaghetti gekookt|macaroni gekookt|penne gekookt|gekookte pasta,95
+169738,"Whole wheat pasta, dry",volkoren pasta|volkorenpasta|volkoren spaghetti|volkoren macaroni,55
+168910,"Whole wheat pasta, cooked",volkoren pasta gekookt|volkorenpasta gekookt,50
+169727,"Fresh pasta, uncooked",verse pasta|verse tagliatelle|verse spaghetti,25
+169728,"Fresh pasta, cooked",verse pasta gekookt,20
+169731,"Egg noodles, dry",mie|eiermie|mienestjes|egg noodles|noedels,50
+169732,"Egg noodles, cooked",mie gekookt|eiermie gekookt|noedels gekookt,50
+169742,"Rice noodles, dry",rijstnoedels|rijstvermicelli|mihoen|rice noodles,25
+168914,"Rice noodles, cooked",rijstnoedels gekookt|mihoen gekookt,25
+174258,"Glass noodles, dry",glasnoedels|cellophane noodles|mungbonen vermicelli,8
+169699,"Couscous, dry",couscous,45
+169700,"Couscous, cooked",couscous gekookt|couscous bereid,45
+168874,"Quinoa, dry",quinoa,40
+168917,"Quinoa, cooked",quinoa gekookt,40
+170688,"Bulgur, dry",bulgur|bulghur,20
+170287,"Bulgur, cooked",bulgur gekookt,20
+170284,"Pearl barley, dry",parelgort|gort|gerst|pearl barley,12
+170285,"Pearl barley, cooked",parelgort gekookt|gort gekookt,10
+170685,"Buckwheat groats, dry",boekweit|boekweitgrutten|kasha,8
+169745,"Spelt, dry",spelt|speltkorrels,8
+168929,"Polenta (cornmeal), dry",polenta|maismeel|cornmeal,20
+169698,Cornstarch,maizena|maïzena|maiszetmeel|cornstarch,30
+168933,Semolina,griesmeel|semolina|harde tarwegries,20
+169761,"Wheat flour, all-purpose",bloem|tarwebloem|patentbloem|meel|flour,55
+168895,"Wheat flour, self-rising",zelfrijzend bakmeel|zelfrijzende bloem|self-raising flour,15
+168893,"Wheat flour, whole-grain",volkorenmeel|volkoren meel|tarwemeel|whole wheat flour,30
+170687,Buckwheat flour,boekweitmeel|boekweitbloem,8
+169714,Rice flour,rijstmeel|rijstebloem|rice flour,8
+169722,Wheat bran,tarwezemelen|zemelen|wheat bran,12
+168872,Oat bran,haverzemelen|oat bran,20
+173904,Rolled oats,havermout|havervlokken|oats|oatmeal|oat flakes|haver|grove havermout,95
+173905,"Oatmeal, cooked with water",havermoutpap|pap|porridge|havermout met water|oatmeal,60
+171661,"Instant oats, dry",instant havermout|quick oats|snelkookhavermout,15
+174648,Corn flakes,cornflakes|corn flakes,50
+169076,Muesli,muesli|musli|bircher muesli,50
+173892,Granola,granola|krokante muesli|crunchy muesli|cruesli,45
+171646,"Granola, homemade",zelfgemaakte granola,10
+173912,Puffed rice cereal,gepofte rijst|rice krispies|rijstcrispies|krokante rijst,15
+173888,Bran flakes,zemelvlokken|bran flakes|all bran,12
+169040,Weetabix,weetabix,20
+173884,Cheerios,cheerios,10
+172990,Frosted flakes,frosties|frosted flakes,12
+172973,Chocolate puffed corn cereal,coco pops|choco pops|chocopops|chocolade ontbijtgranen,15
+174924,White bread,witbrood|wit brood|casinobrood|toastbrood|boterham wit|white bread|brood,85
+172688,Whole wheat bread,volkorenbrood|volkoren brood|boterham volkoren|bruine boterham|whole wheat bread|brood,90
+172686,Brown bread (wheat),bruinbrood|bruin brood|tarwebrood|tarwe brood|wheat bread,70
+168013,Multigrain bread,meergranenbrood|meergranen|zadenbrood|multigrain bread,65
+172684,Rye bread,lichtrogge|rogge brood|rye bread,15
+174918,Pumpernickel,roggebrood|fries roggebrood|zwart roggebrood|pumpernickel,30
+172675,Baguette (French bread),stokbrood|baguette|desembrood|zuurdesembrood|frans brood|sourdough,60
+174913,Italian bread (ciabatta),ciabatta|italiaans brood|italian bread,25
+175031,"Bread roll, hard (white)",bolletje|witte bol|pistolet|kaiserbroodje|harde bol|broodje,55
+172793,"Bread roll, soft (white)",zachte bol|kadetje|puntje|witte puntjes|broodje|dinner roll,40
+172794,"Bread roll, whole wheat",volkoren bol|bruine bol|volkoren broodje|bruin broodje,35
+172796,Hamburger bun,hamburgerbroodje|hotdogbroodje|burger bun|bun|hot dog bun,30
+174915,Pita bread,pita|pitabroodje|turks brood|pide,35
+174916,"Pita bread, whole wheat",volkoren pita,12
+174899,Bagel,bagel|bagels,20
+175037,Flour tortilla (wrap),wrap|wraps|tortilla|tortillawrap|flour tortilla,55
+174081,"Tortilla, whole wheat",volkoren wrap|volkoren tortilla,25
+173241,"Tortilla, corn",maistortilla|corn tortilla,10
+172800,Taco shells,tacoschelpen|taco shells,8
+171845,Naan,naan|naanbrood,20
+171844,Roti (chapati),roti|chapati,15
+167945,Focaccia,focaccia,8
+172680,Raisin bread,krentenbrood|rozijnenbrood|krentenbol|krentenbollen|raisin bread,45
+172673,Brioche (egg bread),brioche|challah|eierbrood|briochebroodje,12
+174987,Croissant,croissant|croissantje,50
+172790,"Puff pastry, frozen",bladerdeeg|bladerdeegplakjes|puff pastry,20
+174981,Rusk (beschuit),beschuit|beschuiten|rusk|biscotte,45
+172739,"Crispbread, rye",knäckebröd|knackebrod|crackers rogge|wasa|ryvita|crispbread,40
+172746,Saltine crackers,crackers|soda crackers|zoute crackers|saltines,25
+172749,Whole wheat crackers,volkoren crackers,15
+174982,"Crackers, snack (Ritz-type)",ritz|tuc|snack crackers|zoutjes,20
+174975,Cheese crackers,kaascrackers|kaaskoekjes|cheese crackers,8
+174977,Melba toast,toastjes|melba toast|toast,20
+172751,Croutons,croutons|soepcroutons,10
+174929,Breadsticks,soepstengels|grissini|breadsticks,15
+175009,"Pancakes, homemade",pannenkoek|pannenkoeken|poffertjes|flensjes|pancakes,60
+175039,"Waffles, homemade",wafel|wafels|luikse wafel|brusselse wafel|waffle,25
+175038,"Waffles, frozen",diepvries wafels|wafels diepvries,8
+174998,French toast,wentelteefjes|french toast|verloren brood,20
+172704,Pound cake,cake|pondcake|marmercake,40
+172706,Sponge cake,biscuitgebak|biscuittaart|sponge cake,12
+172821,Ladyfingers,lange vingers|ladyfingers|savoiardi,12
+172697,Chocolate cake,chocoladetaart|chocoladecake|chocolate cake,25
+172711,Cheesecake,cheesecake,35
+172713,Brownie,brownie|brownies,30
+173239,Apple pie,appeltaart|appelgebak|apple pie,45
+167522,"Apple pie, Dutch",hollandse appeltaart|appeltaart|dutch apple pie|appelkruimeltaart,35
+172780,Cherry pie,kersenvlaai|kersentaart|vlaai|cherry pie,15
+172765,"Muffin, blueberry",muffin|bosbessenmuffin|blueberry muffin,30
+172758,"Doughnut, glazed",donut|doughnut|donuts|geglazuurde donut,30
+172759,"Doughnut, jam-filled",berliner|berlinerbol|berlinerbollen|jam donut,15
+172755,"Danish pastry, fruit",deens gebak|koffiebroodje|danish|vruchtenkoffiebroodje,20
+167940,"Cinnamon bun, frosted",kaneelbroodje|cinnamon roll|kaneelbolletje,15
+167534,Cream puff / éclair,eclair|soes|soesjes|moorkop|roomsoes|profiterole,20
+174950,Butter cookies,boterkoekjes|botergebak|spritsen|butter cookies|koekjes,40
+174967,Shortbread,shortbread|zandkoekjes|boterkoek|zandkoek,25
+172716,Chocolate chip cookies,chocolate chip cookies|koekjes met chocolade|cookies,40
+172725,Oatmeal cookies,havermoutkoekjes|haverkoekjes|oatmeal cookies,20
+171867,Marie biscuits,mariakaakjes|maria biscuit|marie biscuit|biscuitjes,30
+168014,Tea biscuits,theebiscuit|biscuit|biscuits|tea biscuits,20
+172718,Chocolate sandwich cookies (Oreo-type),oreo|chocoladekoekjes met vulling|sandwich koekjes,25
+172736,Wafer cookies with cream,wafeltjes|vanillewafels|wafers,15
+174956,Gingersnaps,gemberkoekjes|gingersnaps,12
+171866,Chocolate biscuit sticks,mikado|pocky|chocolade stokjes,8
+173292,"Pizza, cheese (pizzeria)",pizza margherita|pizza kaas|pizza,35
+173295,"Pizza, pepperoni (pizzeria)",pizza salami|pizza pepperoni,30
+172055,"Pizza, meat and vegetables (pizzeria)",pizza speciale|pizza,15
+170317,"Pizza, cheese, frozen",diepvriespizza|pizza margherita diepvries|pizza,40
+170715,"Pizza, meat and vegetables, frozen",diepvriespizza|pizza diepvries,15
+173800,"Chickpeas, canned, drained",kikkererwten|kikkererwten uit blik|chickpeas|garbanzo,60
+173757,"Chickpeas, cooked",kikkererwten gekookt,40
+173756,"Chickpeas, dry",gedroogde kikkererwten,20
+172421,"Lentils, cooked",linzen|linzen gekookt|lentils,50
+172420,"Lentils, dry",linzen|gedroogde linzen|groene linzen|bruine linzen,35
+174284,"Red lentils, dry",rode linzen|red lentils,35
+174285,"Kidney beans, canned, drained",kidneybonen|bruine bonen|rode bonen|kidney beans,55
+175194,"Kidney beans, cooked",kidneybonen gekookt|bruine bonen gekookt,35
+173744,"Kidney beans, dry",gedroogde kidneybonen|gedroogde bruine bonen,12
+173735,"Black beans, cooked",zwarte bonen|black beans,35
+175188,"Black beans, canned",zwarte bonen uit blik,30
+175204,"White beans, canned",witte bonen|cannellini|witte bonen uit blik|white beans,40
+175203,"White beans, cooked",witte bonen gekookt,30
+175202,"White beans, dry",gedroogde witte bonen,8
+175182,Baked beans in tomato sauce,witte bonen in tomatensaus|baked beans|bonen in tomatensaus,40
+175200,"Pinto beans, cooked",pintobonen|pinto beans,10
+172429,"Split peas, cooked",spliterwten gekookt|split peas,25
+172428,"Split peas, dry",spliterwten|groene spliterwten|gele spliterwten,25
+173753,"Fava beans, cooked",tuinbonen|favabonen|fava beans|broad beans,20
+174253,"Butter beans, cooked",boterbonen|limabonen|butter beans|lima beans,10
+174254,"Butter beans, canned",boterbonen uit blik,10
+174271,"Soybeans, cooked",sojabonen|soybeans,8
+174272,Tempeh,tempeh|tempé,25
+172467,"Tempeh, cooked",tempeh gebakken,15
+172454,Hummus,hummus|houmous|hoemoes,60
+172455,Falafel,falafel,35
+172097,Chili con carne (canned),chili con carne|chili|chili met bonen,25
+174287,Veggie burger,vegaburger|vegetarische burger|groenteburger|veggie burger,30
+172442,Miso,miso|misopasta,10
+174294,Peanut butter,pindakaas|peanut butter|pindakaas naturel,85
+172460,"Peanut butter, chunky",pindakaas met stukjes|crunchy pindakaas|chunky peanut butter,30
+172430,"Peanuts, raw",pinda's|pindas|apenootjes|rauwe pinda's|peanuts,35
+173806,"Peanuts, dry-roasted, unsalted",geroosterde pinda's|ongezouten pinda's|pinda's,40
+174262,"Peanuts, dry-roasted, salted",zoute pinda's|gezouten pinda's,40
+174261,"Peanuts, oil-roasted, salted",gefrituurde pinda's|zoute pinda's,15
+170567,Almonds,amandelen|amandel|almonds,70
+170158,"Almonds, roasted",geroosterde amandelen,30
+168596,"Almonds, roasted, salted",gezouten amandelen|zoute amandelen,20
+170568,"Almonds, blanched",geblancheerde amandelen|gepelde amandelen,10
+170187,Walnuts,walnoten|walnoot|walnuts,60
+170162,"Cashews, raw",cashewnoten|cashews|cashew,45
+170571,"Cashews, roasted",geroosterde cashewnoten|cashewnoten,35
+169421,"Cashews, roasted, salted",gezouten cashewnoten|zoute cashewnoten,30
+170581,Hazelnuts,hazelnoten|hazelnoot|hazelnuts,45
+170583,"Hazelnuts, roasted",geroosterde hazelnoten,15
+170184,"Pistachios, raw",pistachenoten|pistache|pistachio,20
+170185,"Pistachios, roasted",pistachenoten|geroosterde pistachenoten|pistaches,35
+169426,"Pistachios, roasted, salted",gezouten pistachenoten|zoute pistaches,30
+170182,Pecans,pecannoten|pecans,25
+170178,Macadamia nuts,macadamianoten|macadamia,20
+170569,Brazil nuts,paranoten|brazil nuts,20
+170591,Pine nuts,pijnboompitten|pine nuts,30
+170585,"Mixed nuts, roasted, unsalted",gemengde noten|notenmix|ongezouten notenmix|mixed nuts,40
+168599,"Mixed nuts, roasted, salted",gezouten notenmix|gemengde noten gezouten|zoute nootjes,30
+170190,"Chestnuts, roasted",kastanjes|tamme kastanjes|gepofte kastanjes|chestnuts,12
+170170,"Coconut, desiccated",kokosrasp|geraspte kokos|desiccated coconut,25
+170562,Sunflower seeds,zonnebloempitten|sunflower seeds,40
+170563,"Sunflower seeds, roasted",geroosterde zonnebloempitten,15
+170556,Pumpkin seeds,pompoenpitten|pepitas|pumpkin seeds,40
+170557,"Pumpkin seeds, roasted",geroosterde pompoenpitten,15
+170554,Chia seeds,chiazaad|chia zaad|chia,45
+169414,Flaxseed,lijnzaad|gebroken lijnzaad|flax|linseed|flaxseed,40
+170150,Sesame seeds,sesamzaad|sesam|sesame seeds,30
+170148,"Hemp seeds, hulled",hennepzaad|hennepzaden|hemp seeds,15
+171330,Poppy seeds,maanzaad|poppy seeds,8
+170189,Tahini,tahin|tahini|sesampasta,30
+168588,Almond butter,amandelpasta|amandelboter|almond butter,25
+170163,Cashew butter,cashewpasta|cashewnotenpasta|cashew butter,15
+170160,Almond paste (marzipan),amandelspijs|spijs|marsepein|marzipan|almond paste,15
+171413,Olive oil,olijfolie|olive oil|extra vierge olijfolie|extra virgin olive oil,90
+171025,Sunflower oil,zonnebloemolie|sunflower oil|bakolie,65
+172336,Rapeseed oil (canola),koolzaadolie|raapzaadolie|canola olie|rapeseed oil,40
+172370,Vegetable oil,plantaardige olie|slaolie|bakolie|frituurolie|vegetable oil,50
+171412,Coconut oil,kokosolie|kokosvet|coconut oil,30
+171016,Sesame oil,sesamolie|sesame oil,20
+171410,Peanut oil,pinda-olie|arachideolie|wokolie|peanut oil,15
+171401,Lard,reuzel|varkensvet|lard,8
+172347,Margarine (80% fat),margarine|bakboter|bak en braad,40
+173582,Margarine spread (60% fat),margarine|smeerbare margarine|zachte margarine|becel|blue band,40
+171415,Low-fat spread (35-39% fat),halvarine|light margarine|minarine,35
+171009,Mayonnaise,mayonaise|mayo|mayonnaise,65
+173594,"Mayonnaise, light",mayonaise light|halfvolle mayonaise|light mayo,25
+171403,Salad cream (mayonnaise-type dressing),fritessaus|frietsaus|slasaus|miracle whip|salad cream,40
+171417,Vinaigrette,vinaigrette|dressing|olie en azijn dressing,25
+171019,Italian dressing,italiaanse dressing,10
+173592,Ranch dressing,ranch|ranch dressing,8
+171402,Thousand Island dressing,cocktailsaus|thousand island|whiskeysaus,20
+169055,Caesar dressing,caesardressing|caesar dressing,12
+169655,"Sugar, white",suiker|kristalsuiker|witte suiker|tafelsuiker|sugar,70
+168833,Brown sugar,bruine suiker|basterdsuiker|brown sugar,30
+169656,Powdered sugar,poedersuiker|icing sugar,15
+170674,Cane sugar (turbinado),rietsuiker|ruwe rietsuiker|demerara|turbinado,15
+169640,Honey,honing|honey,70
+169661,Maple syrup,ahornsiroop|maple syrup,35
+170277,Agave syrup,agavesiroop|agave,15
+168839,Golden syrup (table syrup),stroop|pannenkoekenstroop|schenkstroop|keukenstroop|golden syrup,40
+169641,Jam,jam|confiture|aardbeienjam|jam extra|preserves,60
+167706,"Jam, reduced sugar",jam minder suiker|light jam,20
+168819,Marmalade,marmelade|sinaasappelmarmelade|marmalade,20
+169642,Fruit jelly,gelei|bessengelei|jelly,8
+168000,Chocolate hazelnut spread,nutella|hazelnootpasta|chocopasta|choco|chocoladepasta|chocolate spread,60
+167587,Milk chocolate,melkchocolade|chocolade|chocolate|milk chocolate|reep chocolade|chocoladereep,60
+170273,"Dark chocolate, 70-85%",pure chocolade|donkere chocolade|dark chocolate|puur 70%|puur 85%,55
+170272,"Dark chocolate, 60-69%",pure chocolade 60%|puur,25
+170271,"Dark chocolate, 45-59%",pure chocolade|puur|semi-sweet chocolate,30
+167571,White chocolate,witte chocolade|white chocolate,25
+168754,Milk chocolate with almonds,chocolade met amandelen,8
+169593,"Cocoa powder, unsweetened",cacaopoeder|cacao|cocoa powder|cacao poeder,40
+167989,Gumdrops (jelly candy),snoep|gummies|jelly sweets|gumdrops|winegums|wine gums,25
+167990,Hard candy,zuurtjes|snoepjes|hard snoep|hard candy|lolly,20
+167995,Marshmallows,spekjes|marshmallows|spekkies,20
+167974,Caramels,karamel|karamels|toffees|caramels,15
+168771,Chewing gum,kauwgom|chewing gum,10
+169882,"Chewing gum, sugar-free",suikervrije kauwgom|kauwgom|sugar free gum,15
+167996,Halva,halva|halvah,8
+169580,Chocolate truffles,truffels|bonbons|pralines|chocolate truffles,15
+168001,Chocolate-covered peanuts,chocoladepinda's|chocolate peanuts,8
+168813,Ice pop (water ice),waterijs|ijslolly|raketje|popsicle,25
+167577,Sherbet / sorbet,sorbet|sorbetijs|sherbet,15
+168782,Rice pudding,rijstpudding|rijstebrij|arroz con leche|rice pudding,20
+168777,Chocolate mousse,chocolademousse|mousse au chocolat|chocolate mousse,20
+167574,Flan (crème caramel),flan|creme caramel|crème caramel|karamelpudding,15
+169596,Gelatin dessert (jelly),gelatinepudding|jello|jelly pudding|gelatine dessert,8
+169599,"Gelatin, unflavored, dry",gelatine|gelatinepoeder|gelatine blaadjes,5
+168841,Caramel sauce,karamelsaus|caramel topping|caramelsaus,10
+168835,Chocolate sauce,chocoladesaus|chocolate sauce|chocolade topping,15
+167957,Fruit syrup (concentrate),limonadesiroop|siroop|ranja siroop|fruit syrup,30
+170679,Stevia,stevia,10
+169657,"Sweetener, aspartame",zoetjes|aspartaam|canderel|zoetstof,10
+173647,Water,water|kraanwater|tap water|mineraalwater|bronwater,40
+174842,Sparkling water,bruiswater|spuitwater|sodawater|sparkling water|spa rood|club soda,20
+171890,"Coffee, black",koffie|zwarte koffie|filterkoffie|coffee|americano|lungo,80
+171891,Espresso,espresso|ristretto|koffie espresso,50
+171889,"Coffee, decaf",decafé|decaf|cafeïnevrije koffie,15
+174130,"Instant coffee, prepared",oploskoffie|instant koffie|nescafe,15
+173227,"Tea, black",thee|zwarte thee|tea|earl grey|engelse melange,70
+171917,"Tea, green",groene thee|green tea,40
+173232,Herbal tea,kruidenthee|muntthee|rooibos|herbal tea|vruchtenthee,35
+174156,Chamomile tea,kamillethee|kamille,8
+174852,Cola,cola|coca cola|coca-cola|pepsi|frisdrank,60
+175099,"Cola, diet",cola zero|cola light|coke zero|diet coke|pepsi max|light frisdrank,55
+173205,Lemon-lime soda,sprite|7up|seven up|lemon lime|frisdrank,25
+174854,Orange soda,sinas|fanta|sinaasappellimonade|orangeade,30
+174846,Ginger ale,ginger ale|gingerale,12
+171869,Tonic water,tonic|tonic water,20
+173204,"Soft drink, diet (non-cola)",light frisdrank|zero frisdrank|sprite zero|fanta zero|7up free,20
+173217,Lemonade,limonade|lemonade|citroenlimonade,20
+171914,Fruit punch drink,ranja|aanmaaklimonade|limonade aangelengd|vruchtendrank|fruit punch,25
+171903,Cranberry juice cocktail,cranberry drank|cranberry juice,10
+173210,Energy drink,red bull|energiedrank|energy drink|monster,30
+171870,"Energy drink, sugar-free",red bull sugarfree|energy drink zero|suikervrije energiedrank,15
+171888,"Iced tea, sweetened",ice tea|icetea|ijsthee|lipton ice tea,35
+174129,"Iced tea, diet",ice tea zero|ice tea light|ijsthee light,10
+174831,Coconut water,kokoswater|coconut water,20
+171880,"Iced coffee, milk-based",ijskoffie|iced coffee|koude koffie,15
+174863,Non-alcoholic beer,alcoholvrij bier|0.0 bier|bier 0.0|non-alcoholic beer|malt beverage,35
+174122,"Hot chocolate mix, powder",chocolademelkpoeder|cacaomix|instant chocolademelk|choco poeder,12
+173180,Whey protein powder,eiwitpoeder|wei-eiwit|whey|protein powder|proteïne poeder|eiwitshake,40
+173177,Whey protein isolate,whey isolaat|wei isolaat|whey isolate,20
+173181,Soy protein powder,soja eiwitpoeder|soy protein,5
+173137,Energy bar,energiereep|power bar|eiwitreep|proteïnereep|sportreep,20
+170775,Smoothie (fruit and yogurt),smoothie|fruit smoothie|yoghurt smoothie,20
+170884,"Milkshake, vanilla",milkshake|vanille milkshake,15
+170883,"Milkshake, chocolate",chocolade milkshake,10
+168746,Beer,bier|pils|biertje|beer|lager|vaasje|fluitje|pilsje,70
+168749,"Beer, light",licht bier|light bier|light beer,12
+171906,"Beer, strong",speciaalbier|zwaar bier|strong beer|ipa,25
+173185,Wine,wijn|wine,40
+173190,Red wine,rode wijn|red wine|rood|merlot|cabernet,50
+174837,White wine,witte wijn|white wine|wit|chardonnay|sauvignon blanc|prosecco|cava|champagne,50
+171908,Rosé wine,rosé|rose|roséwijn,30
+173176,"Dessert wine, sweet",port|porto|dessertwijn|zoete wijn|zoete sherry,12
+174815,"Spirits, 40% (vodka, gin, rum, whisky)",sterke drank|wodka|vodka|gin|rum|whisky|whiskey|jenever|cognac|brandy|tequila|spirits,40
+173665,Coffee liqueur,koffielikeur|kahlua|tia maria|likeur,8
+175098,Cream liqueur,baileys|roomlikeur|cream liqueur,12
+174146,Hard cider,cider|appelcider|strongbow,12
+168556,Ketchup,ketchup|tomatenketchup|catsup,60
+172234,Mustard,mosterd|mustard|gele mosterd,40
+174277,Soy sauce,sojasaus|ketjap asin|soy sauce|shoyu,40
+171604,Hot chili sauce (sambal-style),sambal|sambal oelek|chilisaus|chili sauce|hete saus,25
+171186,Sriracha,sriracha,20
+174527,Hot pepper sauce (Tabasco-style),tabasco|hot sauce|hete saus,15
+174523,Barbecue sauce,barbecuesaus|bbq saus|barbecue sauce,35
+174070,Peanut sauce (satay),satésaus|satesaus|pindasaus|peanut sauce|saté saus,40
+174066,Sweet and sour sauce,zoetzure saus|sweet and sour sauce,15
+171192,Pasta sauce (marinara),pastasaus|tomatensaus|marinara|spaghettisaus|pasta sauce,50
+171580,Pesto,pesto|pesto genovese|groene pesto|basilicumpesto,40
+171826,Tartar sauce,tartaarsaus|remouladesaus|tartare saus|tartar sauce,12
+172886,Hoisin sauce,hoisinsaus|hoisin,12
+174529,Oyster sauce,oestersaus|oyster sauce,12
+174531,Fish sauce,vissaus|fish sauce|nam pla,8
+171167,Teriyaki sauce,teriyakisaus|teriyaki,12
+171610,Worcestershire sauce,worcestershiresaus|worcester saus,5
+174524,Salsa,salsa|tomatensalsa|salsa dip,30
+171831,Wasabi,wasabi,8
+173472,"Horseradish, prepared",mierikswortel|horseradish,5
+172880,Pizza sauce,pizzasaus,8
+174525,White sauce (béchamel),bechamelsaus|béchamelsaus|witte saus|bechamel,15
+171191,Cheese sauce,kaassaus|cheese sauce,8
+171564,"Gravy, beef",jus|vleesjus|gravy|jus de viande,25
+169397,Piccalilli,piccalilly|piccalilli|chow chow,15
+172237,Vinegar,azijn|natuurazijn|witte azijn|vinegar,15
+172241,Balsamic vinegar,balsamico|balsamicoazijn|aceto balsamico|balsamic,25
+173469,Cider vinegar,appelazijn|appelciderazijn|cider vinegar,12
+172240,Red wine vinegar,rode wijnazijn|wijnazijn,5
+173468,Salt,zout|keukenzout|tafelzout|zeezout|salt,30
+170931,Black pepper,peper|zwarte peper|black pepper,25
+171320,Cinnamon,kaneel|cinnamon,30
+171329,Paprika powder,paprikapoeder|gerookte paprika|paprika poeder,20
+170924,Curry powder,kerriepoeder|kerrie|curry powder,15
+170923,Cumin,komijn|djinten|komijnzaad|cumin,10
+171325,Garlic powder,knoflookpoeder|garlic powder,15
+171328,"Oregano, dried",oregano|gedroogde oregano,15
+172231,Turmeric,kurkuma|geelwortel|turmeric,15
+170926,"Ginger, ground",gemberpoeder|ground ginger,8
+171326,Nutmeg,nootmuskaat|nutmeg,10
+171319,Chili powder,chilipoeder|chili powder,8
+173471,Vanilla extract,vanille-extract|vanille extract|vanilla,10
+172243,Taco seasoning,tacokruiden|taco mix|taco seasoning,8
+172924,"Chicken bouillon, prepared",bouillon|kippenbouillon|chicken broth,30
+172922,"Beef bouillon, prepared",runderbouillon|vleesbouillon|beef broth,20
+171583,Vegetable broth,groentebouillon|vegetable broth,20
+171563,"Bouillon cube, chicken, dry",bouillonblokje|bouillonblokjes|kippenbouillonblokje|bouillonpoeder,15
+171176,Tomato soup,tomatensoep|tomato soup,45
+172916,Split pea soup with ham,erwtensoep|snert|split pea soup,40
+172909,Chicken noodle soup,kippensoep|kippensoep met vermicelli|chicken noodle soup,40
+172913,Minestrone,minestrone,15
+174564,Vegetable soup,groentesoep|vegetable soup,35
+172915,Cream of mushroom soup,champignonsoep|champignonroomsoep|mushroom soup,25
+174553,Cream of chicken soup,kippenroomsoep|kipcremesoep|cream of chicken,12
+171549,Lentil soup,linzensoep|lentil soup,12
+174808,Hot and sour soup,pekingsoep|zuurpittige soep|hot and sour soup,8
+171177,"Instant noodles (ramen), dry",instant noedels|ramen|cup noodles|good noodles|maggi noedels,30
+167668,Fried rice,nasi|nasi goreng|gebakken rijst|fried rice,40
+167677,"Lo mein, vegetable",bami|bami goreng|mie goreng|lo mein|gebakken mie,30
+167667,Egg rolls,loempia|loempia's|egg roll|spring roll|springrol,40
+172105,"Egg rolls, vegetable, frozen",vegetarische loempia|groenteloempia|mini loempia,12
+168082,Sweet and sour pork,babi pangang|koe lo yuk|varkensvlees zoetzuur|sweet and sour pork,20
+168081,Sweet and sour chicken,kip zoetzuur|koe loe kai|sweet and sour chicken,20
+167680,Spaghetti bolognese,spaghetti bolognese|pasta bolognese|spaghetti met gehaktsaus|spaghetti,50
+169033,Spaghetti with tomato sauce,spaghetti pomodoro|pasta met tomatensaus,20
+169029,Spaghetti and meatballs,spaghetti met gehaktballetjes,12
+169850,Lasagna with meat,lasagne|lasagne bolognese|lasagna,40
+172106,"Lasagna, vegetable",groentelasagne|vegetarische lasagne,12
+169770,Macaroni and cheese,macaroni met kaas|mac and cheese|macaroni kaas,20
+172094,"Tortellini, cheese-filled, fresh",tortellini|tortelloni|ravioli vers|gevulde pasta,20
+173329,"Ravioli, meat, canned",ravioli uit blik|ravioli,10
+173330,"Beef stew, canned",stoofpot|beef stew|stoofvlees uit blik,12
+169269,Potato salad,aardappelsalade|huzarensalade|potato salad,25
+170300,Coleslaw,koolsla|coleslaw,25
+173344,Pulled pork in barbecue sauce,pulled pork|pulled pork bbq,15
+169773,Dumplings (potstickers),dumplings|gyoza|potstickers|dim sum|wontons,15
+169846,"Fish fillet, battered and fried",kibbeling|lekkerbekje|gebakken vis|gefrituurde vis|fish and chips,35
+169015,"Mozzarella sticks, fried",mozzarella sticks,8
+170698,French fries (fried),patat|friet|frieten|frites|patatje|french fries|fries|snackbar patat,75
+170694,Hamburger (fast food),hamburger|burger,40
+170691,Cheeseburger (fast food),cheeseburger|kaasburger,40
+172084,Double cheeseburger with special sauce,big mac|dubbele burger|double cheeseburger,20
+170718,"Fried chicken pieces, breaded",krokante kip|kipstukjes|chicken bites|popcorn chicken,20
+170756,"Fried chicken breast, with skin and breading",fried chicken|kfc|gefrituurde kip,20
+173321,Chicken tenders (fast food),chicken tenders|kiptenders|kipreepjes,15
+170697,Onion rings,uienringen|onion rings,12
+170291,Nachos with cheese,nachos|nacho's,15
+170689,Taco,taco|tacos|harde taco,10
+173277,Burrito with beans and beef,burrito|burrito's,15
+170765,"Quesadilla, chicken",quesadilla|quesadilla's,10
+169677,Potato chips,chips|chipsjes|aardappelchips|naturel chips|crisps|potato chips,70
+167962,"Potato chips, paprika/barbecue",paprika chips|bbq chips|barbecue chips,30
+167963,"Potato chips, sour cream and onion",chips sour cream|sour cream chips,15
+168853,Stacked potato chips (Pringles-type),pringles|stapelchips,12
+167558,Tortilla chips,tortillachips|nachochips|doritos|tortilla chips,35
+167559,"Tortilla chips, nacho cheese",doritos nacho cheese|nacho cheese chips,12
+167949,Cheese puffs,cheese curls|kaas curls|cheetos|cheese puffs,12
+167959,"Popcorn, air-popped",popcorn|popcorn zonder olie,30
+170247,"Popcorn, oil-popped, salted",zoute popcorn|popcorn zout|bioscoop popcorn,30
+167552,"Popcorn, caramel",zoete popcorn|karamelpopcorn|caramel popcorn,20
+167555,"Pretzels, hard, salted",pretzels|zoute krakelingen|zoutstengels,20
+169064,"Pretzel, soft",zachte pretzel|brezel|pretzel,8
+170250,Rice cakes,rijstwafels|rijstwafel|rice cakes,50
+168857,Corn cakes,maiswafels|maïswafels|corn cakes,30
+173161,Rice crackers,rijstcrackers|japanse rijstcrackers|senbei|rice crackers,15
+167958,Oriental snack mix,japanse mix|borrelmix|oriental mix|nootjesmix,20
+167561,Trail mix,studentenhaver|notenmix met rozijnen|trail mix,30
+167969,Trail mix with chocolate,studentenhaver met chocolade,8
+167954,"Granola bar, soft",mueslireep|graanreep|granola bar|muesli bar,45
+169674,"Granola bar, chocolate chip",mueslireep chocolade|graanreep chocolade,25
+167542,"Granola bar, hard",krokante mueslireep|crunchy granola bar,12
+168849,Banana chips,bananenchips|banana chips,12
+173160,Prawn crackers,kroepoek|kroepoek oedang|prawn crackers|shrimp crackers,30
+167961,Pork rinds,kaantjes|varkenszwoerd|pork rinds|pork scratchings,8
+173157,Wasabi peas,wasabi erwtjes|wasabi peas,8

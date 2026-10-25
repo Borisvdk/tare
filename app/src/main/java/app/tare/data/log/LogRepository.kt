@@ -37,6 +37,9 @@ class LogRepository(
 
     suspend fun get(id: Long): LogEntry? = dao.get(id)
 
+    /** Highest entry id so far; anything logged later has a larger id. */
+    suspend fun maxId(): Long = dao.maxId()
+
     suspend fun logFood(
         food: Food,
         grams: Double,
@@ -75,11 +78,11 @@ class LogRepository(
             val portion = food.portions.firstOrNull { it.label == item.item.portionLabel }
             entryFor(food, item.item.grams * scale, portion, day, time, groupId, meal.meal.name)
         }
-        db.withTransaction {
+        val ids = db.withTransaction {
             mealDao.markUsed(meal.meal.id, now())
             dao.insertAll(entries)
         }
-        return entries
+        return entries.zip(ids) { e, id -> e.copy(id = id) }
     }
 
     /** Logs a batch (e.g. confirmed AI estimates) as one group. */
@@ -88,15 +91,16 @@ class LogRepository(
         day: LocalDate,
         groupName: String?,
         time: LocalTime? = null,
-    ) {
+    ): List<LogEntry> {
         val groupId = if (items.size > 1) UUID.randomUUID().toString() else null
         val entries = items.map { (food, grams, portion) ->
             entryFor(food, grams, portion, day, time, groupId, groupName.takeIf { groupId != null })
         }
-        db.withTransaction {
+        val ids = db.withTransaction {
             items.forEach { (food, grams, portion) -> foodDao.markUsed(food.id, now(), grams, portion?.label) }
             dao.insertAll(entries)
         }
+        return entries.zip(ids) { e, id -> e.copy(id = id) }
     }
 
     suspend fun updateAmount(entry: LogEntry, grams: Double, portion: Portion?) {

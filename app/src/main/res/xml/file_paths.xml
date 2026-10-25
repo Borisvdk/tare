@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Meal and label photos taken for Claude; deleted after use. -->
+    <cache-path name="photos" path="photos/" />
+</paths>
