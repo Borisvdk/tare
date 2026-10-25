@@ -137,14 +137,15 @@ class LogRepository(
         dao.insertAll(entries)
     }
 
-    suspend fun copyTo(entries: List<LogEntry>, day: LocalDate) {
+    /** Copies entries to [day] at the same time of day. Returns the new rows (for undo). */
+    suspend fun copyTo(entries: List<LogEntry>, day: LocalDate): List<LogEntry> {
         val groupIds = entries.mapNotNull { it.groupId }.distinct().associateWith { UUID.randomUUID().toString() }
-        dao.insertAll(
-            entries.map { e ->
-                val time = Instant.ofEpochMilli(e.loggedAt).atZone(zone()).toLocalTime()
-                e.copy(id = 0, day = day.toEpochDay(), loggedAt = timestamp(day, time), groupId = e.groupId?.let(groupIds::get))
-            },
-        )
+        val copies = entries.map { e ->
+            val time = Instant.ofEpochMilli(e.loggedAt).atZone(zone()).toLocalTime()
+            e.copy(id = 0, day = day.toEpochDay(), loggedAt = timestamp(day, time), groupId = e.groupId?.let(groupIds::get))
+        }
+        val ids = dao.insertAll(copies)
+        return copies.zip(ids) { e, id -> e.copy(id = id) }
     }
 
     private fun entryFor(

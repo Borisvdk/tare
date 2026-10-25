@@ -80,6 +80,9 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
 
     private val selectedDay = MutableStateFlow(today())
 
+    /** The day that was "today" when the user last looked; detects midnight while open. */
+    private var lastSeenToday = today()
+
     val state: StateFlow<TodayState> = combine(
         selectedDay,
         selectedDay.flatMapLatest { graph.log.observeDay(it) },
@@ -106,6 +109,18 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
 
     fun goToToday() {
         selectedDay.value = today()
+    }
+
+    /**
+     * Called when the screen resumes. If the date changed since the user last looked and they
+     * were on "today", follow the new day; if they were browsing another day, leave it.
+     */
+    fun onResume() {
+        val now = today()
+        if (now != lastSeenToday) {
+            if (selectedDay.value == lastSeenToday) selectedDay.value = now
+            lastSeenToday = now
+        }
     }
 
     fun updateAmount(entry: LogEntry, grams: Double, portion: Portion?, time: LocalTime?) = viewModelScope.launch {

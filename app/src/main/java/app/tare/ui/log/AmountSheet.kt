@@ -41,6 +41,7 @@ import app.tare.data.db.Food
 import app.tare.domain.FoodSource
 import app.tare.domain.Portion
 import app.tare.ui.Fmt
+import app.tare.ui.components.FoodImage
 import app.tare.ui.components.Macro
 import app.tare.ui.components.MacroStat
 import app.tare.ui.components.NumberPad
@@ -98,6 +99,10 @@ fun AmountSheet(
     TareSheet(onDismiss = onDismiss) {
         // Header
         Row(verticalAlignment = Alignment.CenterVertically) {
+            if (food.imageUrl != null) {
+                FoodImage(food.imageUrl, size = 52.dp)
+                Spacer(Modifier.width(12.dp))
+            }
             Column(Modifier.weight(1f)) {
                 Text(food.name, style = Tare.type.title.copy(fontSize = Tare.type.title.fontSize * 1.1f), color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 val origin = when (food.source) {

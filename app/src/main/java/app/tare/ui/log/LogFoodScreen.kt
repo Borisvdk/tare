@@ -166,6 +166,18 @@ fun LogFoodScreen(route: Route.LogFood) {
                             }
                         }
                     }
+                    if (hub.yesterday.isNotEmpty()) {
+                        item(key = "h-yesterday") { SectionHeader("Same as yesterday") }
+                        item(key = "yesterday") {
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                items(hub.yesterday, key = { it.part.name }) { source ->
+                                    CopyCard(source) {
+                                        scope.launch { announce(viewModel.copy(source)) }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if (hub.meals.isNotEmpty()) {
                         item(key = "h-meals") { SectionHeader("Meals") }
                         item(key = "meals") {
@@ -291,6 +303,25 @@ private fun MealCard(meal: MealWithItems, onClick: () -> Unit) {
             Text(Fmt.items(meal.items.size), style = Tare.type.caption, color = Tare.colors.textMuted)
             Spacer(Modifier.height(12.dp))
             KcalFigure(meal.nutrients.kcal)
+        }
+    }
+}
+
+@Composable
+private fun CopyCard(source: CopySource, onClick: () -> Unit) {
+    Card(Modifier.width(172.dp), padding = PaddingValues(16.dp), onClick = onClick) {
+        Column {
+            Text(source.part.label, style = Tare.type.bodyStrong, color = Tare.colors.text)
+            Text(
+                source.entries.map { it.groupName ?: it.name }.distinct().joinToString(", "),
+                style = Tare.type.caption,
+                color = Tare.colors.textMuted,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                minLines = 2,
+            )
+            Spacer(Modifier.height(10.dp))
+            KcalFigure(source.kcal)
         }
     }
 }

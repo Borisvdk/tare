@@ -113,6 +113,15 @@ fun TareTheme(mode: ThemeMode = ThemeMode.SYSTEM, content: @Composable () -> Uni
         darkColorScheme(
             primary = colors.kcal,
             onPrimary = colors.onAccent,
+            // Stock Material components (time picker, dialogs, menus) take these slots; keep
+            // them neutral so nothing outside the four quantity colours picks up a hue.
+            primaryContainer = colors.surfacePressed,
+            onPrimaryContainer = colors.text,
+            secondaryContainer = colors.surfacePressed,
+            onSecondaryContainer = colors.text,
+            tertiaryContainer = colors.surfacePressed,
+            onTertiaryContainer = colors.text,
+            surfaceTint = colors.surface,
             secondary = colors.protein,
             tertiary = colors.carbs,
             background = colors.background,
@@ -137,6 +146,15 @@ fun TareTheme(mode: ThemeMode = ThemeMode.SYSTEM, content: @Composable () -> Uni
         lightColorScheme(
             primary = colors.kcal,
             onPrimary = colors.onAccent,
+            // Stock Material components (time picker, dialogs, menus) take these slots; keep
+            // them neutral so nothing outside the four quantity colours picks up a hue.
+            primaryContainer = colors.surfacePressed,
+            onPrimaryContainer = colors.text,
+            secondaryContainer = colors.surfacePressed,
+            onSecondaryContainer = colors.text,
+            tertiaryContainer = colors.surfacePressed,
+            onTertiaryContainer = colors.text,
+            surfaceTint = colors.surface,
             secondary = colors.protein,
             tertiary = colors.carbs,
             background = colors.background,

@@ -63,6 +63,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.domain.FoodSource
@@ -114,6 +115,11 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
     var showTargets by remember { mutableStateOf(false) }
     var savingMeal by remember { mutableStateOf<List<LogEntry>?>(null) }
     var retiming by remember { mutableStateOf<List<LogEntry>?>(null) }
+
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
 
     LaunchedEffect(state.day) {
         onDayChange(state.day)

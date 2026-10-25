@@ -8,11 +8,7 @@ reason.
 
 - [ ] **Verify Claude end to end with a real key** on the phone: describe text, plate photo,
       label photo. Tune the prompts on real Dutch meals (portion sizes, AH/Jumbo products).
-- [ ] **Copy from another day**: in the log hub, "Yesterday's morning" style shortcuts that
-      copy a whole section in one tap.
 - [ ] **Edit time on log**: remember the last time picked for past-day logging.
-- [ ] **Product images**: show OFF thumbnails in search results and the amount sheet (Coil
-      is already a dependency).
 - [ ] **Favourites row** in the log hub above recents.
 - [ ] **Pinned quick items**: long-press a recent food to pin it with a fixed amount for
       true one-tap logging.
@@ -29,6 +25,12 @@ reason.
 - Instrumented UI tests on an emulator in CI.
 
 ## Shipped
+
+- "Same as yesterday" cards in the log hub: copy a whole morning/afternoon/evening in one tap.
+- Product thumbnails in search results and the amount sheet (Open Food Facts images;
+  `images.openfoodfacts.org` was unreachable from the dev machine on 2026-10-25, so check
+  on the phone).
+- Today follows the date after midnight when the app resumes.
 
 - v0.1: Today, log hub, barcode scan, Claude describe and label reading, saved meals,
   recipes, custom foods, weight trend, intake chart, targets, backup, signed releases through
