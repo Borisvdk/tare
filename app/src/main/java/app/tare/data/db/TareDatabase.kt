@@ -43,9 +43,14 @@ abstract class TareDatabase : RoomDatabase() {
 class Converters {
     @TypeConverter
     fun portionsToJson(portions: List<Portion>): String =
-        Json.encodeToString(ListSerializer(Portion.serializer()), portions)
+        json.encodeToString(ListSerializer(Portion.serializer()), portions)
 
     @TypeConverter
-    fun portionsFromJson(json: String): List<Portion> =
-        if (json.isBlank()) emptyList() else Json.decodeFromString(ListSerializer(Portion.serializer()), json)
+    fun portionsFromJson(text: String): List<Portion> =
+        if (text.isBlank()) emptyList() else json.decodeFromString(ListSerializer(Portion.serializer()), text)
+
+    private companion object {
+        // Tolerate fields added by newer app versions, so reading data back never crashes.
+        val json = Json { ignoreUnknownKeys = true }
+    }
 }

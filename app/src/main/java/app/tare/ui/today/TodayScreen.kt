@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -478,7 +479,7 @@ private fun DayHeader(
     onSettings: () -> Unit,
 ) {
     Row(
-        Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp, start = 4.dp).height(HEADER_HEIGHT),
+        Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp, start = 4.dp).heightIn(min = HEADER_HEIGHT),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -508,7 +509,7 @@ private fun SelectionBar(
     onDelete: () -> Unit,
 ) {
     Row(
-        Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp).height(HEADER_HEIGHT),
+        Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp).heightIn(min = HEADER_HEIGHT),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
