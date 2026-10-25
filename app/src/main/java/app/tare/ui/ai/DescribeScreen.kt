@@ -169,49 +169,19 @@ fun DescribeScreen(route: Route.Describe) {
                                 SecondaryButton("Try again", onClick = { viewModel.estimate(text) })
                             }
                         }
-                        is DescribeState.Ready -> Column(Modifier.padding(top = 8.dp)) {
-                            SectionHeader(s.title)
-                            if (s.rows.isEmpty()) {
-                                Text("Nothing left to log.", style = Tare.type.body, color = Tare.colors.textMuted)
-                            }
-                            s.rows.forEach { row ->
-                                ListRow(
-                                    title = row.food.name,
-                                    subtitle = "${Fmt.amount(row.grams)} ${row.food.unit}" + if (row.lowConfidence) " · rough guess, check amount" else "",
-                                    kcal = row.nutrients.kcal,
-                                    onClick = { editing = row },
-                                    trailingAction = {
-                                        RoundIconButton(Icons.Rounded.Close, "Remove", { viewModel.remove(row.key) }, size = 32.dp, iconSize = 16.dp)
-                                    },
-                                )
-                            }
-                            if (s.note.isNotBlank()) {
-                                Text(s.note, style = Tare.type.caption, color = Tare.colors.textMuted, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
-                            }
-                            Spacer(Modifier.height(12.dp))
-                            Card(Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Column(Modifier.weight(1f)) {
-                                        KcalFigure(s.total.kcal)
-                                        MacroLine(s.total)
-                                    }
+                        is DescribeState.Ready -> EstimateResult(
+                            state = s,
+                            onEdit = { editing = it },
+                            onRemove = viewModel::remove,
+                            onLogAll = {
+                                scope.launch {
+                                    val entries = viewModel.logAll()
+                                    if (entries.isEmpty()) return@launch
+                                    nav.back()
+                                    notify.show("Logged ${s.title} · ${Fmt.kcal(entries.sumOf { it.nutrients.kcal })} kcal")
                                 }
-                            }
-                            Spacer(Modifier.height(14.dp))
-                            PrimaryButton(
-                                "Log all · ${Fmt.kcal(s.total.kcal)} kcal",
-                                onClick = {
-                                    scope.launch {
-                                        val entries = viewModel.logAll()
-                                        if (entries.isEmpty()) return@launch
-                                        nav.back()
-                                        notify.show("Logged ${s.title} · ${Fmt.kcal(entries.sumOf { it.nutrients.kcal })} kcal")
-                                    }
-                                },
-                                enabled = s.rows.isNotEmpty(),
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
+                            },
+                        )
                     }
                 }
             }
@@ -229,6 +199,50 @@ fun DescribeScreen(route: Route.Describe) {
                 editing = null
             },
             onDismiss = { editing = null },
+        )
+    }
+}
+
+/** Claude's estimate: editable rows, an optional note, totals and "Log all". */
+@Composable
+internal fun EstimateResult(
+    state: DescribeState.Ready,
+    onEdit: (EstimateRow) -> Unit,
+    onRemove: (Int) -> Unit,
+    onLogAll: () -> Unit,
+) {
+    Column(Modifier.padding(top = 8.dp)) {
+        SectionHeader(state.title)
+        if (state.rows.isEmpty()) {
+            Text("Nothing left to log.", style = Tare.type.body, color = Tare.colors.textMuted)
+        }
+        state.rows.forEach { row ->
+            ListRow(
+                title = row.food.name,
+                subtitle = "${Fmt.amount(row.grams)} ${row.food.unit}" + if (row.lowConfidence) " · rough guess, check amount" else "",
+                kcal = row.nutrients.kcal,
+                onClick = { onEdit(row) },
+                trailingAction = {
+                    RoundIconButton(Icons.Rounded.Close, "Remove", { onRemove(row.key) }, size = 32.dp, iconSize = 16.dp)
+                },
+            )
+        }
+        if (state.note.isNotBlank()) {
+            Text(state.note, style = Tare.type.caption, color = Tare.colors.textMuted, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
+        }
+        Spacer(Modifier.height(12.dp))
+        Card(Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
+            Column {
+                KcalFigure(state.total.kcal)
+                MacroLine(state.total)
+            }
+        }
+        Spacer(Modifier.height(14.dp))
+        PrimaryButton(
+            "Log all · ${Fmt.kcal(state.total.kcal)} kcal",
+            onClick = onLogAll,
+            enabled = state.rows.isNotEmpty(),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

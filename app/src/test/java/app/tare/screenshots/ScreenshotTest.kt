@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -22,6 +23,9 @@ import app.tare.domain.Nutrients
 import app.tare.domain.Portion
 import app.tare.domain.Targets
 import app.tare.domain.buildSearchText
+import app.tare.ui.ai.DescribeState
+import app.tare.ui.ai.EstimateResult
+import app.tare.ui.ai.EstimateRow
 import app.tare.ui.library.LibraryScreen
 import app.tare.ui.log.AmountMode
 import app.tare.ui.log.AmountSheet
@@ -167,6 +171,27 @@ class ScreenshotTest {
     @Test fun settings() {
         seed(ThemeMode.DARK)
         shoot("settings_dark", waitFor = "kcal per day") { TareRoot(graph, start = Route.Settings) }
+    }
+
+    @Test fun describeResult() {
+        seed(ThemeMode.DARK, withDiary = false)
+        fun ai(key: Int, name: String, grams: Double, per100: Nutrients, low: Boolean = false) =
+            EstimateRow(key, food("ai:$key", name, per100, source = FoodSource.AI), grams, low)
+        val state = DescribeState.Ready(
+            title = "Breakfast",
+            note = "Assumed medium eggs fried in a little butter.",
+            rows = listOf(
+                ai(0, "Fried egg", 100.0, Nutrients(196.0, 13.6, 0.8, 15.0)),
+                ai(1, "Volkoren brood", 70.0, Nutrients(247.0, 10.0, 41.0, 3.4, 7.0)),
+                ai(2, "Peanut butter", 16.0, Nutrients(588.0, 25.0, 20.0, 50.0, 6.0)),
+                ai(3, "Flat white", 240.0, Nutrients(45.0, 2.6, 3.8, 2.2), low = true),
+            ),
+        )
+        shoot("describe_result_dark", waitFor = "Log all") {
+            tab(ThemeMode.DARK) {
+                Box(Modifier.padding(16.dp)) { EstimateResult(state, onEdit = {}, onRemove = {}, onLogAll = {}) }
+            }
+        }
     }
 
     @Test fun mealEditor() {
