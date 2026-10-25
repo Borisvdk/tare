@@ -1,9 +1,7 @@
 package app.tare.ui.ai
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
-import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,18 +16,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import java.io.File
 
-/** Launchers for taking a photo, picking one from the gallery, and dictating text. */
+/** Launchers for taking a photo and picking one from the gallery. Dictation is [Dictation]. */
 class MediaInput(
     val takePhoto: () -> Unit,
     val pickPhoto: () -> Unit,
-    val dictate: () -> Unit,
 )
 
 @Composable
-fun rememberMediaInput(onPhoto: (ByteArray) -> Unit, onSpeech: (String) -> Unit = {}): MediaInput {
+fun rememberMediaInput(onPhoto: (ByteArray) -> Unit): MediaInput {
     val context = LocalContext.current
     val currentOnPhoto by rememberUpdatedState(onPhoto)
-    val currentOnSpeech by rememberUpdatedState(onSpeech)
     var pendingUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
@@ -41,9 +37,6 @@ fun rememberMediaInput(onPhoto: (ByteArray) -> Unit, onSpeech: (String) -> Unit 
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) readBytes(context, uri)?.let(currentOnPhoto)
     }
-    val speech = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let(currentOnSpeech)
-    }
 
     return remember {
         MediaInput(
@@ -53,12 +46,6 @@ fun rememberMediaInput(onPhoto: (ByteArray) -> Unit, onSpeech: (String) -> Unit 
                 camera.launch(uri)
             },
             pickPhoto = { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-            dictate = {
-                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-                    .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                    .putExtra(RecognizerIntent.EXTRA_PROMPT, "What did you eat?")
-                runCatching { speech.launch(intent) }
-            },
         )
     }
 }
