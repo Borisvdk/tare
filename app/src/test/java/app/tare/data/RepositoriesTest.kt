@@ -158,6 +158,17 @@ class RepositoriesTest {
     }
 
     @Test
+    fun deletedMealsCanBeRestored() = runTest {
+        val id = meals.save(null, "Rice bowl", listOf(DraftItem(rice, 200.0), DraftItem(chicken, 150.0)))
+        val snapshot = meals.delete(id)!!
+        assertThat(meals.get(id)).isNull()
+        meals.restore(snapshot)
+        val restored = meals.get(id)!!
+        assertThat(restored.items).hasSize(2)
+        assertThat(restored.nutrients.kcal).isWithin(0.01).of(260.0 + 247.5)
+    }
+
+    @Test
     fun quickAddEntriesSurviveBeingSavedAsMeal() = runTest {
         val quick = log.logQuick("Pizza slice", Nutrients(285.0, 12.0, 36.0, 10.0), day)
         val riceEntry = log.logFood(rice, 150.0, null, day)

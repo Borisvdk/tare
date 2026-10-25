@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.tare.AppGraph
 import app.tare.data.db.Food
+import app.tare.data.db.MealWithItems
 import app.tare.data.meal.DraftItem
 import app.tare.domain.FoodSource
 import app.tare.domain.Nutrients
@@ -65,7 +66,5 @@ class MealEditorViewModel(graph: AppGraph, private val mealId: String?) : ItemsE
 
     suspend fun save() = graph.meals.save(mealId, name, items.toList())
 
-    suspend fun delete() {
-        mealId?.let { graph.meals.delete(it) }
-    }
+    suspend fun delete(): MealWithItems? = mealId?.let { graph.meals.delete(it) }
 }

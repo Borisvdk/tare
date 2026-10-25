@@ -35,7 +35,7 @@ data class ProgressState(
     val today: LocalDate,
     val weights: List<WeightEntry> = emptyList(),
     val trend: List<TrendPoint> = emptyList(),
-    /** The last 14 days, oldest first, including empty days. */
+    /** The last 21 days, oldest first, including empty days (the chart shows the last 14). */
     val intake: List<DayIntake> = emptyList(),
     val targets: Targets = Targets(),
     val loaded: Boolean = false,
@@ -50,12 +50,15 @@ data class ProgressState(
         return last.trendKg - earlier.trendKg
     }
 
+    val chart: List<DayIntake> get() = intake.takeLast(14)
+
     /**
-     * Average over the [days] before today, counting only days with entries so a forgotten
-     * day doesn't drag it down. Today is excluded because it isn't finished yet.
+     * Average over the [days] before today (skipping the most recent [skip] days), counting
+     * only days with entries so a forgotten day doesn't drag it down. Today is excluded
+     * because it isn't finished yet.
      */
-    fun averageIntake(days: Int): Nutrients? {
-        val logged = intake.filter { it.day < today }.takeLast(days).filter { it.nutrients.kcal > 0 }
+    fun averageIntake(days: Int, skip: Int = 0): Nutrients? {
+        val logged = intake.filter { it.day < today }.dropLast(skip).takeLast(days).filter { it.nutrients.kcal > 0 }
         if (logged.isEmpty()) return null
         return logged.fold(Nutrients.Zero) { acc, d -> acc + d.nutrients } * (1.0 / logged.size)
     }
@@ -72,7 +75,7 @@ class ProgressViewModel(private val graph: AppGraph) : ViewModel() {
     }
 
     val state: StateFlow<ProgressState> = todayFlow.flatMapLatest { today ->
-        val from = today.minusDays(13)
+        val from = today.minusDays(20)
         combine(
             graph.weights.observeAll(),
             graph.log.observeTotals(from, today),
@@ -92,7 +95,7 @@ class ProgressViewModel(private val graph: AppGraph) : ViewModel() {
             today = today,
             weights = weights,
             trend = weightTrend(weights.map { WeightPoint(it.day, it.kg) }),
-            intake = (0L..13L).map { offset ->
+            intake = (0L..20L).map { offset ->
                 val day = from.plusDays(offset)
                 DayIntake(day, totals[day.toEpochDay()] ?: Nutrients.Zero)
             },

@@ -48,6 +48,7 @@ import app.tare.ui.components.TareTextField
 import app.tare.ui.components.foodSubtitle
 import app.tare.ui.log.AmountMode
 import app.tare.ui.log.AmountSheet
+import app.tare.ui.navigation.LocalAppGraph
 import app.tare.ui.navigation.LocalNavigator
 import app.tare.ui.navigation.Route
 import app.tare.ui.navigation.tareViewModel
@@ -58,6 +59,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MealEditorScreen(route: Route.MealEditor) {
     val viewModel = tareViewModel(key = "meal-${route.mealId}") { MealEditorViewModel(it, route.mealId) }
+    val graph = LocalAppGraph.current
     val nav = LocalNavigator.current
     val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
@@ -68,9 +70,11 @@ fun MealEditorScreen(route: Route.MealEditor) {
         onDelete = if (viewModel.isNew) null else {
             {
                 scope.launch {
-                    viewModel.delete()
+                    val deleted = viewModel.delete()
                     nav.back()
-                    notify.show("Meal deleted")
+                    notify.show("Meal deleted", actionLabel = "Undo") {
+                        deleted?.let { graph.appScope.launch { graph.meals.restore(it) } }
+                    }
                 }
             }
         },

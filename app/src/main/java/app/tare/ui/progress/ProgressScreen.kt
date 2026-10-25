@@ -234,14 +234,26 @@ private fun IntakeCard(state: ProgressState) {
                     style = Tare.type.caption,
                     color = colors.textMuted,
                 )
+                state.averageIntake(7, skip = 7)?.let { previous ->
+                    val diff = avg7.kcal - previous.kcal
+                    Text(
+                        when {
+                            kotlin.math.abs(diff) < 50 -> "About the same as the week before"
+                            diff < 0 -> "${Fmt.kcal(-diff)} kcal less per day than the week before"
+                            else -> "${Fmt.kcal(diff)} kcal more per day than the week before"
+                        },
+                        style = Tare.type.caption,
+                        color = colors.textFaint,
+                    )
+                }
             }
             Spacer(Modifier.height(16.dp))
             IntakeBars(state, Modifier.fillMaxWidth().height(120.dp))
             Spacer(Modifier.height(6.dp))
             Row(Modifier.fillMaxWidth()) {
-                state.intake.forEachIndexed { i, d ->
+                state.chart.forEachIndexed { i, d ->
                     Text(
-                        if (i % 2 == 1 || i == state.intake.lastIndex) Fmt.weekdayLetter(d.day) else "",
+                        if (i % 2 == 1 || i == state.chart.lastIndex) Fmt.weekdayLetter(d.day) else "",
                         style = Tare.type.caption,
                         color = if (d.day == state.today) colors.kcal else colors.textFaint,
                         modifier = Modifier.weight(1f),
@@ -258,10 +270,11 @@ private fun IntakeBars(state: ProgressState, modifier: Modifier = Modifier) {
     val colors = Tare.colors
     val target = state.targets.kcal.toDouble()
     Canvas(modifier) {
-        val maxValue = max(target * 1.25, state.intake.maxOfOrNull { it.nutrients.kcal } ?: 0.0).coerceAtLeast(1.0)
-        val slot = size.width / state.intake.size
+        val bars = state.chart
+        val maxValue = max(target * 1.25, bars.maxOfOrNull { it.nutrients.kcal } ?: 0.0).coerceAtLeast(1.0)
+        val slot = size.width / bars.size
         val barWidth = min(slot * 0.56f, 18.dp.toPx())
-        state.intake.forEachIndexed { i, d ->
+        bars.forEachIndexed { i, d ->
             val kcal = d.nutrients.kcal
             val cx = slot * i + slot / 2
             val h = (kcal / maxValue * size.height).toFloat()
