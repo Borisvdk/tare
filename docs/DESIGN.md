@@ -83,3 +83,16 @@ headlines only (screen titles such as "Today", empty states). Tokens are in `ui/
 
 Short and plain, like a friend who knows nutrition. Sentence case. No exclamation marks, no
 hype. Say what happens: "Logged Banana · 105 kcal", "Removed 2 items · Undo".
+
+## Logo
+
+The mark is ▸0◂: the sign a scale's display shows once it has settled at zero, set around
+the Instrument Serif zero. Tagline: "Zero in on what counts."
+
+- `tools/logo/build.py` generates the launcher layers, the animated splash icon and the SVGs
+  in `docs/brand/`. Change the script, not the generated XML.
+- Launcher icon: the mark in `#1A0A04` on coral (`tare_launcher_background`). The
+  monochrome layer has the same shapes for themed icons.
+- Splash: no icon background. The zero in text colour and coral triangles on the screen
+  background; the triangles slide onto the zero (700 ms).
+- The mark only ever uses coral and neutrals, never the protein, carbs or fat colours.

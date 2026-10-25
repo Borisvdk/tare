@@ -21,6 +21,9 @@ reason.
 
 ## Shipped
 
+- New logo, ▸0◂ (a scale's settled-at-zero sign around a serif zero): coral launcher icon,
+  themed-icon layer, and a splash where the triangles slide onto the zero. Built by
+  `tools/logo/build.py`; brand SVGs in `docs/brand/` (PR #23).
 - Health Connect, read only: Renpho weigh-ins into the trend, Garmin calories burned as
   "eaten vs burned" on Progress (PR #24).
 - Guided Claude key setup: claim Max plan API credits, create a key, paste; checked before
