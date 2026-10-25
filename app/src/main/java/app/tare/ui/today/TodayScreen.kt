@@ -1,6 +1,5 @@
 package app.tare.ui.today
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -36,6 +35,7 @@ import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBox
@@ -153,14 +153,32 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
             bottom = contentPadding.calculateBottomPadding() + 24.dp,
         ),
     ) {
-        item(key = "header") {
-            AnimatedContent(targetState = selected.isNotEmpty(), label = "header") { selecting ->
-                if (selecting) {
+        // While selecting, the actions stay pinned at the top so they're reachable from an entry
+        // far down the list.
+        if (selected.isNotEmpty()) {
+            stickyHeader(key = "selection") {
+                Box(Modifier.background(Tare.colors.background)) {
                     SelectionBar(
                         count = selected.size,
                         canCopyToToday = state.day != state.today,
                         onClose = { selected = emptySet() },
                         onSaveMeal = { savingMeal = selectedEntries },
+                        onFavorite = {
+                            val entries = selectedEntries
+                            selected = emptySet()
+                            scope.launch {
+                                val starred = viewModel.favorite(entries)
+                                notify.show(
+                                    when {
+                                        entries.none { it.foodId != null } -> "Quick adds can't be favourites"
+                                        starred.isEmpty() -> "Already in favourites"
+                                        starred.size == 1 -> "Added to favourites"
+                                        else -> "${starred.size} foods added to favourites"
+                                    },
+                                    actionLabel = if (starred.isEmpty()) null else "Undo",
+                                ) { viewModel.unfavorite(starred) }
+                            }
+                        },
                         onCopy = {
                             viewModel.copyToToday(selectedEntries)
                             selected = emptySet()
@@ -172,23 +190,25 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                             selected = emptySet()
                         },
                     )
-                } else {
-                    DayHeader(
-                        day = state.day,
-                        today = state.today,
-                        canCopy = state.entries.isNotEmpty(),
-                        onToday = viewModel::goToToday,
-                        onCopyToToday = {
-                            scope.launch {
-                                val copies = viewModel.copyDayToToday()
-                                notify.show("Copied ${Fmt.items(copies.size)} to today", actionLabel = "Undo") {
-                                    viewModel.undoCopy(copies)
-                                }
-                            }
-                        },
-                        onSettings = { nav.go(Route.Settings) },
-                    )
                 }
+            }
+        } else {
+            item(key = "header") {
+                DayHeader(
+                    day = state.day,
+                    today = state.today,
+                    canCopy = state.entries.isNotEmpty(),
+                    onToday = viewModel::goToToday,
+                    onCopyToToday = {
+                        scope.launch {
+                            val copies = viewModel.copyDayToToday()
+                            notify.show("Copied ${Fmt.items(copies.size)} to today", actionLabel = "Undo") {
+                                viewModel.undoCopy(copies)
+                            }
+                        }
+                    },
+                    onSettings = { nav.go(Route.Settings) },
+                )
             }
         }
         item(key = "week") {
@@ -504,6 +524,7 @@ private fun SelectionBar(
     canCopyToToday: Boolean,
     onClose: () -> Unit,
     onSaveMeal: () -> Unit,
+    onFavorite: () -> Unit,
     onCopy: () -> Unit,
     onRetime: () -> Unit,
     onDelete: () -> Unit,
@@ -515,6 +536,7 @@ private fun SelectionBar(
     ) {
         RoundIconButton(Icons.Rounded.Close, "Clear selection", onClose, background = Tare.colors.surface)
         Text("$count selected", style = Tare.type.title, color = Tare.colors.text, modifier = Modifier.weight(1f))
+        RoundIconButton(Icons.Rounded.StarBorder, "Add to favourites", onFavorite)
         RoundIconButton(Icons.Rounded.BookmarkAdd, "Save as meal", onSaveMeal)
         if (canCopyToToday) RoundIconButton(Icons.Rounded.ContentCopy, "Copy to today", onCopy)
         RoundIconButton(Icons.Rounded.Schedule, "Change time", onRetime)

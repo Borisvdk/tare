@@ -138,6 +138,11 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
 
     fun toggleFavorite(food: Food) = viewModelScope.launch { graph.foods.setFavorite(food.id, !food.favorite) }
 
+    /** Stars the foods behind [entries]; returns the ids that weren't favourites yet, for undo. */
+    suspend fun favorite(entries: List<LogEntry>): List<String> = graph.foods.favoriteAll(entries.mapNotNull { it.foodId })
+
+    fun unfavorite(ids: List<String>) = graph.appScope.launch { ids.forEach { graph.foods.setFavorite(it, false) } }
+
     private fun sectionsOf(entries: List<LogEntry>): List<DaySection> {
         val zone = zone
         val byPart = entries.groupBy { DayPart.of(Instant.ofEpochMilli(it.loggedAt).atZone(zone).toLocalTime()) }

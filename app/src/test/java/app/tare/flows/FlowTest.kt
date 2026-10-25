@@ -226,6 +226,36 @@ class FlowTest {
         assertThat(entries().map { it.name }).containsExactly("Banana", "Pizza")
     }
 
+    private fun isFavorite() = runBlocking { graph.db.foodDao().get(banana.id)!!.favorite }
+
+    @Test
+    fun holdAFoodInTheLogHubToStarIt() {
+        runBlocking { graph.log.logFood(banana, 118.0, banana.portions.first(), today.minusDays(1)) }
+        compose.setContent { TareRoot(graph, start = Route.LogFood(today.toEpochDay())) }
+
+        compose.waitForText("Hold a food to star it")
+        // The last "Banana" is the Recent row (the first is yesterday's card).
+        compose.onAllNodesWithText("Banana").onLast().performTouchInput { longClick() }
+        compose.waitForText("Banana added to favourites")
+        compose.waitUntil(5_000) { isFavorite() }
+        compose.waitForText("FAVOURITES")
+
+        compose.onNodeWithText("Undo").performClick()
+        compose.waitUntil(5_000) { !isFavorite() }
+    }
+
+    @Test
+    fun starLoggedEntriesFromToday() {
+        runBlocking { graph.log.logFood(banana, 118.0, banana.portions.first(), today, LocalTime.of(9, 0)) }
+        compose.setContent { TareRoot(graph) }
+        compose.waitForText("Banana")
+        compose.onNodeWithText("Banana").performTouchInput { longClick() }
+
+        compose.onNodeWithContentDescription("Add to favourites").performClick()
+        compose.waitForText("Added to favourites")
+        compose.waitUntil(5_000) { isFavorite() }
+    }
+
     @Test
     fun saveSelectedEntriesAsAMeal() {
         runBlocking { graph.log.logFood(banana, 118.0, banana.portions.first(), today, LocalTime.of(9, 0)) }

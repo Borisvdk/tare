@@ -144,6 +144,7 @@ fun FoodRow(
     modifier: Modifier = Modifier,
     onQuickAdd: (() -> Unit)? = null,
     showImage: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val (grams, portion) = defaultAmount(food)
     ListRow(
@@ -172,6 +173,7 @@ fun FoodRow(
             }
         },
         onClick = onClick,
+        onLongClick = onLongClick,
     )
 }
 

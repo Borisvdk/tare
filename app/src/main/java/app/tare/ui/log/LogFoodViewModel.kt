@@ -147,4 +147,7 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate, initialP
     fun undo(entries: List<LogEntry>) = viewModelScope.launch { graph.log.delete(entries) }
 
     fun toggleFavorite(food: Food) = viewModelScope.launch { graph.foods.setFavorite(food.id, !food.favorite) }
+
+    /** Toggles the stored food's star (saving an online product first) and returns the new state. */
+    suspend fun toggleFavoriteNow(food: Food): Boolean = graph.foods.toggleFavorite(food)
 }

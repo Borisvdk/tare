@@ -40,6 +40,7 @@ fun LazyListScope.searchResults(
     onMeal: ((MealWithItems) -> Unit)? = null,
     onAskAi: ((String) -> Unit)? = null,
     onCreate: ((String) -> Unit)? = null,
+    onLongPress: ((Food) -> Unit)? = null,
 ) {
     // "2 eggs and toast" is a meal, not a food name: lead with Describe.
     val aiFirst = onAskAi != null && results.isSearching && looksLikeAMeal(results.query)
@@ -69,7 +70,13 @@ fun LazyListScope.searchResults(
             }
         }
         items(results.local, key = { "l-" + it.id }) { food ->
-            FoodRow(food, onClick = { onFood(food) }, onQuickAdd = onQuickAdd?.let { { it(food) } }, modifier = Modifier.animateItem())
+            FoodRow(
+                food,
+                onClick = { onFood(food) },
+                onQuickAdd = onQuickAdd?.let { { it(food) } },
+                onLongClick = onLongPress?.let { { it(food) } },
+                modifier = Modifier.animateItem(),
+            )
         }
     }
     when (val remote = results.remote) {
@@ -90,7 +97,7 @@ fun LazyListScope.searchResults(
         is RemoteState.Loaded -> if (remote.foods.isNotEmpty()) {
             item(key = "h-remote") { SectionHeader("Products") }
             items(remote.foods, key = { "r-" + it.id }) { food ->
-                FoodRow(food, onClick = { onFood(food) }, modifier = Modifier.animateItem(), showImage = true)
+                FoodRow(food, onClick = { onFood(food) }, modifier = Modifier.animateItem(), showImage = true, onLongClick = onLongPress?.let { { it(food) } })
             }
         }
     }

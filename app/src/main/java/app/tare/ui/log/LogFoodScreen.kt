@@ -52,7 +52,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -93,6 +95,7 @@ fun LogFoodScreen(route: Route.LogFood) {
     val nav = LocalNavigator.current
     val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
     val focus = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     val listState = rememberLazyListState()
@@ -121,6 +124,17 @@ fun LogFoodScreen(route: Route.LogFood) {
 
     fun quickLog(food: Food) {
         scope.launch { announce(listOf(viewModel.quickLog(food))) }
+    }
+
+    // Long-press anywhere a food is listed to star it.
+    fun toggleFavorite(food: Food) {
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        scope.launch {
+            val starred = viewModel.toggleFavoriteNow(food)
+            notify.show(if (starred) "${food.name} added to favourites" else "${food.name} removed from favourites", actionLabel = "Undo") {
+                scope.launch { viewModel.toggleFavoriteNow(food.copy(favorite = starred)) }
+            }
+        }
     }
 
     Column(Modifier.fillMaxSize().background(Tare.colors.background).statusBarsPadding().imePadding()) {
@@ -201,19 +215,24 @@ fun LogFoodScreen(route: Route.LogFood) {
                     if (hub.usual.isNotEmpty()) {
                         item(key = "h-usual") { SectionHeader("Usually ${part.phrase}") }
                         items(hub.usual, key = { "usual-" + it.id }) { food ->
-                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
+                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, onLongClick = { toggleFavorite(food) }, modifier = Modifier.animateItem())
                         }
                     }
                     if (hub.favorites.isNotEmpty()) {
                         item(key = "h-favorites") { SectionHeader("Favourites") }
                         items(hub.favorites, key = { "fav-" + it.id }) { food ->
-                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
+                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, onLongClick = { toggleFavorite(food) }, modifier = Modifier.animateItem())
                         }
                     }
                     if (hub.recent.isNotEmpty()) {
-                        item(key = "h-recent") { SectionHeader("Recent") }
+                        item(key = "h-recent") {
+                            SectionHeader("Recent") {
+                                // Until there are favourites, say how to make one.
+                                if (hub.favorites.isEmpty()) Text("Hold a food to star it", style = Tare.type.caption, color = Tare.colors.textFaint)
+                            }
+                        }
                         items(hub.recent, key = { "recent-" + it.id }) { food ->
-                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
+                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, onLongClick = { toggleFavorite(food) }, modifier = Modifier.animateItem())
                         }
                     } else if (hub.favorites.isEmpty() && hub.usual.isEmpty()) {
                         item(key = "hint") {
@@ -239,6 +258,7 @@ fun LogFoodScreen(route: Route.LogFood) {
                         },
                         onAskAi = { nav.go(Route.Describe(route.day, prefill = it, part = part)) },
                         onCreate = { nav.go(Route.FoodEditor(logDay = route.day, name = it)) },
+                        onLongPress = { toggleFavorite(it) },
                     )
                 }
             }
