@@ -61,6 +61,7 @@ import app.tare.data.db.LogEntry
 import app.tare.data.db.MealWithItems
 import app.tare.domain.DayPart
 import app.tare.domain.FoodSource
+import app.tare.domain.phrase
 import app.tare.ui.Fmt
 import app.tare.ui.components.Card
 import app.tare.ui.components.FoodRow
@@ -197,6 +198,12 @@ fun LogFoodScreen(route: Route.LogFood) {
                             }
                         }
                     }
+                    if (hub.usual.isNotEmpty()) {
+                        item(key = "h-usual") { SectionHeader("Usually ${part.phrase}") }
+                        items(hub.usual, key = { "usual-" + it.id }) { food ->
+                            FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
+                        }
+                    }
                     if (hub.favorites.isNotEmpty()) {
                         item(key = "h-favorites") { SectionHeader("Favourites") }
                         items(hub.favorites, key = { "fav-" + it.id }) { food ->
@@ -208,7 +215,7 @@ fun LogFoodScreen(route: Route.LogFood) {
                         items(hub.recent, key = { "recent-" + it.id }) { food ->
                             FoodRow(food, onClick = { picked = food }, onQuickAdd = { quickLog(food) }, modifier = Modifier.animateItem())
                         }
-                    } else if (hub.favorites.isEmpty()) {
+                    } else if (hub.favorites.isEmpty() && hub.usual.isEmpty()) {
                         item(key = "hint") {
                             Text(
                                 "Search thousands of basic foods and millions of products, scan a barcode, or describe a whole meal and let Claude do the maths.",

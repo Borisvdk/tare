@@ -22,6 +22,12 @@ reason.
 
 ## Shipped
 
+- "Usually in the morning/afternoon/…" in the log hub: foods you had in that part of the day
+  on 2+ of the last 28 days, at your usual amount there, until you've logged them today.
+- Search survives typos ("bnaan", "brocolli", "chiken breast"); guesses are labelled and
+  dropped when Open Food Facts shows the word was a real product.
+- Large system font sizes (130%+) keep the amount sheet and Today headers readable; portion
+  data from newer app versions no longer crashes an older one.
 - "Same as yesterday" cards in the log hub: copy a whole morning/afternoon/evening in one tap.
 - Product thumbnails in search results and the amount sheet (Open Food Facts images;
   `images.openfoodfacts.org` was unreachable from the dev machine on 2026-10-25, so check

@@ -53,7 +53,8 @@ the owner's phone never touches the real diary.
 ```
 app/src/main/java/app/tare/
   AppGraph.kt            manual DI: database, HTTP, repositories, FoodAi
-  domain/                pure Kotlin: Nutrients, search normalization + ranking, weight trend
+  domain/                pure Kotlin: Nutrients, search (normalize, typos, ranking), parts of
+                         the day + usual foods, weight trend
   data/db/               Room entities (Food, LogEntry, Meal, MealItem, RecipeIngredient, WeightEntry) + DAOs
   data/food/             FoodRepository, Open Food Facts client, bundled USDA importer
   data/log|meal|weight/  repositories

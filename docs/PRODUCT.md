@@ -38,9 +38,10 @@ groceries from Albert Heijn and Jumbo, a mix of Dutch and English food names.
   today in one tap.
 - **Log hub:** a Morning/Afternoon/Evening/Night selector, then search across bundled basic
   foods (USDA, with Dutch aliases), your foods, recipes and saved meals, plus Open Food
-  Facts products online. Shortcuts for scan, describe and quick add. "Same as yesterday"
-  cards, favourites and recents with one-tap re-log. Meal-like searches ("2 eggs and
-  toast") lead with Describe.
+  Facts products online, forgiving typos. Shortcuts for scan, describe and quick add.
+  "Same as yesterday" cards; "Usually in the morning" (what you have in that part of the
+  day, at your usual amount there, minus what's already logged); favourites and recents,
+  all with one-tap re-log. Meal-like searches ("2 eggs and toast") lead with Describe.
 - **Amount sheet:** number pad, food portions plus your own ("my bowl"), live macros and
   what's left after logging.
 - **Barcode scanning:** on-device ML Kit and Open Food Facts lookup. For an unknown product:

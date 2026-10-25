@@ -137,6 +137,24 @@ class FlowTest {
     }
 
     @Test
+    fun usualFoodRelogsTheUsualAmountForThatPartOfTheDay() {
+        runBlocking {
+            // Two bananas at lunch on two days; one in the evening most recently.
+            listOf(3L, 2L).forEach { graph.log.logFood(banana, 236.0, banana.portions.first(), today.minusDays(it), LocalTime.of(12, 0)) }
+            graph.log.logFood(banana, 118.0, banana.portions.first(), today.minusDays(1), LocalTime.of(19, 0))
+        }
+        compose.setContent { TareRoot(graph, start = Route.LogFood(today.toEpochDay())) }
+
+        compose.waitForText("USUALLY IN THE AFTERNOON")
+        compose.onNodeWithContentDescription("Log Banana").performClick()
+        waitForEntries(1)
+        assertThat(entries().single().grams).isEqualTo(236.0)
+
+        // Once it's logged this afternoon it leaves the list.
+        compose.waitUntil(5_000) { compose.onAllNodes(hasText("USUALLY IN THE AFTERNOON")).fetchSemanticsNodes().isEmpty() }
+    }
+
+    @Test
     fun oneTapRelogAndUndo() {
         runBlocking { graph.log.logFood(banana, 118.0, banana.portions.first(), today.minusDays(1)) }
         compose.setContent { TareRoot(graph, start = Route.LogFood(today.toEpochDay())) }
