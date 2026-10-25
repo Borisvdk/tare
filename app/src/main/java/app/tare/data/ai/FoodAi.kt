@@ -9,6 +9,7 @@ import com.anthropic.client.AnthropicClient
 import com.anthropic.client.okhttp.AnthropicOkHttpClient
 import com.anthropic.core.JsonValue
 import com.anthropic.errors.AnthropicServiceException
+import com.anthropic.errors.PermissionDeniedException
 import com.anthropic.errors.RateLimitException
 import com.anthropic.errors.UnauthorizedException
 import com.anthropic.models.messages.Base64ImageSource
@@ -174,6 +175,25 @@ class FoodAi(
             AiResult.Failed("Couldn't read Claude's answer. Try again.")
         } catch (e: Exception) {
             AiResult.Failed(e.message ?: "Couldn't reach Claude. Check your connection.")
+        }
+    }
+
+    /**
+     * Checks [key] without spending credits: it looks up the chosen model, which needs a valid
+     * key with access to it.
+     */
+    suspend fun checkKey(key: String): AiResult<Unit> = withContext(Dispatchers.IO) {
+        try {
+            clientFor(key).models().retrieve(model().id)
+            AiResult.Success(Unit)
+        } catch (e: UnauthorizedException) {
+            AiResult.Failed("That key was rejected. Copy it again from the Claude Console.")
+        } catch (e: PermissionDeniedException) {
+            AiResult.Failed("This key can't use ${model().label}. Pick another model or check the key's workspace.")
+        } catch (e: AnthropicServiceException) {
+            AiResult.Failed("Claude error (${e.statusCode()}). Try again in a minute.")
+        } catch (e: Exception) {
+            AiResult.Failed("Couldn't reach Claude. Check your connection.")
         }
     }
 

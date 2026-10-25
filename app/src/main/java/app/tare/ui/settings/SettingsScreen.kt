@@ -1,5 +1,10 @@
 package app.tare.ui.settings
 
+import app.tare.data.ai.AiResult
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.Box
+import android.content.Context
+import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -85,6 +90,8 @@ fun SettingsScreen() {
 
     var showTargets by remember { mutableStateOf(false) }
     var keyDraft by remember { mutableStateOf("") }
+    var keyStatus by remember { mutableStateOf<String?>(null) }
+    var checkingKey by remember { mutableStateOf(false) }
     var pendingImport by remember { mutableStateOf<Uri?>(null) }
 
     val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { target ->
@@ -162,33 +169,84 @@ fun SettingsScreen() {
             Card(Modifier.fillMaxWidth(), padding = PaddingValues(18.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "Describing meals, photo estimates and label reading call the Claude API with your own key. A request costs a few cents with Opus and less with Sonnet or Haiku. Your diary never leaves the phone.",
+                        "Describe, photo estimates and label reading use the Claude API with your own key. Only what you send to Claude leaves the phone.",
                         style = Tare.type.caption,
                         color = Tare.colors.textMuted,
                     )
                     if (hasKey) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("API key saved", style = Tare.type.bodyStrong, color = Tare.colors.carbs, modifier = Modifier.weight(1f))
-                            TextAction("Remove", onClick = { scope.launch { graph.secrets.setApiKey(null) } }, color = Tare.colors.over)
+                            Column(Modifier.weight(1f)) {
+                                Text("API key saved", style = Tare.type.bodyStrong, color = Tare.colors.carbs)
+                                keyStatus?.let { Text(it, style = Tare.type.caption, color = Tare.colors.textMuted) }
+                            }
+                            TextAction(if (checkingKey) "Checking…" else "Check", color = Tare.colors.textMuted, onClick = {
+                                if (!checkingKey) {
+                                    checkingKey = true
+                                    scope.launch {
+                                        val key = graph.secrets.apiKey()
+                                        keyStatus = when (val r = key?.let { graph.ai.checkKey(it) }) {
+                                            is AiResult.Success -> "Works with ${model.label}"
+                                            is AiResult.Failed -> r.message
+                                            else -> null
+                                        }
+                                        checkingKey = false
+                                    }
+                                }
+                            })
+                            TextAction("Remove", onClick = {
+                                keyStatus = null
+                                scope.launch { graph.secrets.setApiKey(null) }
+                            }, color = Tare.colors.over)
                         }
                     } else {
+                        KeyStep(1, "Claim your plan's API credits", "Claude Max includes monthly API credits. On claude.ai: Settings → Billing → API credits, and link a Console organization.") {
+                            TextAction("Open claude.ai billing", onClick = { uri.openUri("https://claude.ai/settings/billing") })
+                        }
+                        KeyStep(2, "Create a key", "In the Claude Console: API keys → Create key, then copy it.") {
+                            TextAction("Open the Console", onClick = { uri.openUri("https://platform.claude.com/settings/keys") })
+                        }
+                        KeyStep(3, "Paste it here", null) {}
                         TareTextField(
                             value = keyDraft,
-                            onValueChange = { keyDraft = it.trim() },
+                            onValueChange = {
+                                keyDraft = it.trim()
+                                keyStatus = null
+                            },
                             placeholder = "sk-ant-…",
                             keyboardType = KeyboardType.Password,
+                            trailing = {
+                                TextAction("Paste", onClick = {
+                                    clipboardText(context)?.let {
+                                        keyDraft = it.trim()
+                                        keyStatus = null
+                                    }
+                                })
+                            },
                         )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            TextAction("Get a key", onClick = { uri.openUri("https://console.anthropic.com/settings/keys") }, color = Tare.colors.textMuted)
-                            Spacer(Modifier.weight(1f))
-                            PrimaryButton("Save key", onClick = {
+                        keyStatus?.let { Text(it, style = Tare.type.caption, color = Tare.colors.over) }
+                        PrimaryButton(
+                            if (checkingKey) "Checking key…" else "Save key",
+                            onClick = {
+                                checkingKey = true
                                 scope.launch {
-                                    graph.secrets.setApiKey(keyDraft)
-                                    keyDraft = ""
-                                    notify.show("API key saved")
+                                    // Check before saving, so a mistyped key never lands; an
+                                    // unreachable network is no reason to refuse it.
+                                    val result = graph.ai.checkKey(keyDraft)
+                                    val rejected = result is AiResult.Failed && "rejected" in result.message
+                                    if (rejected) {
+                                        keyStatus = (result as AiResult.Failed).message
+                                    } else {
+                                        graph.secrets.setApiKey(keyDraft)
+                                        keyDraft = ""
+                                        keyStatus = (result as? AiResult.Failed)?.message
+                                        notify.show(if (result is AiResult.Success) "Key saved and working" else "Key saved")
+                                    }
+                                    checkingKey = false
                                 }
-                            }, enabled = keyDraft.startsWith("sk-"))
-                        }
+                            },
+                            enabled = keyDraft.startsWith("sk-") && !checkingKey,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                     AiModel.entries.forEach { option ->
                         Row(
@@ -318,3 +376,19 @@ fun SettingsScreen() {
 /** "Documents/Tare" from a SAF tree Uri like content://…/tree/primary%3ADocuments%2FTare. */
 private fun folderLabel(tree: String): String =
     Uri.decode(tree.substringAfterLast("/tree/")).substringAfter(':').ifBlank { "Selected folder" }
+
+/** One numbered step of getting a Claude key. */
+@Composable
+private fun KeyStep(number: Int, title: String, body: String?, action: @Composable () -> Unit) {
+    Row {
+        Text("$number", style = Tare.type.bodyStrong, color = Tare.colors.textFaint, modifier = Modifier.width(22.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = Tare.type.bodyStrong, color = Tare.colors.text)
+            body?.let { Text(it, style = Tare.type.caption, color = Tare.colors.textMuted) }
+            Box(Modifier.offset(x = (-10).dp)) { action() }
+        }
+    }
+}
+
+private fun clipboardText(context: Context): String? =
+    context.getSystemService(ClipboardManager::class.java)?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()

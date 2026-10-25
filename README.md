@@ -32,9 +32,11 @@ Releases are built and signed by CI on every merge to `main`.
 3. Add app → `https://github.com/Borisvdk/tare`. Obtainium installs the latest
    `tare-<version>.apk` and updates it from then on.
 
-To use Describe and label reading, add a Claude API key in Tare → Settings → Claude. Keys
-come from [console.anthropic.com](https://console.anthropic.com/settings/keys). The key is
-encrypted on the device and never included in backups.
+To use Describe and label reading, add a Claude API key in Tare → Settings → Claude, which
+walks through it: Claude Max includes monthly API credits (claim them on claude.ai →
+Settings → Billing → API credits, linking a Console organization), then create a key at
+[platform.claude.com](https://platform.claude.com/settings/keys) and paste it. Tare checks the
+key before saving it. It is encrypted on the device and never included in backups.
 
 Then turn on **Settings → Data → Back up daily to a folder** and pick a folder that syncs
 (Google Drive, for example). Your diary only lives on the phone otherwise.

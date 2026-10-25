@@ -116,6 +116,28 @@ class FoodAiTest {
     }
 
     @Test
+    fun keyCheckLooksUpTheModelForFree() = runTest {
+        server.enqueue(
+            MockResponse.Builder().code(200).addHeader("content-type", "application/json")
+                .body("""{"type":"model","id":"claude-opus-5-5","display_name":"Claude Opus 5.5","created_at":"2026-01-01T00:00:00Z"}""").build(),
+        )
+        assertThat(ai().checkKey("sk-ant-test")).isEqualTo(AiResult.Success(Unit))
+        val request = server.takeRequest()
+        assertThat(request.method).isEqualTo("GET")
+        assertThat(request.url.encodedPath).isEqualTo("/v1/models/claude-opus-5-5")
+    }
+
+    @Test
+    fun keyCheckReportsARejectedKey() = runTest {
+        server.enqueue(
+            MockResponse.Builder().code(401).addHeader("content-type", "application/json")
+                .body("""{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}""").build(),
+        )
+        val result = ai().checkKey("sk-ant-wrong") as AiResult.Failed
+        assertThat(result.message).contains("rejected")
+    }
+
+    @Test
     fun unauthorizedKeyIsReported() = runTest {
         server.enqueue(
             MockResponse.Builder().code(401).addHeader("content-type", "application/json")
