@@ -69,6 +69,7 @@ import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.domain.FoodSource
 import app.tare.ui.Fmt
+import app.tare.ui.update.UpdateBanner
 import app.tare.ui.components.CalorieGauge
 import app.tare.ui.components.Card
 import app.tare.ui.components.EmptyState
@@ -223,6 +224,7 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
         item(key = "hero") {
             HeroCard(state)
         }
+        item(key = "update") { UpdateBanner(Modifier.padding(top = 12.dp)) }
         if (!state.targetsConfirmed && state.loaded) {
             item(key = "setup") {
                 Card(Modifier.fillMaxWidth().padding(top = 12.dp), onClick = { showTargets = true }) {

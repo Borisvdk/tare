@@ -342,6 +342,9 @@ fun SettingsScreen() {
                 }
             }
 
+            SectionHeader("Updates")
+            UpdatesCard()
+
             SectionHeader("About")
             Text(
                 "Tare ${BuildConfig.VERSION_NAME}\n" +

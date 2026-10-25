@@ -57,3 +57,10 @@ always wins its day. Calories burned are read when Progress opens and only shown
 comparison: targets still never change by themselves. Days Health Connect fills with its own
 resting estimate (no data origin) are skipped.
 
+## 2026-10-25: Tare updates itself from GitHub Releases
+
+The owner wants to update without opening GitHub or Obtainium. The repository stays private,
+so Tare asks once for a fine-grained read-only token (the one Obtainium uses works) and talks
+to the GitHub API itself. A download is only installed if it's the same package, newer, and
+signed with the release key. Obtainium keeps working as a fallback.
+

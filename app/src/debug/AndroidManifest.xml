@@ -9,5 +9,8 @@
         <receiver
             android:name="app.tare.debug.HealthSeedReceiver"
             android:exported="true" />
+        <receiver
+            android:name="app.tare.debug.UpdateTestReceiver"
+            android:exported="true" />
     </application>
 </manifest>
