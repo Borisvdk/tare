@@ -1,3 +1,5 @@
+<img src="docs/brand/icon.svg" width="72" align="right" alt="Tare icon">
+
 # Tare
 
 A fast, calm calorie tracker for Android. Log food in seconds and see only what matters.

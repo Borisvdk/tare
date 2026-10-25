@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="tare_background">#F6F4F0</color>
-    <color name="tare_icon_background">#141312</color>
+    <color name="tare_launcher_background">#FF7A50</color>
+    <color name="tare_shortcut_background">#141312</color>
+    <color name="tare_splash_mark">#1B1A18</color>
+    <color name="tare_splash_accent">#EC5B2C</color>
 </resources>

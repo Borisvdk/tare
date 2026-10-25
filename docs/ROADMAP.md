@@ -22,6 +22,9 @@ reason.
 
 ## Shipped
 
+- New logo, ▸0◂ (a scale's settled-at-zero sign around a serif zero): coral launcher icon,
+  themed-icon layer, and a splash where the triangles slide onto the zero. Built by
+  `tools/logo/build.py`; brand SVGs in `docs/brand/`.
 - "Usually in the morning/afternoon/…" in the log hub: foods you had in that part of the day
   on 2+ of the last 28 days, at your usual amount there, until you've logged them today.
 - Search survives typos ("bnaan", "brocolli", "chiken breast"); guesses are labelled and
