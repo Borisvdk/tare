@@ -56,10 +56,17 @@ Schema JSON is exported to `app/schemas/`. **Every schema change needs a migrati
    `food` the first time they're logged.
 3. **Custom foods, recipes, AI estimates:** created in the app.
 
-Local search: normalize the query (lowercase, no accents), fetch candidates by the longest
-token with `LIKE`, then rank in Kotlin (`domain/Ranking.kt`). Exact names and aliases win,
-then usage and recency, then curated popularity. About 10k rows makes this a few
-milliseconds; no FTS needed.
+Local search: normalize the query (lowercase, no accents), fetch candidates where every
+token matches with `LIKE`, then rank in Kotlin (`domain/Ranking.kt`). Exact names and
+aliases win, then usage and recency, then curated popularity. About 10k rows makes this a
+few milliseconds; no FTS needed.
+
+When that finds nothing, typos get fixed (`correctTypos` in `domain/Search.kt`): each token
+that appears in no word of any food name becomes the closest whole word, within 1 edit from
+5 letters and 2 from 8 (a swap of neighbouring letters counts as one). Shorter words are
+left alone because they're often brands ("liga", "hero"). The list says which word it
+searched for, and `FoodSearch` drops the guesses once Open Food Facts returns products that
+match what was typed ("ontbijtkoek" is a product, not a typo of ontbijtspek).
 
 ## Claude
 

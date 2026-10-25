@@ -6,10 +6,12 @@ import app.tare.domain.FoodSource
 import app.tare.domain.RemoteSignals
 import app.tare.domain.Portion
 import app.tare.domain.buildSearchText
+import app.tare.domain.correctTypos
 import app.tare.domain.mergeCustomPortions
 import app.tare.domain.rankFoods
 import app.tare.domain.rankRemote
 import app.tare.domain.searchTokens
+import app.tare.domain.typoBudget
 import androidx.sqlite.db.SimpleSQLiteQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +32,9 @@ sealed interface BarcodeResult {
     data class Failed(override val barcode: String, val message: String) : BarcodeResult
 }
 
+/** Local search results; [fixedQuery] is set when they are for the search with its typos fixed. */
+data class LocalResults(val foods: List<Food>, val fixedQuery: String? = null)
+
 class FoodRepository(
     private val dao: FoodDao,
     private val off: OpenFoodFactsClient,
@@ -38,6 +43,10 @@ class FoodRepository(
     private val remoteCache = object : LinkedHashMap<String, List<Food>>(32, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, List<Food>>) = size > 40
     }
+
+    // Every word in the food names (word → foods using it), for fixing typos. Rebuilt when the
+    // number of foods changes; a renamed custom food can go stale, which only costs a fix.
+    @Volatile private var vocabulary: Pair<Int, Map<String, Int>>? = null
 
     fun observe(id: String): Flow<Food?> = dao.observe(id)
 
@@ -63,16 +72,35 @@ class FoodRepository(
 
     fun recipes(): Flow<List<Food>> = dao.observeRecipes()
 
-    suspend fun searchLocal(query: String, limit: Int = 30): List<Food> = withContext(Dispatchers.IO) {
+    suspend fun searchLocal(query: String, limit: Int = 30): List<Food> = searchLocalResults(query, limit).foods
+
+    /** Your foods and the bundled basics; a search that finds nothing is retried with its typos fixed. */
+    suspend fun searchLocalResults(query: String, limit: Int = 30): LocalResults = withContext(Dispatchers.IO) {
         val tokens = searchTokens(query)
-        if (tokens.isEmpty()) return@withContext emptyList()
-        // Every token must match in SQL; anchoring on one token and filtering afterwards drops
-        // good rows when that token is common ("cooked" matches ~1,700 foods).
+        if (tokens.isEmpty()) return@withContext LocalResults(emptyList())
+        val found = candidates(tokens)
+        if (found.isNotEmpty() || tokens.none { typoBudget(it) > 0 }) return@withContext LocalResults(rankFoods(found, query, now(), limit))
+        val fixed = correctTypos(tokens, vocabulary()) ?: return@withContext LocalResults(emptyList())
+        val fixedQuery = fixed.joinToString(" ")
+        LocalResults(rankFoods(candidates(fixed), fixedQuery, now(), limit), fixedQuery)
+    }
+
+    // Every token must match in SQL; anchoring on one token and filtering afterwards drops
+    // good rows when that token is common ("cooked" matches ~1,700 foods).
+    private suspend fun candidates(tokens: List<String>): List<Food> {
         val sql = "SELECT * FROM food WHERE hidden = 0 AND " +
             tokens.joinToString(" AND ") { "searchText LIKE ?" } +
             " ORDER BY useCount DESC, popularity DESC, length(name) LIMIT 400"
-        val candidates = dao.search(SimpleSQLiteQuery(sql, tokens.map { "%$it%" }.toTypedArray()))
-        rankFoods(candidates, query, now(), limit)
+        return dao.search(SimpleSQLiteQuery(sql, tokens.map { "%$it%" }.toTypedArray()))
+    }
+
+    private suspend fun vocabulary(): Map<String, Int> {
+        val count = dao.visibleCount()
+        vocabulary?.takeIf { it.first == count }?.let { return it.second }
+        val words = HashMap<String, Int>()
+        dao.searchTexts().forEach { text -> text.split(' ').toSet().forEach { if (it.isNotEmpty()) words.merge(it, 1, Int::plus) } }
+        vocabulary = count to words
+        return words
     }
 
     /** Open Food Facts text search; Dutch products first, worldwide when that comes up short. */
