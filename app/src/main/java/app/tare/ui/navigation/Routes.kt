@@ -9,19 +9,25 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import app.tare.AppGraph
+import app.tare.domain.DayPart
 import kotlinx.serialization.Serializable
 
 /** Navigation destinations. Days are passed as epoch days. */
 sealed interface Route : NavKey {
     @Serializable data object Home : Route
 
-    /** The search/log hub for a day. */
-    @Serializable data class LogFood(val day: Long, val focusSearch: Boolean = false) : Route
+    /** The search/log hub for a day. [part] presets which part of the day logs go to. */
+    @Serializable data class LogFood(val day: Long, val focusSearch: Boolean = false, val part: DayPart? = null) : Route
 
-    @Serializable data class Scan(val day: Long) : Route
+    @Serializable data class Scan(val day: Long, val part: DayPart? = null) : Route
 
     /** AI logging. [prefill] carries a search query over ("2 eggs and toast"). */
-    @Serializable data class Describe(val day: Long, val prefill: String = "", val openCamera: Boolean = false) : Route
+    @Serializable data class Describe(
+        val day: Long,
+        val prefill: String = "",
+        val openCamera: Boolean = false,
+        val part: DayPart? = null,
+    ) : Route
 
     /** Create (foodId = null) or edit a custom food. [logDay] logs it right after saving. */
     @Serializable data class FoodEditor(

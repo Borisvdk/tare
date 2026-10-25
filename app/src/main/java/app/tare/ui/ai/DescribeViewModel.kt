@@ -7,7 +7,9 @@ import app.tare.data.ai.AiResult
 import app.tare.data.ai.EstimatedItem
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
+import app.tare.domain.DayPart
 import app.tare.domain.FoodSource
+import app.tare.domain.logTimeFor
 import app.tare.domain.Nutrients
 import app.tare.domain.buildSearchText
 import app.tare.domain.normalizeForSearch
@@ -20,7 +22,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 
 data class EstimateRow(val key: Int, val food: Food, val grams: Double, val lowConfidence: Boolean) {
     val nutrients: Nutrients get() = food.per100.forGrams(grams)
@@ -36,7 +40,7 @@ sealed interface DescribeState {
     data object NoApiKey : DescribeState
 }
 
-class DescribeViewModel(private val graph: AppGraph, private val day: LocalDate) : ViewModel() {
+class DescribeViewModel(private val graph: AppGraph, private val day: LocalDate, private val part: DayPart? = null) : ViewModel() {
     private val _state = MutableStateFlow<DescribeState>(DescribeState.Idle)
     val state: StateFlow<DescribeState> = _state.asStateFlow()
 
@@ -91,7 +95,8 @@ class DescribeViewModel(private val graph: AppGraph, private val day: LocalDate)
         if (logging) return emptyList()
         logging = true
         val items = ready.rows.map { row -> Triple(graph.foods.saveRemote(row.food), row.grams, null) }
-        val entries = graph.log.logBatch(items, day, ready.title)
+        val time = part?.let { logTimeFor(it, day, Instant.ofEpochMilli(graph.now()).atZone(ZoneId.systemDefault())) }
+        val entries = graph.log.logBatch(items, day, ready.title, time)
         _state.value = DescribeState.Idle
         photo.value = null
         logging = false

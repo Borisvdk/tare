@@ -72,7 +72,7 @@ import java.time.LocalDate
 @Composable
 fun ScanScreen(route: Route.Scan) {
     val day = LocalDate.ofEpochDay(route.day)
-    val viewModel = tareViewModel(key = "scan-${route.day}") { ScanViewModel(it, day) }
+    val viewModel = tareViewModel(key = "scan-${route.day}-${route.part}") { ScanViewModel(it, day, route.part) }
     val state by viewModel.state.collectAsState()
     val remaining by viewModel.remainingKcal.collectAsState()
     val nav = LocalNavigator.current
@@ -141,6 +141,7 @@ fun ScanScreen(route: Route.Scan) {
             food = s.food,
             mode = AmountMode.LOG,
             remainingKcal = remaining,
+            initialTime = viewModel.sessionTime(),
             onConfirm = { result ->
                 if (!logging) {
                     logging = true

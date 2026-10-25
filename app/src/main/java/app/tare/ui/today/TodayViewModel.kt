@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.tare.AppGraph
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
+import app.tare.domain.DayPart
 import app.tare.domain.Nutrients
 import app.tare.domain.Portion
 import app.tare.domain.Targets
@@ -21,23 +22,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
-
-enum class DayPart(val label: String) {
-    MORNING("Morning"),
-    AFTERNOON("Afternoon"),
-    EVENING("Evening"),
-    NIGHT("Night"),
-    ;
-
-    companion object {
-        fun of(time: LocalTime): DayPart = when (time.hour) {
-            in 4..10 -> MORNING
-            in 11..16 -> AFTERNOON
-            in 17..21 -> EVENING
-            else -> NIGHT
-        }
-    }
-}
 
 /** A row on the Today screen: a single entry or a group logged together (saved meal, AI batch). */
 sealed interface DayItem {

@@ -6,6 +6,8 @@ import app.tare.AppGraph
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.data.food.BarcodeResult
+import app.tare.domain.DayPart
+import app.tare.domain.logTimeFor
 import app.tare.domain.Portion
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,8 +16,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 
 sealed interface ScanState {
     data object Scanning : ScanState
@@ -26,7 +30,7 @@ sealed interface ScanState {
     data class Missing(val barcode: String, val title: String, val message: String, val name: String?) : ScanState
 }
 
-class ScanViewModel(private val graph: AppGraph, private val day: LocalDate) : ViewModel() {
+class ScanViewModel(private val graph: AppGraph, private val day: LocalDate, private val part: DayPart?) : ViewModel() {
     private val _state = MutableStateFlow<ScanState>(ScanState.Scanning)
     val state: StateFlow<ScanState> = _state.asStateFlow()
 
@@ -84,6 +88,10 @@ class ScanViewModel(private val graph: AppGraph, private val day: LocalDate) : V
         ignoredUntil = System.currentTimeMillis() + 2_500
     }
 
+    /** Default log time for this scan session (null = now); see [logTimeFor]. */
+    fun sessionTime(): LocalTime? =
+        part?.let { logTimeFor(it, day, Instant.ofEpochMilli(graph.now()).atZone(ZoneId.systemDefault())) }
+
     suspend fun log(food: Food, grams: Double, portion: Portion?, time: LocalTime?): LogEntry =
-        graph.log.logFood(food, grams, portion, day, time)
+        graph.log.logFood(food, grams, portion, day, time ?: sessionTime())
 }
