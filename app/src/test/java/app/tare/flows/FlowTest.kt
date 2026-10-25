@@ -9,6 +9,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -110,6 +111,29 @@ class FlowTest {
         assertThat(entry.portionLabel).isEqualTo("medium")
         assertThat(entry.nutrients.kcal).isWithin(0.1).of(210.0)
         compose.waitForText("1 added")
+    }
+
+    @Test
+    fun saveTypedAmountAsOwnPortion() {
+        compose.setContent { TareRoot(graph, start = Route.LogFood(today.toEpochDay())) }
+        compose.onAllNodes(hasSetTextAction()).onFirst().performTextInput("banana")
+        compose.waitForText("Banana")
+        compose.onAllNodesWithText("Banana").onFirst().performClick()
+
+        compose.waitForText("Log · 105 kcal")
+        compose.onNodeWithText("g").performClick()
+        listOf("pad-3", "pad-5", "pad-0").forEach { compose.onNodeWithTag(it).performClick() }
+        compose.onNodeWithText("+ Save 350 g").performClick()
+        compose.waitForText("Name 350 g, e.g. my bowl")
+        compose.onAllNodes(hasSetTextAction()).onLast().performTextInput("my bowl")
+        compose.onNodeWithText("Save").performClick()
+
+        compose.waitForText("my bowl · 350 g")
+        compose.onNodeWithText("Log · 312 kcal").performClick()
+        waitForEntries(1)
+        assertThat(entries().single().portionLabel).isEqualTo("my bowl")
+        val stored = runBlocking { graph.db.foodDao().get(banana.id)!! }
+        assertThat(stored.portions).contains(Portion("my bowl", 350.0, custom = true))
     }
 
     @Test

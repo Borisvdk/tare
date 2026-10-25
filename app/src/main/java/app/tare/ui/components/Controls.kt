@@ -170,8 +170,10 @@ fun SelectChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     accent: Color = Tare.colors.text,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val colors = Tare.colors
+    val interaction = remember { MutableInteractionSource() }
     val bg by animateColorAsState(if (selected) accent else colors.surfaceRaised, label = "chip")
     val fg by animateColorAsState(if (selected) colors.background else colors.textMuted, label = "chipText")
     Text(
@@ -181,9 +183,10 @@ fun SelectChip(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
+            .pressScale(interaction, 0.95f)
             .clip(Radii.pill)
             .background(bg)
-            .clickable(onClick = onClick)
+            .combinedClickableCompat(interaction, onClick, onLongClick)
             .padding(horizontal = 14.dp, vertical = 9.dp),
     )
 }

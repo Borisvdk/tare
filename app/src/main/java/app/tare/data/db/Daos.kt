@@ -9,6 +9,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
 import androidx.sqlite.db.SupportSQLiteQuery
+import app.tare.domain.Portion
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -75,6 +76,9 @@ interface FoodDao {
     )
     suspend fun markUsed(id: String, at: Long, grams: Double?, portionLabel: String?)
 
+    @Query("UPDATE food SET portions = :portions, updatedAt = :at WHERE id = :id")
+    suspend fun setPortions(id: String, portions: List<Portion>, at: Long)
+
     @Query("UPDATE food SET favorite = :favorite WHERE id = :id")
     suspend fun setFavorite(id: String, favorite: Boolean)
 
@@ -87,10 +91,11 @@ interface FoodDao {
     @Query("SELECT COUNT(*) FROM food WHERE source = 'GENERIC'")
     suspend fun genericCount(): Int
 
-    @Query("SELECT * FROM food WHERE source = 'GENERIC' AND (useCount > 0 OR favorite = 1)")
+    /** Generic foods carrying user state: usage, a star, or portions the user added. */
+    @Query("SELECT * FROM food WHERE source = 'GENERIC' AND (useCount > 0 OR favorite = 1 OR portions LIKE '%\"custom\":true%')")
     suspend fun usedGeneric(): List<Food>
 
-    @Query("SELECT * FROM food WHERE source != 'GENERIC' OR useCount > 0 OR favorite = 1")
+    @Query("SELECT * FROM food WHERE source != 'GENERIC' OR useCount > 0 OR favorite = 1 OR portions LIKE '%\"custom\":true%'")
     suspend fun allForBackup(): List<Food>
 }
 

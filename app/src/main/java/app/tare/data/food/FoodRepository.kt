@@ -4,7 +4,9 @@ import app.tare.data.db.Food
 import app.tare.data.db.FoodDao
 import app.tare.domain.FoodSource
 import app.tare.domain.RemoteSignals
+import app.tare.domain.Portion
 import app.tare.domain.buildSearchText
+import app.tare.domain.mergeCustomPortions
 import app.tare.domain.rankFoods
 import app.tare.domain.rankRemote
 import app.tare.domain.searchTokens
@@ -117,6 +119,7 @@ class FoodRepository(
             food
         } else {
             food.copy(
+                portions = mergeCustomPortions(food.portions, existing.portions),
                 useCount = existing.useCount,
                 lastUsedAt = existing.lastUsedAt,
                 lastGrams = existing.lastGrams,
@@ -162,6 +165,23 @@ class FoodRepository(
         }
         dao.upsert(food)
         food
+    }
+
+    /**
+     * Adds (or replaces, by label) one of the user's own portions on [food], saving the food
+     * first if it only came from the network so far. Returns the updated food.
+     */
+    suspend fun addPortion(food: Food, portion: Portion): Food = withContext(Dispatchers.IO) {
+        val stored = dao.get(food.id) ?: saveRemote(food)
+        val portions = stored.portions.filterNot { it.label.equals(portion.label, ignoreCase = true) } + portion.copy(custom = true)
+        dao.setPortions(stored.id, portions, now())
+        stored.copy(portions = portions)
+    }
+
+    suspend fun removePortion(food: Food, label: String): Food = withContext(Dispatchers.IO) {
+        val portions = food.portions.filterNot { it.custom && it.label == label }
+        dao.setPortions(food.id, portions, now())
+        food.copy(portions = portions)
     }
 
     suspend fun markUsed(id: String, grams: Double?, portionLabel: String?) =

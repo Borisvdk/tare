@@ -42,9 +42,19 @@ data class Nutrients(
 
 fun Iterable<Nutrients>.sum(): Nutrients = fold(Nutrients.Zero) { acc, n -> acc + n }
 
-/** A household measure for a food, e.g. "slice" = 35 g. [grams] is the weight of one unit. */
+/**
+ * A household measure for a food, e.g. "slice" = 35 g. [grams] is the weight of one unit.
+ * [custom] portions were added by the user ("my bowl") and survive dataset re-imports,
+ * product refreshes and edits.
+ */
 @Serializable
-data class Portion(val label: String, val grams: Double)
+data class Portion(val label: String, val grams: Double, val custom: Boolean = false)
+
+/** [fresh] portions plus the user's own ones from [existing] (theirs win on a label clash). */
+fun mergeCustomPortions(fresh: List<Portion>, existing: List<Portion>): List<Portion> {
+    val custom = existing.filter { it.custom }
+    return fresh.filterNot { f -> custom.any { it.label.equals(f.label, ignoreCase = true) } } + custom
+}
 
 enum class FoodSource {
     /** Bundled USDA whole foods. */
