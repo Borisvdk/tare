@@ -154,6 +154,19 @@ fun ScanScreen(route: Route.Scan) {
             },
             onDismiss = viewModel::reset,
             onEditFood = { nav.replace(Route.FoodEditor(foodId = s.food.id)) },
+            onConfirmAndNext = { result ->
+                if (!logging) {
+                    logging = true
+                    scope.launch {
+                        val entry = viewModel.log(s.food, result.grams, result.portion, result.time)
+                        viewModel.reset()
+                        logging = false
+                        notify.show("Logged ${entry.name} · ${Fmt.kcal(entry.nutrients.kcal)} kcal · scan the next one", actionLabel = "Undo") {
+                            viewModel.undo(entry)
+                        }
+                    }
+                }
+            },
         )
         is ScanState.Missing -> TareSheet(onDismiss = viewModel::reset) {
             Text(s.title, style = Tare.type.title, color = Tare.colors.text)
