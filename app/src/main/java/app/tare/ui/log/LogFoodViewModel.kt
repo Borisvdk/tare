@@ -17,14 +17,18 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import app.tare.domain.DayPart
 import app.tare.domain.logTimeFor
+import app.tare.domain.usualFoods
 import java.time.Instant
 import java.time.ZoneId
 import java.time.LocalDate
 import java.time.LocalTime
+
+private data class Hub(val base: Long?, val yesterday: List<CopySource>, val favorites: List<Food>, val usual: List<Food>)
 
 /** One time-of-day block from yesterday that can be copied to the current day in one tap. */
 data class CopySource(val part: DayPart, val entries: List<LogEntry>) {
@@ -34,6 +38,8 @@ data class CopySource(val part: DayPart, val entries: List<LogEntry>) {
 data class LogHubState(
     val yesterday: List<CopySource> = emptyList(),
     val favorites: List<Food> = emptyList(),
+    /** What you usually have in the chosen part of the day, carrying your usual amount. */
+    val usual: List<Food> = emptyList(),
     val recent: List<Food> = emptyList(),
     val meals: List<MealWithItems> = emptyList(),
     val dayTotals: Nutrients = Nutrients.Zero,
@@ -73,18 +79,37 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate, initialP
             .map { (part, list) -> CopySource(part, list) }
     }
 
+    // Foods you had in this part of the day on at least two days of the last four weeks, minus
+    // the ones already logged there today. Each comes back as a copy carrying the usual
+    // amount, so the row and its + use it.
+    private val usual = combine(part, graph.log.observeFoodEntriesSince(day.minusDays(28))) { part, entries ->
+        val (thisDay, before) = entries.partition { it.day == day.toEpochDay() }
+        val zone = ZoneId.systemDefault()
+        val had = usualFoods(thisDay, part, zone, minDays = 1, limit = Int.MAX_VALUE).map { it.foodId }.toSet()
+        usualFoods(before, part, zone).filterNot { it.foodId in had }
+    }.mapLatest { usual ->
+        usual.mapNotNull { u ->
+            graph.foods.resolve(u.foodId)?.let { food ->
+                food.copy(lastGrams = u.grams, lastPortionLabel = u.portionLabel.takeIf { label -> food.portions.any { it.label == label } })
+            }
+        }.distinctBy { it.id }
+    }
+
     val hub: StateFlow<LogHubState> = combine(
         graph.foods.recent(30),
         graph.meals.observeAll(),
         graph.log.observeDay(day),
         graph.settings.targets,
-        combine(baseline, yesterday, graph.foods.favorites(), ::Triple),
-    ) { recent, meals, entries, targets, (base, yesterday, favorites) ->
+        combine(baseline, yesterday, graph.foods.favorites(), usual) { base, yesterday, favorites, usual -> Hub(base, yesterday, favorites, usual) },
+    ) { recent, meals, entries, targets, (base, yesterday, favorites, usual) ->
+        // Favourites have their own section; don't list anything twice.
+        val shown = usual.filterNot { it.favorite }
+        val shownIds = shown.map { it.id }.toSet()
         LogHubState(
             yesterday = yesterday,
             favorites = favorites,
-            // Favourites have their own section; don't list them twice.
-            recent = recent.filterNot { it.favorite },
+            usual = shown,
+            recent = recent.filterNot { it.favorite || it.id in shownIds },
             meals = meals,
             dayTotals = entries.map { it.nutrients }.sum(),
             targets = targets,

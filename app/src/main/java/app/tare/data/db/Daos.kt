@@ -113,6 +113,9 @@ interface LogDao {
     @Query("SELECT * FROM log_entry WHERE day = :day ORDER BY loggedAt, id")
     suspend fun entriesForDay(day: Long): List<LogEntry>
 
+    @Query("SELECT * FROM log_entry WHERE day >= :from AND foodId IS NOT NULL")
+    fun observeFoodEntriesSince(from: Long): Flow<List<LogEntry>>
+
     @Query(
         """
         SELECT day, SUM(n_kcal) AS kcal, SUM(n_protein) AS protein, SUM(n_carbs) AS carbs,

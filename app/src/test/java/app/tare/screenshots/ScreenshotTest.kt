@@ -112,6 +112,8 @@ class ScreenshotTest {
         (1L..13L).forEach { back ->
             val day = today.minusDays(back)
             if (back % 6 != 0L) log.logQuick("Day total", Nutrients(1900.0 + 350 * sin(back.toDouble()), 150.0, 210.0, 70.0), day)
+            // An evening habit, for "Usually in the evening".
+            if (back <= 3L) log.logFood(skyr, 200.0, null, day, LocalTime.of(20, 15))
         }
         (0L..70L).forEach { back ->
             if (back % 3 != 1L) graph.weights.log(today.minusDays(back), 79.8 - (70 - back) * 0.035 + 0.6 * sin(back * 1.7))

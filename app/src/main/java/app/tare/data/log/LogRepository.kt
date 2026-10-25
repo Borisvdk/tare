@@ -29,6 +29,9 @@ class LogRepository(
 
     fun observeDay(day: LocalDate): Flow<List<LogEntry>> = dao.observeDay(day.toEpochDay())
 
+    /** Entries for foods (not quick adds) from [from] on, for spotting habits. */
+    fun observeFoodEntriesSince(from: LocalDate): Flow<List<LogEntry>> = dao.observeFoodEntriesSince(from.toEpochDay())
+
     fun observeTotals(from: LocalDate, to: LocalDate): Flow<Map<Long, Nutrients>> =
         dao.observeTotals(from.toEpochDay(), to.toEpochDay()).map { rows -> rows.associate { it.day to it.nutrients } }
 
