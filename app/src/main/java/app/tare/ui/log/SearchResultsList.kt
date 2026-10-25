@@ -63,7 +63,11 @@ fun LazyListScope.searchResults(
         }
     }
     if (results.local.isNotEmpty()) {
-        item(key = "h-local") { SectionHeader("Foods") }
+        item(key = "h-local") {
+            SectionHeader("Foods") {
+                results.fixedQuery?.let { Text("for “$it”", style = Tare.type.caption, color = Tare.colors.textMuted) }
+            }
+        }
         items(results.local, key = { "l-" + it.id }) { food ->
             FoodRow(food, onClick = { onFood(food) }, onQuickAdd = onQuickAdd?.let { { it(food) } }, modifier = Modifier.animateItem())
         }

@@ -50,6 +50,12 @@ interface FoodDao {
     @RawQuery(observedEntities = [Food::class])
     suspend fun search(query: SupportSQLiteQuery): List<Food>
 
+    @Query("SELECT searchText FROM food WHERE hidden = 0")
+    suspend fun searchTexts(): List<String>
+
+    @Query("SELECT COUNT(*) FROM food WHERE hidden = 0")
+    suspend fun visibleCount(): Int
+
     @Query("SELECT * FROM food WHERE barcode IN (:barcodes)")
     suspend fun byBarcodes(barcodes: List<String>): List<Food>
 

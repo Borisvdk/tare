@@ -3,6 +3,9 @@ package app.tare.ui.log
 import app.tare.AppGraph
 import app.tare.data.db.Food
 import app.tare.data.db.MealWithItems
+import app.tare.data.food.LocalResults
+import app.tare.domain.matchesAll
+import app.tare.domain.searchTokens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +31,8 @@ data class SearchResults(
     val query: String = "",
     val meals: List<MealWithItems> = emptyList(),
     val local: List<Food> = emptyList(),
+    /** Set when [local] is for the query with its typos fixed. */
+    val fixedQuery: String? = null,
     val remote: RemoteState = RemoteState.Idle,
 ) {
     val isSearching: Boolean get() = query.isNotBlank()
@@ -45,10 +50,10 @@ class FoodSearch(private val graph: AppGraph, scope: CoroutineScope, includeMeal
 
     private val localResults = trimmed.debounce(80).mapLatest { q ->
         if (q.isEmpty()) {
-            emptyList<MealWithItems>() to emptyList()
+            emptyList<MealWithItems>() to LocalResults(emptyList())
         } else {
             val meals = if (includeMeals) graph.meals.search(q) else emptyList()
-            meals to graph.foods.searchLocal(q)
+            meals to graph.foods.searchLocalResults(q)
         }
     }
 
@@ -64,12 +69,18 @@ class FoodSearch(private val graph: AppGraph, scope: CoroutineScope, includeMeal
         }
     }
 
-    val results: StateFlow<SearchResults> = combine(trimmed, localResults, remoteResults) { q, (meals, local), remote ->
+    val results: StateFlow<SearchResults> = combine(trimmed, localResults, remoteResults) { q, (meals, found), remote ->
+        // A "typo" that real products match ("fristi", "ontbijtkoek") was a word we don't
+        // know, not a typo: drop the guesses once Open Food Facts shows that.
+        val tokens = searchTokens(q)
+        val wasRealWord = found.fixedQuery != null && remote is RemoteState.Loaded && remote.foods.any { matchesAll(it.searchText, tokens) }
+        val local = if (wasRealWord) emptyList() else found.foods
         val localIds = local.map { it.id }.toSet()
         SearchResults(
             query = q,
             meals = meals,
             local = local,
+            fixedQuery = found.fixedQuery.takeUnless { wasRealWord },
             remote = if (remote is RemoteState.Loaded) RemoteState.Loaded(remote.foods.filterNot { it.id in localIds }) else remote,
         )
     }.stateIn(scope, SharingStarted.WhileSubscribed(5_000), SearchResults())
