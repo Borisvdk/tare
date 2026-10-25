@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -181,6 +182,8 @@ fun FoodImage(url: String?, size: Dp, modifier: Modifier = Modifier) {
         modifier.size(size).clip(Radii.chip).background(Tare.colors.surfaceRaised),
         contentAlignment = Alignment.Center,
     ) {
+        // Shown when there's no photo or it can't load; a loaded photo covers it.
+        Icon(Icons.Rounded.Inventory2, null, tint = Tare.colors.textFaint.copy(alpha = 0.6f), modifier = Modifier.size(size * 0.42f))
         if (url != null) {
             AsyncImage(
                 model = url,
