@@ -8,11 +8,12 @@ reason.
 
 - [ ] **Verify Claude end to end with a real key** on the phone: describe text, plate photo,
       label photo. Tune the prompts on real Dutch meals (portion sizes, AH/Jumbo products).
-- [ ] **Edit time on log**: remember the last time picked for past-day logging.
-- [ ] **Pinned quick items**: long-press a recent food to pin it with a fixed amount for
-      true one-tap logging.
-- [ ] **Search quality pass**: collect queries where the right food isn't first and adjust
-      ranking or aliases. Add tests for each.
+- [ ] **Search quality**: when a real search disappoints, add the query to
+      `SearchQualityTest` and fix the ranking or aliases (60 queries pass today).
+- [ ] **Scan several products in a row**: an option to stay in the scanner after logging,
+      for meals assembled from packaged items.
+- [ ] **Weekly glance**: on Progress, average kcal and protein for this week vs last week.
+- [ ] **Undo for deleting meals/recipes/foods** in the library (currently immediate).
 
 ## Later
 
@@ -30,7 +31,12 @@ reason.
   `images.openfoodfacts.org` was unreachable from the dev machine on 2026-10-25, so check
   on the phone).
 - Today follows the date after midnight when the app resumes.
-- Favourites section in the log hub, above Recent.
+- Favourites section in the log hub, above Recent. (Covers the "pinned items" idea: the
+  `+` re-logs the last amount.)
+- Log into a chosen part of the day: Morning/Afternoon/Evening/Night selector in the log
+  hub and a `+` per section on Today. (Covers "edit time on log".)
+- Launcher shortcuts (scan, describe, log) and share-to-Tare for photos and text.
+- End-to-end UI flow tests on the JVM (`FlowTest`) and a 60-query search-quality suite.
 - 15 fixes from an independent code review (see PR #2).
 
 - v0.1: Today, log hub, barcode scan, Claude describe and label reading, saved meals,

@@ -39,6 +39,10 @@ import app.tare.ui.root.TareRoot
 import app.tare.ui.theme.Tare
 import app.tare.ui.theme.TareTheme
 import com.github.takahirom.roborazzi.captureScreenRoboImage
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respondError
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -73,7 +77,12 @@ class ScreenshotTest {
     @Before
     fun setUp() {
         TimeZone.setDefault(TimeZone.getTimeZone(zone))
-        graph = AppGraph(ApplicationProvider.getApplicationContext(), now = { now }) { TareDatabase.inMemory(it) }
+        graph = AppGraph(
+            ApplicationProvider.getApplicationContext(),
+            now = { now },
+            databaseFactory = { TareDatabase.inMemory(it) },
+            httpFactory = { HttpClient(MockEngine { respondError(HttpStatusCode.ServiceUnavailable) }) },
+        )
     }
 
     private fun food(id: String, name: String, per100: Nutrients, portions: List<Portion> = emptyList(), brand: String? = null, source: FoodSource = FoodSource.GENERIC) =
