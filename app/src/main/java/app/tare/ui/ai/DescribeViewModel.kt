@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.tare.AppGraph
 import app.tare.data.ai.AiResult
 import app.tare.data.ai.EstimatedItem
+import app.tare.data.ai.KnownFood
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.domain.DayPart
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -71,14 +73,21 @@ class DescribeViewModel(
         job?.cancel()
         _state.value = DescribeState.Working
         job = viewModelScope.launch {
-            _state.value = when (val result = graph.ai.estimateMeal(text, image)) {
+            // The foods you log most, so "a slice of my usual bread" reuses your exact product.
+            val usual = graph.foods.frequent(MAX_KNOWN_FOODS).first()
+                .filter { it.source != FoodSource.AI }
+                .mapIndexed { i, f -> "f${i + 1}" to f }
+                .toMap()
+            val known = usual.map { (ref, f) -> KnownFood(ref, f.name, f.brand, f.per100, f.unit) }
+            _state.value = when (val result = graph.ai.estimateMeal(text, image, known)) {
                 is AiResult.Success -> {
                     val now = graph.now()
                     DescribeState.Ready(
                         title = result.value.title.ifBlank { "Meal" },
                         note = result.value.note,
                         rows = result.value.items.filter { it.grams > 0 }.mapIndexed { i, item ->
-                            EstimateRow(i, item.toFood(now), item.grams, item.confidence == "low")
+                            val mine = usual[item.myFood]
+                            EstimateRow(i, mine ?: item.toFood(now), item.grams, lowConfidence = mine == null && item.confidence == "low")
                         },
                     )
                 }
@@ -106,7 +115,10 @@ class DescribeViewModel(
         val ready = _state.value as? DescribeState.Ready ?: return emptyList()
         if (logging) return emptyList()
         logging = true
-        val items = ready.rows.map { row -> Triple(graph.foods.saveRemote(row.food), row.grams, null) }
+        val items = ready.rows.map { row ->
+            val food = if (row.food.source == FoodSource.AI) graph.foods.saveRemote(row.food) else row.food
+            Triple(food, row.grams, null)
+        }
         val time = part?.let { logTimeFor(it, day, Instant.ofEpochMilli(graph.now()).atZone(ZoneId.systemDefault())) }
         val entries = graph.log.logBatch(items, day, ready.title, time)
         _state.value = DescribeState.Idle
@@ -123,6 +135,8 @@ class DescribeViewModel(
  * AI estimates become foods (source AI) keyed by name, so "Flat white" estimated twice is
  * one food that shows up in recents and search with its usage history.
  */
+private const val MAX_KNOWN_FOODS = 40
+
 private fun EstimatedItem.toFood(now: Long): Food {
     val cleanName = name.trim().replaceFirstChar { it.titlecase() }
     return Food(

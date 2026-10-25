@@ -77,6 +77,25 @@ class FoodAiTest {
     }
 
     @Test
+    fun usualFoodsAreOfferedAndMatchesComeBackByRef() = runTest {
+        server.enqueue(
+            messageResponse(
+                """{"title":"Lunch","note":"","items":[{"name":"Volkoren brood","grams":70,"isLiquid":false,"kcalPer100g":240,
+                "proteinPer100g":10,"carbsPer100g":41,"fatPer100g":3,"fiberPer100g":7,"confidence":"high","myFood":"f1"}]}""",
+            ),
+        )
+        val known = listOf(KnownFood("f1", "Volkoren brood", "Jumbo", app.tare.domain.Nutrients(240.0, 10.0, 41.0, 3.4, 7.0), "g"))
+        val estimate = (ai().estimateMeal("2 boterhammen", null, known) as AiResult.Success).value
+
+        assertThat(estimate.items.single().myFood).isEqualTo("f1")
+        val body = Json.parseToJsonElement(server.takeRequest().body!!.utf8()).jsonObject
+        val userText = body["messages"]!!.jsonArray.single().jsonObject["content"]!!.jsonArray
+            .joinToString { it.jsonObject["text"]?.jsonPrimitive?.content.orEmpty() }
+        assertThat(userText).contains("f1 | Volkoren brood | Jumbo | 240 kcal")
+        assertThat(userText).contains("What I ate: 2 boterhammen")
+    }
+
+    @Test
     fun haikuRequestsSkipServerFallback() = runTest {
         server.enqueue(messageResponse("""{"title":"x","note":"","items":[]}"""))
         ai(AiModel.HAIKU).estimateMeal("tea", null)
