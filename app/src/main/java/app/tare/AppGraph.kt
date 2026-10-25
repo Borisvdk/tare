@@ -68,6 +68,10 @@ class AppGraph(
     val backup: BackupManager by lazy { BackupManager(db, settings, now) }
     val ai: FoodAi by lazy { FoodAi(apiKey = { secrets.apiKey() }, model = { settings.aiModel.first() }) }
 
+    /** Reads a content Uri (e.g. a photo shared from the gallery); null if it's gone or unreadable. */
+    fun readUri(uri: String): ByteArray? =
+        runCatching { context.contentResolver.openInputStream(android.net.Uri.parse(uri))?.use { it.readBytes() } }.getOrNull()
+
     val genericImporter: GenericFoodImporter by lazy {
         GenericFoodImporter(context.assets, db, settings, BuildConfig.GENERIC_DATASET_VERSION, now)
     }

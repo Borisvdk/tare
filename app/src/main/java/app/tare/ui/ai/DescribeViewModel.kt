@@ -13,6 +13,7 @@ import app.tare.domain.logTimeFor
 import app.tare.domain.Nutrients
 import app.tare.domain.buildSearchText
 import app.tare.domain.normalizeForSearch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,11 +41,22 @@ sealed interface DescribeState {
     data object NoApiKey : DescribeState
 }
 
-class DescribeViewModel(private val graph: AppGraph, private val day: LocalDate, private val part: DayPart? = null) : ViewModel() {
+class DescribeViewModel(
+    private val graph: AppGraph,
+    private val day: LocalDate,
+    private val part: DayPart? = null,
+    sharedPhotoUri: String? = null,
+) : ViewModel() {
     private val _state = MutableStateFlow<DescribeState>(DescribeState.Idle)
     val state: StateFlow<DescribeState> = _state.asStateFlow()
 
     val photo = MutableStateFlow<ByteArray?>(null)
+
+    init {
+        if (sharedPhotoUri != null) {
+            viewModelScope.launch(Dispatchers.IO) { photo.value = graph.readUri(sharedPhotoUri) }
+        }
+    }
     private var job: Job? = null
 
     val hasApiKey: StateFlow<Boolean> = graph.secrets.hasApiKey.stateIn(viewModelScope, SharingStarted.Eagerly, true)

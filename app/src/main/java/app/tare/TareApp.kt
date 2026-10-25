@@ -1,6 +1,7 @@
 package app.tare
 
 import android.app.Application
+import app.tare.ui.root.DeepLinks
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -16,6 +17,7 @@ class TareApp : Application(), SingletonImageLoader.Factory {
         super.onCreate()
         graph = AppGraph(this)
         graph.appScope.launch { graph.genericImporter.importIfNeeded() }
+        DeepLinks.publishShortcuts(this)
     }
 
     /** Product thumbnails from Open Food Facts. The fetcher is registered explicitly, not discovered. */
