@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
@@ -284,7 +285,7 @@ private fun MealCard(meal: MealWithItems, onClick: () -> Unit) {
     Card(Modifier.width(172.dp), padding = PaddingValues(16.dp), onClick = onClick) {
         Column {
             Text(meal.meal.name, style = Tare.type.bodyStrong, color = Tare.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("${meal.items.size} items", style = Tare.type.caption, color = Tare.colors.textMuted)
+            Text(Fmt.items(meal.items.size), style = Tare.type.caption, color = Tare.colors.textMuted)
             Spacer(Modifier.height(12.dp))
             KcalFigure(meal.nutrients.kcal)
         }
@@ -302,6 +303,7 @@ private fun SessionBar(session: List<LogEntry>, onDone: () -> Unit, modifier: Mo
         Row(
             Modifier
                 .fillMaxWidth()
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Tare.colors.background, Tare.colors.background)))
                 .navigationBarsPadding()
                 .padding(16.dp)
                 .clip(Radii.pill)

@@ -77,6 +77,14 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             all {
+                // Robolectric pokes at JDK internals (FileDescriptor etc.) on JDK 17+.
+                it.jvmArgs(
+                    "--add-opens=java.base/java.io=ALL-UNNAMED",
+                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                    "--add-opens=java.base/java.util=ALL-UNNAMED",
+                    "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+                )
+                it.maxHeapSize = "3g"
                 it.systemProperty("robolectric.graphicsMode", "NATIVE")
                 it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
             }
@@ -163,4 +171,5 @@ dependencies {
     testImplementation(libs.androidx.test.junit)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.ktor.client.mock)
+    testImplementation(libs.mockwebserver)
 }

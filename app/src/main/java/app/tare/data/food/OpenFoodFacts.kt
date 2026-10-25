@@ -98,7 +98,7 @@ data class OffProduct(
                 is JsonPrimitive -> b.contentOrNull?.split(',')?.firstOrNull()
                 else -> null
             }
-            return raw?.trim()?.takeIf { it.isNotEmpty() }?.let(::tidyCase)
+            return raw?.trim()?.takeIf { it.isNotEmpty() }?.let(::tidyBrand)
         }
 
     /** Per-100 g nutrients, or null when the product has no usable energy value. */
@@ -177,6 +177,16 @@ private fun servingLabel(servingSize: String?): String {
 private fun JsonElement?.asDouble(): Double? = (this as? JsonPrimitive)?.let {
     it.doubleOrNull ?: it.contentOrNull?.replace(',', '.')?.toDoubleOrNull()
 }
+
+/** "COCA-COLA SERVICES" → "Coca-Cola Services"; short all-caps brands ("AH") stay. */
+private fun tidyBrand(text: String): String =
+    if (text.length > 3 && text == text.uppercase() && text.any { it.isLetter() }) {
+        text.lowercase().replace(WORD_START) { it.value.uppercase() }
+    } else {
+        text
+    }
+
+private val WORD_START = Regex("(^|[\\s\\-/])\\p{L}")
 
 /** "MAGERE KWARK" → "Magere kwark"; leaves mixed-case names alone. */
 private fun tidyCase(text: String): String =

@@ -30,6 +30,8 @@ object Fmt {
         return if (rounded % 1.0 == 0.0) rounded.toLong().toString() else rounded.toString().trimEnd('0').trimEnd('.')
     }
 
+    fun items(count: Int): String = if (count == 1) "1 item" else "$count items"
+
     fun weight(kg: Double): String = String.format(locale, "%.1f", kg)
 
     fun signedWeight(kg: Double): String = (if (kg > 0) "+" else if (kg < 0) "−" else "±") + String.format(locale, "%.1f", abs(kg))

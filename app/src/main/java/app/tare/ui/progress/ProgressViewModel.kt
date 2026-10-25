@@ -47,9 +47,12 @@ data class ProgressState(
         return last.trendKg - earlier.trendKg
     }
 
-    /** Average over logged days only, so an unlogged day doesn't count as zero. */
+    /**
+     * Average over the [days] before today, counting only days with entries so a forgotten
+     * day doesn't drag it down. Today is excluded because it isn't finished yet.
+     */
     fun averageIntake(days: Int): Nutrients? {
-        val logged = intake.takeLast(days).filter { it.nutrients.kcal > 0 }
+        val logged = intake.filter { it.day < today }.takeLast(days).filter { it.nutrients.kcal > 0 }
         if (logged.isEmpty()) return null
         return logged.fold(Nutrients.Zero) { acc, d -> acc + d.nutrients } * (1.0 / logged.size)
     }

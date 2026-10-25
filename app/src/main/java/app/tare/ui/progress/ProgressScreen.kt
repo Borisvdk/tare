@@ -215,7 +215,7 @@ private fun IntakeCard(state: ProgressState) {
             Text("Calories · last 14 days", style = Tare.type.label, color = colors.textMuted)
             Spacer(Modifier.height(4.dp))
             if (avg7 == null) {
-                Text("Log a few days to see your average.", style = Tare.type.body, color = colors.textMuted)
+                Text("Your average shows up after your first full day.", style = Tare.type.body, color = colors.textMuted)
             } else {
                 Text(
                     buildAnnotatedString {
@@ -225,7 +225,7 @@ private fun IntakeCard(state: ProgressState) {
                     style = Tare.type.number,
                 )
                 Text(
-                    "7-day average of logged days · ${Fmt.grams(avg7.protein)} g protein · target ${Fmt.kcal(state.targets.kcal)}",
+                    "Average of the last 7 days · ${Fmt.grams(avg7.protein)} g protein · target ${Fmt.kcal(state.targets.kcal)}",
                     style = Tare.type.caption,
                     color = colors.textMuted,
                 )

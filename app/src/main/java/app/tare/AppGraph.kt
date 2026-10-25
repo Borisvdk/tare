@@ -26,6 +26,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 
 /**
@@ -35,10 +36,11 @@ import kotlinx.serialization.json.Json
 class AppGraph(
     private val context: Context,
     val now: () -> Long = System::currentTimeMillis,
+    private val databaseFactory: (Context) -> TareDatabase = TareDatabase::build,
 ) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    val db: TareDatabase by lazy { TareDatabase.build(context) }
+    val db: TareDatabase by lazy { databaseFactory(context) }
 
     val http: HttpClient by lazy {
         HttpClient(OkHttp) {
@@ -64,7 +66,7 @@ class AppGraph(
     val recipes: RecipeRepository by lazy { RecipeRepository(db, now) }
     val weights: WeightRepository by lazy { WeightRepository(db.weightDao(), now) }
     val backup: BackupManager by lazy { BackupManager(db, settings, now) }
-    val ai: FoodAi by lazy { FoodAi(secrets, settings) }
+    val ai: FoodAi by lazy { FoodAi(apiKey = { secrets.apiKey() }, model = { settings.aiModel.first() }) }
 
     val genericImporter: GenericFoodImporter by lazy {
         GenericFoodImporter(context.assets, db, settings, BuildConfig.VERSION_CODE, now)

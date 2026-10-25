@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import app.tare.data.db.Food
 import app.tare.data.db.MealWithItems
+import app.tare.ui.Fmt
 import app.tare.ui.components.FoodRow
 import app.tare.ui.components.ListRow
 import app.tare.ui.components.SectionHeader
@@ -44,7 +45,7 @@ fun LazyListScope.searchResults(
         items(results.meals, key = { "m-" + it.meal.id }) { meal ->
             ListRow(
                 title = meal.meal.name,
-                subtitle = "Saved meal · ${meal.items.size} items",
+                subtitle = "Saved meal · ${Fmt.items(meal.items.size)}",
                 kcal = meal.nutrients.kcal,
                 onClick = { onMeal(meal) },
                 modifier = Modifier.animateItem(),

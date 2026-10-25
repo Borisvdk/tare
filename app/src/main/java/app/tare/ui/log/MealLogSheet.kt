@@ -52,7 +52,7 @@ fun MealLogSheet(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(meal.meal.name, style = Tare.type.title, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("${meal.items.size} items", style = Tare.type.caption, color = colors.textMuted)
+                Text(Fmt.items(meal.items.size), style = Tare.type.caption, color = colors.textMuted)
             }
             RoundIconButton(Icons.Rounded.Edit, "Edit meal", onEdit, size = 40.dp, iconSize = 18.dp)
         }

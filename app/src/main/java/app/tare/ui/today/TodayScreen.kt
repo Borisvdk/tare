@@ -98,6 +98,7 @@ import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 
 private const val WEEK_PAGES = 520
+private val HEADER_HEIGHT = 64.dp
 
 @Composable
 fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, contentPadding: PaddingValues) {
@@ -359,7 +360,7 @@ private fun LazyListScope.sectionItems(
                     val allSelected = item.entries.all { it.id in selected }
                     ListRow(
                         title = item.name,
-                        subtitle = "${item.entries.size} items",
+                        subtitle = Fmt.items(item.entries.size),
                         kcal = item.kcal,
                         selected = allSelected,
                         modifier = Modifier.animateItem(),
@@ -443,7 +444,7 @@ private fun SwipeToDelete(onDelete: () -> Unit, modifier: Modifier = Modifier, c
 @Composable
 private fun DayHeader(day: LocalDate, today: LocalDate, onToday: () -> Unit, onSettings: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp, start = 4.dp),
+        Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp, start = 4.dp).height(HEADER_HEIGHT),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -469,7 +470,7 @@ private fun SelectionBar(
     onDelete: () -> Unit,
 ) {
     Row(
-        Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp),
+        Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 8.dp).height(HEADER_HEIGHT),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -603,7 +604,7 @@ private fun SaveMealSheet(
     TareSheet(onDismiss = onDismiss) {
         Text("Save as meal", style = Tare.type.title, color = Tare.colors.text)
         Text(
-            "${entries.size} items · ${Fmt.kcal(entries.sumOf { it.nutrients.kcal })} kcal. Log them together with one tap.",
+            "${Fmt.items(entries.size)} · ${Fmt.kcal(entries.sumOf { it.nutrients.kcal })} kcal. Log them together with one tap.",
             style = Tare.type.caption,
             color = Tare.colors.textMuted,
         )

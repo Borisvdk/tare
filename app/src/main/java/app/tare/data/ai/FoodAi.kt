@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import app.tare.data.settings.AiModel
-import app.tare.data.settings.SecretStore
-import app.tare.data.settings.SettingsRepository
 import com.anthropic.client.AnthropicClient
 import com.anthropic.client.okhttp.AnthropicOkHttpClient
 import com.anthropic.core.JsonValue
@@ -21,7 +19,6 @@ import com.anthropic.models.messages.OutputConfig
 import com.anthropic.models.messages.StopReason
 import com.anthropic.models.messages.TextBlockParam
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -78,8 +75,10 @@ sealed interface AiResult<out T> {
  * response is parsed, not scraped.
  */
 class FoodAi(
-    private val secrets: SecretStore,
-    private val settings: SettingsRepository,
+    private val apiKey: suspend () -> String?,
+    private val model: suspend () -> AiModel,
+    /** Override for tests (mock server); null uses the real API. */
+    private val baseUrl: String? = null,
 ) {
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
 
@@ -108,8 +107,8 @@ class FoodAi(
         schema: Map<String, Any>,
         parse: (String) -> T,
     ): AiResult<T> = withContext(Dispatchers.IO) {
-        val key = secrets.apiKey() ?: return@withContext AiResult.NoApiKey
-        val model = settings.aiModel.first()
+        val key = apiKey() ?: return@withContext AiResult.NoApiKey
+        val model = model()
         val client = clientFor(key)
 
         val blocks = buildList {
@@ -164,13 +163,14 @@ class FoodAi(
             .apiKey(key)
             .timeout(Duration.ofSeconds(120))
             .maxRetries(2)
+            .apply { baseUrl?.let { baseUrl(it) } }
             .build()
         cached = key to client
         return client
     }
 
     private fun imageBlock(bytes: ByteArray): ImageBlockParam {
-        val jpeg = downscaleJpeg(bytes)
+        val jpeg = runCatching { downscaleJpeg(bytes) }.getOrDefault(bytes)
         return ImageBlockParam.builder()
             .source(
                 Base64ImageSource.builder()

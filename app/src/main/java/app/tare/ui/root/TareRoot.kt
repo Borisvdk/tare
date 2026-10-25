@@ -52,11 +52,12 @@ import app.tare.ui.theme.TareTheme
 
 val LocalSnackbar = staticCompositionLocalOf<SnackbarHostState> { error("SnackbarHostState not provided") }
 
+/** App UI. [start] lets screenshot tests open a specific screen. */
 @Composable
-fun TareRoot(graph: AppGraph) {
+fun TareRoot(graph: AppGraph, start: Route = Route.Home) {
     val theme by graph.settings.theme.collectAsState(initial = ThemeMode.SYSTEM)
     TareTheme(theme) {
-        val backStack = rememberNavBackStack(Route.Home)
+        val backStack = rememberNavBackStack(start)
         val navigator = remember(backStack) { Navigator(backStack) }
         val snackbar = remember { SnackbarHostState() }
         CompositionLocalProvider(
@@ -101,7 +102,7 @@ fun TareRoot(graph: AppGraph) {
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
                         .imePadding()
-                        .padding(bottom = 88.dp, start = 16.dp, end = 16.dp),
+                        .padding(bottom = 104.dp, start = 16.dp, end = 16.dp),
                 ) { data ->
                     Snackbar(
                         shape = Radii.row,
