@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -112,6 +113,13 @@ private fun PadButton(key: PadKey, onKey: (PadKey) -> Unit) {
     val haptics = LocalHapticFeedback.current
     Box(
         Modifier
+            .testTag(
+                when (key) {
+                    is PadKey.Digit -> "pad-${key.value}"
+                    PadKey.Dot -> "pad-dot"
+                    PadKey.Back -> "pad-back"
+                },
+            )
             .pressScale(interaction, 0.92f)
             .fillMaxWidth()
             .height(56.dp)

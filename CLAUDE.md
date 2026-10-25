@@ -75,7 +75,9 @@ The owner has approved autonomous merging. A change goes like this:
 
 1. Branch from `main`: `feat/<slug>`, `fix/<slug>` or `chore/<slug>`.
 2. Implement it. Add or adjust tests for logic changes; re-record screenshots for UI changes
-   and **look at them**.
+   and **look at them**. Changing a logging flow? Extend `app/src/test/.../flows/FlowTest.kt`.
+   It drives the real UI on the JVM (tap, type, number pad via `pad-<digit>` test tags,
+   sheets) against an in-memory database, with no emulator needed.
 3. Run `scripts/dev.sh test`. For anything touching R8, serialization, the Claude SDK or
    networking, also run `scripts/dev.sh release`.
 4. Commit in Conventional Commits style (`feat: …`, `fix: …`). Push and open a PR with

@@ -37,13 +37,15 @@ class AppGraph(
     private val context: Context,
     val now: () -> Long = System::currentTimeMillis,
     private val databaseFactory: (Context) -> TareDatabase = TareDatabase::build,
+    /** Tests pass a mock-engine client so nothing reaches the network. */
+    private val httpFactory: (() -> HttpClient)? = null,
 ) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     val db: TareDatabase by lazy { databaseFactory(context) }
 
     val http: HttpClient by lazy {
-        HttpClient(OkHttp) {
+        httpFactory?.invoke() ?: HttpClient(OkHttp) {
             install(ContentNegotiation) {
                 json(Json { ignoreUnknownKeys = true; explicitNulls = false; coerceInputValues = true })
             }
