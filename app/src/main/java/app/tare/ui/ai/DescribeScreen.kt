@@ -1,8 +1,13 @@
 package app.tare.ui.ai
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -35,6 +40,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -51,10 +57,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import app.tare.ui.Fmt
@@ -93,10 +103,19 @@ fun DescribeScreen(route: Route.Describe) {
 
     var text by rememberSaveable { mutableStateOf(route.prefill) }
     var editing by remember { mutableStateOf<EstimateRow?>(null) }
-    val media = rememberMediaInput(
-        onPhoto = { viewModel.photo.value = it },
-        onSpeech = { spoken -> text = if (text.isBlank()) spoken else "$text, $spoken" },
-    )
+    val media = rememberMediaInput(onPhoto = { viewModel.photo.value = it })
+    val context = LocalContext.current
+    val dictation = rememberDictation { phrase -> text = appendSpoken(text, phrase) }
+    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) dictation.start()
+    }
+    fun toggleDictation() {
+        when {
+            dictation.listening -> dictation.stop()
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED -> dictation.start()
+            else -> micPermission.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
     LaunchedEffect(Unit) { if (route.openCamera) media.takePhoto() }
 
     Column(Modifier.fillMaxSize().background(Tare.colors.background).statusBarsPadding().imePadding()) {
@@ -116,16 +135,24 @@ fun DescribeScreen(route: Route.Describe) {
             item(key = "input") {
                 Column {
                     TareTextField(
-                        value = text,
-                        onValueChange = { text = it },
+                        // Words being spoken show up live, after what's already there.
+                        value = if (dictation.partial.isNotEmpty()) appendSpoken(text, dictation.partial) else text,
+                        onValueChange = {
+                            // Typing takes over from dictation.
+                            dictation.stop()
+                            text = it
+                        },
                         placeholder = "2 eggs, toast with peanut butter and a flat white",
                         singleLine = false,
                         minLines = 3,
                         imeAction = ImeAction.Default,
+                        trailing = { MicButton(dictation.listening, dictation.level, onClick = ::toggleDictation) },
                     )
+                    if (dictation.listening || dictation.error != null) {
+                        DictationStatus(dictation)
+                    }
                     Spacer(Modifier.height(10.dp))
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        RoundIconButton(Icons.Rounded.Mic, "Dictate", media.dictate)
                         RoundIconButton(Icons.Rounded.PhotoCamera, "Take photo", media.takePhoto)
                         RoundIconButton(Icons.Rounded.Image, "Choose photo", media.pickPhoto)
                         photo?.let { bytes -> PhotoThumb(bytes, onRemove = { viewModel.photo.value = null }) }
@@ -137,7 +164,8 @@ fun DescribeScreen(route: Route.Describe) {
                         icon = Icons.Rounded.AutoAwesome,
                         onClick = {
                             focus.clearFocus()
-                            viewModel.estimate(text)
+                            dictation.stop()
+                            viewModel.estimate(appendSpoken(text, dictation.partial))
                         },
                         enabled = hasKey && (text.isNotBlank() || photo != null) && state !is DescribeState.Working,
                         modifier = Modifier.fillMaxWidth(),
@@ -286,6 +314,50 @@ private fun Thinking() {
                     .background(Tare.colors.surfaceRaised),
             )
         }
+    }
+}
+
+/** Mic inside the text field: tap to talk, tap again to stop. Pulses with your voice. */
+@Composable
+private fun MicButton(listening: Boolean, level: Float, onClick: () -> Unit) {
+    val colors = Tare.colors
+    val pulse by animateFloatAsState(if (listening) 1f + level * 0.35f else 1f, label = "micPulse")
+    Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
+        if (listening) {
+            Box(Modifier.size(36.dp).scale(pulse).clip(CircleShape).background(colors.text.copy(alpha = 0.12f)))
+        }
+        RoundIconButton(
+            if (listening) Icons.Rounded.Stop else Icons.Rounded.Mic,
+            if (listening) "Stop dictating" else "Dictate",
+            onClick,
+            size = 32.dp,
+            iconSize = 18.dp,
+            background = if (listening) colors.text else Color.Transparent,
+            tint = if (listening) colors.background else colors.textMuted,
+        )
+    }
+}
+
+@Composable
+private fun DictationStatus(dictation: Dictation) {
+    Row(Modifier.fillMaxWidth().padding(start = 6.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        val error = dictation.error
+        if (error != null) {
+            Text(error, style = Tare.type.caption, color = Tare.colors.textMuted, modifier = Modifier.weight(1f))
+        } else {
+            Text("Listening · tap stop when you're done", style = Tare.type.caption, color = Tare.colors.textMuted, modifier = Modifier.weight(1f))
+        }
+        // Tap to switch between Dutch and English.
+        Text(
+            dictation.language.label,
+            style = Tare.type.label,
+            color = Tare.colors.text,
+            modifier = Modifier
+                .clip(Radii.pill)
+                .background(Tare.colors.surfaceRaised)
+                .clickable(onClick = dictation::switchLanguage)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+        )
     }
 }
 
