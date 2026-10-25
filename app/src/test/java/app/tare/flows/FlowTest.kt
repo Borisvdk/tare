@@ -257,6 +257,27 @@ class FlowTest {
     }
 
     @Test
+    fun changingCaloriesKeepsMacrosAddingUp() {
+        runBlocking { graph.weights.log(today, 82.0) }
+        compose.setContent { TareRoot(graph, start = Route.Settings) }
+        compose.waitForText("kcal per day", substring = true)
+        compose.onNodeWithText("kcal per day", substring = true).performClick()
+        compose.waitForText("the rest", substring = true)
+
+        // 1.8 g/kg protein at 82 kg and 30% fat, then calories down to 1800.
+        compose.onNodeWithText("1.8 g/kg").performClick()
+        compose.onNodeWithText("30%").performClick()
+        listOf("pad-1", "pad-8", "pad-0", "pad-0").forEach { compose.onNodeWithTag(it).performClick() }
+        compose.onNodeWithText("Save targets").performClick()
+
+        compose.waitUntil(5_000) { runBlocking { graph.settings.targets.first() }.kcal == 1800 }
+        val saved = runBlocking { graph.settings.targets.first() }
+        assertThat(saved.protein).isEqualTo(150)
+        assertThat(saved.fat).isEqualTo(60)
+        assertThat(saved.carbs).isEqualTo(165)
+    }
+
+    @Test
     fun saveSelectedEntriesAsAMeal() {
         runBlocking { graph.log.logFood(banana, 118.0, banana.portions.first(), today, LocalTime.of(9, 0)) }
         compose.setContent { TareRoot(graph) }
