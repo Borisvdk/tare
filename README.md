@@ -9,13 +9,18 @@ A fast, calm calorie tracker for Android. Log food in seconds and see only what 
   <img src="app/src/test/screenshots/progress_dark.png" width="24%" alt="Progress">
 </p>
 
-- **One-tap re-logging** of anything you've eaten before, plus saved meals you can scale.
-- **Barcode scanning** with Open Food Facts, strongest on Dutch supermarket products.
+- **One-tap re-logging** of anything you've eaten before, favourites, saved meals you can
+  scale, and "same as yesterday" for whole mornings or days.
+- **Your own portions**: save "my bowl = 350 g" once, then it's one tap.
+- **Barcode scanning** with Open Food Facts, strongest on Dutch supermarket products, with
+  "Log & next" for meals built from several packages.
 - **Thousands of basic foods offline** (USDA), searchable in Dutch and English.
-- **Describe a meal or snap a photo** and Claude turns it into editable items.
+- **Describe a meal or snap a photo** and Claude turns it into editable items, reusing your
+  usual foods when it recognises them. Share a photo from the gallery to Tare to do the same.
 - **Recipes by cooked weight**, so a portion of the pot is exact.
-- **Weight trend** that smooths out daily water swings.
-- Local-first: everything is stored on the phone.
+- **Weight trend** that smooths out daily water swings, and a week-over-week intake glance.
+- **Launcher shortcuts** (long-press the icon): scan, describe, log.
+- Local-first, with a **daily automatic backup** to a folder you choose.
 
 ## Install on your phone
 
@@ -30,6 +35,9 @@ Releases are built and signed by CI on every merge to `main`.
 To use Describe and label reading, add a Claude API key in Tare → Settings → Claude. Keys
 come from [console.anthropic.com](https://console.anthropic.com/settings/keys). The key is
 encrypted on the device and never included in backups.
+
+Then turn on **Settings → Data → Back up daily to a folder** and pick a folder that syncs
+(Google Drive, for example). Your diary only lives on the phone otherwise.
 
 ## Develop
 
