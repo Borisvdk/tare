@@ -73,6 +73,15 @@ refusal fallbacks. Photos are downscaled to 1568 px JPEG. Two prompts:
 
 AI items become `ai:` foods keyed by name, so they show up in recents and search.
 
+## Backups
+
+- **Daily automatic backup** (`data/backup/AutoBackup.kt`): the user picks a folder once
+  (SAF tree, persisted permission). A WorkManager job writes `tare-backup.json` there every
+  day, ideally into a folder that syncs to Google Drive. Settings shows the last run.
+- **Manual** export/import of the same JSON format (`BackupManager`). Import replaces the
+  diary, meals and weights; foods are merged by id.
+- Android auto backup includes the database and settings, but not the encrypted API key.
+
 ## Release pipeline
 
 `.github/workflows/ci.yml`: every push and PR runs unit tests and builds the APK. Pushes to
