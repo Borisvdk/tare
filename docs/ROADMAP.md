@@ -21,6 +21,9 @@ reason.
 
 ## Shipped
 
+- The scanner crash, found: R8 full mode stripped ML Kit's registrar constructors, so both
+  scanners crashed in release builds only. Keep rule, a CI check on a release build per PR, and
+  R8 mappings attached to releases.
 - In-app updates: Tare checks GitHub Releases, shows what's new on Today, and installs the
   update after checking it's signed with the release key (PR #26).
 - Scanner: any bad exit while scanning switches to Google's scanner; Settings switch; reports
