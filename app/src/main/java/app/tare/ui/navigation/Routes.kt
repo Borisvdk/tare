@@ -21,12 +21,16 @@ sealed interface Route : NavKey {
 
     @Serializable data class Scan(val day: Long, val part: DayPart? = null) : Route
 
-    /** AI logging. [prefill] carries a search query over ("2 eggs and toast"). */
+    /**
+     * AI logging. [prefill] carries a search query or shared text over ("2 eggs and toast");
+     * [photoUri] is a photo shared from another app.
+     */
     @Serializable data class Describe(
         val day: Long,
         val prefill: String = "",
         val openCamera: Boolean = false,
         val part: DayPart? = null,
+        val photoUri: String? = null,
     ) : Route
 
     /** Create (foodId = null) or edit a custom food. [logDay] logs it right after saving. */

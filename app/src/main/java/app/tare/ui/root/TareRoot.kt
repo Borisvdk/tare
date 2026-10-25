@@ -18,6 +18,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +34,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import app.tare.AppGraph
+import kotlinx.coroutines.flow.MutableStateFlow
 import app.tare.data.settings.ThemeMode
 import app.tare.ui.ai.DescribeScreen
 import app.tare.ui.food.FoodEditorScreen
@@ -50,9 +52,12 @@ import app.tare.ui.theme.Radii
 import app.tare.ui.theme.Tare
 import app.tare.ui.theme.TareTheme
 
-/** App UI. [start] lets screenshot tests open a specific screen. */
+/**
+ * App UI. [start] lets screenshot tests open a specific screen; [deepLinks] carries routes from
+ * launcher shortcuts and the share sheet, which are pushed on top of the current screen.
+ */
 @Composable
-fun TareRoot(graph: AppGraph, start: Route = Route.Home) {
+fun TareRoot(graph: AppGraph, start: Route = Route.Home, deepLinks: MutableStateFlow<Route?>? = null) {
     val theme by graph.settings.theme.collectAsState(initial = ThemeMode.SYSTEM)
     TareTheme(theme) {
         val backStack = rememberNavBackStack(start)
@@ -60,6 +65,16 @@ fun TareRoot(graph: AppGraph, start: Route = Route.Home) {
         val snackbar = remember { SnackbarHostState() }
         val rootScope = rememberCoroutineScope()
         val notifier = remember(snackbar) { Notifier(snackbar, rootScope) }
+        if (deepLinks != null) {
+            LaunchedEffect(deepLinks, navigator) {
+                deepLinks.collect { route ->
+                    if (route != null) {
+                        navigator.go(route)
+                        deepLinks.value = null
+                    }
+                }
+            }
+        }
         CompositionLocalProvider(
             LocalAppGraph provides graph,
             LocalNavigator provides navigator,
