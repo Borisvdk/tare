@@ -103,3 +103,33 @@ class TrendTest {
         assertThat(trend.map { it.day }).containsExactly(1L, 5L).inOrder()
     }
 }
+
+class DayPartTest {
+    private val zone = java.time.ZoneId.of("Europe/Amsterdam")
+    private val today = java.time.LocalDate.of(2026, 10, 25)
+    private fun at(hour: Int, minute: Int = 0) = today.atTime(hour, minute).atZone(zone)
+
+    @Test
+    fun currentPartOfTodayLogsNow() {
+        assertThat(logTimeFor(DayPart.AFTERNOON, today, at(13, 10))).isNull()
+    }
+
+    @Test
+    fun breakfastLoggedAtLunchGoesToTheMorning() {
+        assertThat(logTimeFor(DayPart.MORNING, today, at(13, 10))).isEqualTo(java.time.LocalTime.of(8, 0))
+    }
+
+    @Test
+    fun pastDaysAlwaysUseThePartsUsualTime() {
+        assertThat(logTimeFor(DayPart.AFTERNOON, today.minusDays(1), at(13, 10))).isEqualTo(java.time.LocalTime.of(12, 30))
+    }
+
+    @Test
+    fun partBoundaries() {
+        assertThat(DayPart.of(java.time.LocalTime.of(3, 59))).isEqualTo(DayPart.NIGHT)
+        assertThat(DayPart.of(java.time.LocalTime.of(4, 0))).isEqualTo(DayPart.MORNING)
+        assertThat(DayPart.of(java.time.LocalTime.of(11, 0))).isEqualTo(DayPart.AFTERNOON)
+        assertThat(DayPart.of(java.time.LocalTime.of(17, 0))).isEqualTo(DayPart.EVENING)
+        assertThat(DayPart.of(java.time.LocalTime.of(22, 0))).isEqualTo(DayPart.NIGHT)
+    }
+}

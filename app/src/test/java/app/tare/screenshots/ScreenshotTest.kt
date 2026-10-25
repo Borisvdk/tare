@@ -118,12 +118,12 @@ class ScreenshotTest {
 
     @Test fun todayLight() {
         seed(ThemeMode.LIGHT)
-        shoot("today_light", waitFor = "Chicken rice bowl") { TareRoot(graph) }
+        shoot("today_light", waitFor = "Rolled oats") { TareRoot(graph) }
     }
 
     @Test fun todayDark() {
         seed(ThemeMode.DARK)
-        shoot("today_dark", waitFor = "Chicken rice bowl") { TareRoot(graph) }
+        shoot("today_dark", waitFor = "Rolled oats") { TareRoot(graph) }
     }
 
     @Test fun todayEmpty() {

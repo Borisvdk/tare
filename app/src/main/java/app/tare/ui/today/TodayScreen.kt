@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
@@ -223,6 +224,14 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
             item(key = "section-${section.part}") {
                 SectionHeader(section.part.label) {
                     Text("${Fmt.kcal(section.kcal)} kcal", style = Tare.type.caption, color = Tare.colors.textFaint)
+                    Spacer(Modifier.width(8.dp))
+                    RoundIconButton(
+                        Icons.Rounded.Add,
+                        "Add to ${section.part.label.lowercase()}",
+                        { nav.go(Route.LogFood(state.day.toEpochDay(), part = section.part)) },
+                        size = 28.dp,
+                        iconSize = 16.dp,
+                    )
                 }
             }
             sectionItems(

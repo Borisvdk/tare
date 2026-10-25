@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.data.db.MealWithItems
+import app.tare.domain.DayPart
 import app.tare.domain.FoodSource
 import app.tare.ui.Fmt
 import app.tare.ui.components.Card
@@ -67,6 +68,7 @@ import app.tare.ui.components.KcalFigure
 import app.tare.ui.components.PrimaryButton
 import app.tare.ui.components.RoundIconButton
 import app.tare.ui.components.SectionHeader
+import app.tare.ui.components.Segmented
 import app.tare.ui.components.TareIcons
 import app.tare.ui.components.TareTextField
 import app.tare.ui.components.combinedClickableCompat
@@ -83,8 +85,9 @@ import java.time.LocalDate
 @Composable
 fun LogFoodScreen(route: Route.LogFood) {
     val day = LocalDate.ofEpochDay(route.day)
-    val viewModel = tareViewModel(key = "log-${route.day}") { LogFoodViewModel(it, day) }
+    val viewModel = tareViewModel(key = "log-${route.day}-${route.part}") { LogFoodViewModel(it, day, route.part) }
     val hub by viewModel.hub.collectAsState()
+    val part by viewModel.part.collectAsState()
     val results by viewModel.search.results.collectAsState()
     val nav = LocalNavigator.current
     val notify = LocalNotifier.current
@@ -143,6 +146,14 @@ fun LogFoodScreen(route: Route.LogFood) {
             )
         }
 
+        Segmented(
+            options = DayPart.entries,
+            selected = part,
+            label = { it.label },
+            onSelect = viewModel::setPart,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+        )
+
         Box(Modifier.weight(1f)) {
             LazyColumn(
                 state = listState,
@@ -153,10 +164,10 @@ fun LogFoodScreen(route: Route.LogFood) {
                     item(key = "actions") {
                         Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             ActionTile(TareIcons.Barcode, "Scan", Tare.colors.text, Modifier.weight(1f)) {
-                                nav.go(Route.Scan(route.day))
+                                nav.go(Route.Scan(route.day, part))
                             }
                             ActionTile(Icons.Rounded.AutoAwesome, "Describe", Tare.colors.kcal, Modifier.weight(1f)) {
-                                nav.go(Route.Describe(route.day))
+                                nav.go(Route.Describe(route.day, part = part))
                             }
                             ActionTile(Icons.Rounded.Bolt, "Quick add", Tare.colors.fat, Modifier.weight(1f)) {
                                 quickAdd = true
@@ -167,7 +178,8 @@ fun LogFoodScreen(route: Route.LogFood) {
                         item(key = "h-yesterday") { SectionHeader("Same as yesterday") }
                         item(key = "yesterday") {
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                items(hub.yesterday, key = { it.part.name }) { source ->
+                                // The block matching the chosen part of the day comes first.
+                                items(hub.yesterday.sortedByDescending { it.part == part }, key = { it.part.name }) { source ->
                                     CopyCard(source) {
                                         scope.launch { announce(viewModel.copy(source)) }
                                     }
@@ -218,7 +230,7 @@ fun LogFoodScreen(route: Route.LogFood) {
                             focus.clearFocus()
                             pickedMeal = it
                         },
-                        onAskAi = { nav.go(Route.Describe(route.day, prefill = it)) },
+                        onAskAi = { nav.go(Route.Describe(route.day, prefill = it, part = part)) },
                         onCreate = { nav.go(Route.FoodEditor(logDay = route.day, name = it)) },
                     )
                 }
@@ -237,6 +249,7 @@ fun LogFoodScreen(route: Route.LogFood) {
             food = food,
             mode = AmountMode.LOG,
             remainingKcal = hub.remainingKcal,
+            initialTime = viewModel.sessionTime(),
             onConfirm = { result ->
                 picked = null
                 scope.launch { announce(listOf(viewModel.log(food, result.grams, result.portion, result.time))) }

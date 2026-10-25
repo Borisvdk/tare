@@ -81,7 +81,7 @@ import java.time.LocalDate
 @Composable
 fun DescribeScreen(route: Route.Describe) {
     val day = LocalDate.ofEpochDay(route.day)
-    val viewModel = tareViewModel(key = "describe-${route.day}") { DescribeViewModel(it, day) }
+    val viewModel = tareViewModel(key = "describe-${route.day}-${route.part}") { DescribeViewModel(it, day, route.part) }
     val state by viewModel.state.collectAsState()
     val photo by viewModel.photo.collectAsState()
     val hasKey by viewModel.hasApiKey.collectAsState()

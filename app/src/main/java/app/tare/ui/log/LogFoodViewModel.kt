@@ -19,7 +19,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import app.tare.ui.today.DayPart
+import app.tare.domain.DayPart
+import app.tare.domain.logTimeFor
 import java.time.Instant
 import java.time.ZoneId
 import java.time.LocalDate
@@ -43,7 +44,19 @@ data class LogHubState(
     val remainingKcal: Double get() = targets.kcal - dayTotals.kcal
 }
 
-class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate) : ViewModel() {
+class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate, initialPart: DayPart?) : ViewModel() {
+    private fun now() = Instant.ofEpochMilli(graph.now()).atZone(ZoneId.systemDefault())
+
+    /** Which part of the day this session logs into; defaults to the current one. */
+    val part = MutableStateFlow(initialPart ?: DayPart.of(now().toLocalTime()))
+
+    fun setPart(part: DayPart) {
+        this.part.value = part
+    }
+
+    /** Time for new entries: null (now) or the chosen part's usual time. */
+    fun sessionTime(): LocalTime? = logTimeFor(part.value, day, now())
+
     /** Entries with an id above this were logged while the screen was open (including via Scan/Describe). */
     private val baseline = MutableStateFlow<Long?>(null)
 
@@ -91,15 +104,15 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate) : ViewMo
 
     suspend fun log(food: Food, grams: Double, portion: Portion?, time: LocalTime?): LogEntry {
         val saved = if (food.source == FoodSource.OPEN_FOOD_FACTS) graph.foods.saveRemote(food) else food
-        return graph.log.logFood(saved, grams, portion, day, time)
+        return graph.log.logFood(saved, grams, portion, day, time ?: sessionTime())
     }
 
     suspend fun logMeal(meal: MealWithItems, scale: Double, time: LocalTime?): List<LogEntry> {
-        return graph.log.logMeal(meal, scale, day, time)
+        return graph.log.logMeal(meal, scale, day, time ?: sessionTime())
     }
 
     suspend fun logQuick(name: String, nutrients: Nutrients): LogEntry {
-        return graph.log.logQuick(name, nutrients, day)
+        return graph.log.logQuick(name, nutrients, day, sessionTime())
     }
 
     suspend fun copy(source: CopySource): List<LogEntry> = graph.log.copyTo(source.entries, day)
