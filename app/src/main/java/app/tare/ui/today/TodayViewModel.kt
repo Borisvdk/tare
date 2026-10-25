@@ -125,6 +125,11 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
 
     fun copyToToday(entries: List<LogEntry>) = viewModelScope.launch { graph.log.copyTo(entries, today()) }
 
+    /** Copies everything from the selected day to today; returns the copies for undo. */
+    suspend fun copyDayToToday(): List<LogEntry> = graph.log.copyTo(state.value.entries, today())
+
+    fun undoCopy(copies: List<LogEntry>) = graph.appScope.launch { graph.log.delete(copies) }
+
     fun copyTo(entries: List<LogEntry>, day: LocalDate) = viewModelScope.launch { graph.log.copyTo(entries, day) }
 
     suspend fun saveAsMeal(name: String, entries: List<LogEntry>): String = graph.meals.saveFromEntries(name, entries)
