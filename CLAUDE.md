@@ -84,7 +84,7 @@ The owner has approved autonomous merging. A change goes like this:
 4. Commit in Conventional Commits style (`feat: …`, `fix: …`). Push and open a PR with
    `gh pr create` that says what changed and how you verified it, with screenshots for UI.
 5. When CI is green, `gh pr merge --squash --delete-branch`. Merging to `main` publishes a
-   signed release that the owner's phone installs through Obtainium. **Main must always be
+   signed release that the owner's phone installs from inside Tare. **Main must always be
    shippable.**
 6. Update docs/ROADMAP.md: tick off what shipped and add follow-ups you found.
 

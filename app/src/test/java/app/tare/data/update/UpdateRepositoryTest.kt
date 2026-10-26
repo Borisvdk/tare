@@ -23,7 +23,7 @@ class UpdateRepositoryTest {
 
     private val requests = mutableListOf<HttpRequestData>()
 
-    private fun repo(token: String? = "github_pat_test", current: Int = 28, handler: MockRequestHandleScope.(HttpRequestData) -> io.ktor.client.request.HttpResponseData): UpdateRepository {
+    private fun repo(current: Int = 28, handler: MockRequestHandleScope.(HttpRequestData) -> io.ktor.client.request.HttpResponseData): UpdateRepository {
         val client = HttpClient(MockEngine { request ->
             requests += request
             handler(request)
@@ -31,7 +31,7 @@ class UpdateRepositoryTest {
             install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
             install(HttpTimeout)
         }
-        return UpdateRepository(client, token = { token }, currentVersionCode = current)
+        return UpdateRepository(client, currentVersionCode = current)
     }
 
     private fun MockRequestHandleScope.json(body: String, status: HttpStatusCode = HttpStatusCode.OK) =
@@ -40,8 +40,8 @@ class UpdateRepositoryTest {
     private val releases = """
         [
           {"tag_name":"v0.1.30","body":"## What's Changed\n* feat: in-app updates by @Borisvdk in https://github.com/Borisvdk/tare/pull/26\n* fix: scanner by @Borisvdk in https://github.com/Borisvdk/tare/pull/25\n","draft":false,"prerelease":false,
-           "assets":[{"name":"tare-0.1.30.apk","size":2048,"url":"https://api.github.com/repos/Borisvdk/tare/releases/assets/9"}]},
-          {"tag_name":"v0.1.29","body":"* feat: Health Connect by @Borisvdk in https://github.com/Borisvdk/tare/pull/24","assets":[{"name":"tare-0.1.29.apk","size":1,"url":"x"}]},
+           "assets":[{"name":"tare-0.1.30.apk","size":2048,"url":"https://api.github.com/repos/Borisvdk/tare/releases/assets/9","browser_download_url":"https://github.com/Borisvdk/tare/releases/download/v0.1.30/tare-0.1.30.apk"}]},
+          {"tag_name":"v0.1.29","body":"* feat: Health Connect by @Borisvdk in https://github.com/Borisvdk/tare/pull/24","assets":[{"name":"tare-0.1.29.apk","size":1,"url":"x","browser_download_url":"y"}]},
           {"tag_name":"v0.1.28","body":"* feat: new logo by @Borisvdk in https://github.com/Borisvdk/tare/pull/23","assets":[]}
         ]
     """.trimIndent()
@@ -51,10 +51,12 @@ class UpdateRepositoryTest {
         val result = repo { json(releases) }.check() as UpdateCheck.Available
         assertThat(result.update.versionName).isEqualTo("0.1.30")
         assertThat(result.update.versionCode).isEqualTo(30)
-        assertThat(result.update.assetUrl).endsWith("/releases/assets/9")
+        // The public download link, not the API asset URL (that one serves JSON to JSON clients).
+        assertThat(result.update.assetUrl).isEqualTo("https://github.com/Borisvdk/tare/releases/download/v0.1.30/tare-0.1.30.apk")
         // 0.1.28 is what's installed, so its notes don't count.
-        assertThat(result.update.changes).containsExactly("feat: in-app updates", "fix: scanner", "feat: Health Connect").inOrder()
-        assertThat(requests.single().headers[HttpHeaders.Authorization]).isEqualTo("Bearer github_pat_test")
+        assertThat(result.update.changes).containsExactly("In-app updates", "Scanner", "Health Connect").inOrder()
+        // The repository is public: no account, no token.
+        assertThat(requests.single().headers[HttpHeaders.Authorization]).isNull()
         assertThat(requests.single().url.encodedPath).isEqualTo("/repos/Borisvdk/tare/releases")
     }
 
@@ -64,40 +66,42 @@ class UpdateRepositoryTest {
     }
 
     @Test
-    fun noTokenMeansNoRequest() = runTest {
-        assertThat(repo(token = null) { json(releases) }.check()).isEqualTo(UpdateCheck.NoToken)
-        assertThat(requests).isEmpty()
+    fun rateLimitsAndMissingReleasesSaySo() = runTest {
+        val limited = repo { json("""{"message":"API rate limit exceeded"}""", HttpStatusCode.Forbidden) }.check() as UpdateCheck.Failed
+        assertThat(limited.message).contains("limiting")
+        val missing = repo { json("""{"message":"Not Found"}""", HttpStatusCode.NotFound) }.check() as UpdateCheck.Failed
+        assertThat(missing.message).contains("Couldn't find")
     }
 
     @Test
-    fun aRejectedTokenSaysSo() = runTest {
-        val result = repo { json("""{"message":"Bad credentials"}""", HttpStatusCode.Unauthorized) }.check() as UpdateCheck.Failed
-        assertThat(result.message).contains("rejected")
-        val noAccess = repo { json("""{"message":"Not Found"}""", HttpStatusCode.NotFound) }.check() as UpdateCheck.Failed
-        assertThat(noAccess.message).contains("can't read")
-    }
-
-    @Test
-    fun downloadFollowsTheRedirectWithoutTheToken() = runTest {
+    fun downloadFollowsTheRedirectToStorage() = runTest {
         val apkBytes = ByteArray(2048) { it.toByte() }
         val repository = repo { request ->
             when (request.url.host) {
-                "api.github.com" -> respond("", HttpStatusCode.Found, headersOf(HttpHeaders.Location, "https://objects.githubusercontent.com/apk?sig=abc"))
+                "github.com" -> respond("", HttpStatusCode.Found, headersOf(HttpHeaders.Location, "https://release-assets.githubusercontent.com/apk?sig=abc"))
                 else -> respond(apkBytes, HttpStatusCode.OK, headersOf(HttpHeaders.ContentLength, apkBytes.size.toString()))
             }
         }
-        val update = AppUpdate("0.1.30", 30, "https://api.github.com/repos/Borisvdk/tare/releases/assets/9", 2048, emptyList())
+        val update = AppUpdate("0.1.30", 30, "https://github.com/Borisvdk/tare/releases/download/v0.1.30/tare-0.1.30.apk", 2048, emptyList())
         val target = folder.root.resolve("updates/tare.apk")
         var progress = 0f
         repository.download(update, target) { progress = it }
 
         assertThat(target.readBytes()).isEqualTo(apkBytes)
         assertThat(progress).isEqualTo(1f)
-        val (asset, storage) = requests
-        assertThat(asset.headers[HttpHeaders.Authorization]).isEqualTo("Bearer github_pat_test")
-        assertThat(asset.headers[HttpHeaders.Accept]).isEqualTo("application/octet-stream")
-        assertThat(storage.url.host).isEqualTo("objects.githubusercontent.com")
-        assertThat(storage.headers[HttpHeaders.Authorization]).isNull()
+        assertThat(requests.map { it.url.host }).containsExactly("github.com", "release-assets.githubusercontent.com").inOrder()
+        assertThat(requests.map { it.headers[HttpHeaders.Authorization] }).containsExactly(null, null)
+    }
+
+    @Test
+    fun changeListLeavesOutPlumbing() {
+        val notes = """
+            * feat(log): favourites by @B in https://x/pull/1
+            * docs: readme by @B in https://x/pull/2
+            * ci: faster by @B in https://x/pull/3
+            * fix!: crash by @B in https://x/pull/4
+        """.trimIndent()
+        assertThat(UpdateRepository.changesIn(notes)).containsExactly("Favourites", "Crash").inOrder()
     }
 
     @Test

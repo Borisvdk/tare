@@ -21,6 +21,7 @@ reason.
 
 ## Shipped
 
+- The repository is public, so in-app updates need no token and Obtainium isn't needed (PR #28).
 - The scanner crash, found: R8 full mode stripped ML Kit's registrar constructors, so both
   scanners crashed in release builds only. Keep rule, a CI check on a release build per PR, and
   R8 mappings attached to releases.

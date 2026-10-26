@@ -39,7 +39,7 @@ excluded from backups.
 
 ## 2026-10-25: Releases on every merge, version code = commit count
 
-Obtainium installs from GitHub Releases. Every merge to `main` ships, so `main` must stay
+The phone installs from GitHub Releases. Every merge to `main` ships, so `main` must stay
 shippable. Commit count gives a strictly increasing version code with no manual bumps.
 
 ## 2026-10-25: Name: Tare
@@ -59,8 +59,14 @@ resting estimate (no data origin) are skipped.
 
 ## 2026-10-25: Tare updates itself from GitHub Releases
 
-The owner wants to update without opening GitHub or Obtainium. The repository stays private,
-so Tare asks once for a fine-grained read-only token (the one Obtainium uses works) and talks
-to the GitHub API itself. A download is only installed if it's the same package, newer, and
-signed with the release key. Obtainium keeps working as a fallback.
+The owner wants to update without opening GitHub or Obtainium. Tare talks to the GitHub API
+itself and only installs a download if it's the same package, newer, and signed with the
+release key.
+
+## 2026-10-26: The repository is public
+
+A private repository meant a GitHub token in Obtainium and in Tare, which the owner found
+confusing. Nothing secret lives in the repository (signing material is in GitHub secrets and
+`keystore.properties`, the Claude key stays on the phone; history checked), so it was made
+public and updates need no token. Diary data never leaves the phone either way.
 

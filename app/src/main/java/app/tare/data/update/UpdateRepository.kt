@@ -30,7 +30,6 @@ data class AppUpdate(
 sealed interface UpdateCheck {
     data class Available(val update: AppUpdate) : UpdateCheck
     data object UpToDate : UpdateCheck
-    data object NoToken : UpdateCheck
     data class Failed(val message: String) : UpdateCheck
 }
 
@@ -44,28 +43,28 @@ private data class GhRelease(
 )
 
 @Serializable
-private data class GhAsset(val name: String, val size: Long, val url: String)
+private data class GhAsset(
+    val name: String,
+    val size: Long,
+    // The public download link always serves the file. (The API's asset URL answers with JSON
+    // whenever Accept mentions JSON, which the shared client's content negotiation adds.)
+    @SerialName("browser_download_url") val downloadUrl: String,
+)
 
 /**
- * Finds and downloads new releases of Tare from its (private) GitHub repository, with a
- * read-only token the owner pastes in once. CI tags releases `v0.1.<commit count>`, and the
- * commit count is also the version code, so the tag says which build is newer.
+ * Finds and downloads new releases of Tare from its public GitHub repository; no account or
+ * token needed. CI tags releases `v0.1.<commit count>`, and the commit count is also the
+ * version code, so the tag says which build is newer.
  */
 class UpdateRepository(
     private val http: HttpClient,
-    private val token: suspend () -> String?,
     private val currentVersionCode: Int,
     private val repo: String = "Borisvdk/tare",
     private val api: String = "https://api.github.com",
 ) {
-    // Shares the engine with [http]; never closed, closing it would close the shared engine.
-    private val noRedirects by lazy { http.config { followRedirects = false } }
-
     suspend fun check(): UpdateCheck = withContext(Dispatchers.IO) {
-        val token = token() ?: return@withContext UpdateCheck.NoToken
         val response = try {
             http.get("$api/repos/$repo/releases?per_page=20") {
-                header(HttpHeaders.Authorization, "Bearer $token")
                 header(HttpHeaders.Accept, "application/vnd.github+json")
                 header("X-GitHub-Api-Version", "2022-11-28")
             }
@@ -73,9 +72,10 @@ class UpdateRepository(
             return@withContext UpdateCheck.Failed("Couldn't reach GitHub. Check your connection.")
         }
         when (response.status) {
-            HttpStatusCode.Unauthorized -> return@withContext UpdateCheck.Failed("GitHub rejected the token. Paste a new one.")
-            HttpStatusCode.Forbidden, HttpStatusCode.NotFound ->
-                return@withContext UpdateCheck.Failed("This token can't read $repo. Give it read access to the repository's contents.")
+            // Unauthenticated requests get 60 an hour per network; a check every few hours is far below.
+            HttpStatusCode.Forbidden, HttpStatusCode.TooManyRequests ->
+                return@withContext UpdateCheck.Failed("GitHub is limiting requests right now. Try again later.")
+            HttpStatusCode.NotFound -> return@withContext UpdateCheck.Failed("Couldn't find Tare's releases on GitHub")
             else -> if (!response.status.isSuccess()) return@withContext UpdateCheck.Failed("GitHub error (${response.status.value})")
         }
         val releases = runCatching { response.body<List<GhRelease>>() }.getOrElse {
@@ -92,33 +92,19 @@ class UpdateRepository(
             AppUpdate(
                 versionName = latest.tag.removePrefix("v"),
                 versionCode = code,
-                assetUrl = apk.url,
+                assetUrl = apk.downloadUrl,
                 size = apk.size,
                 changes = newer.flatMap { (_, r) -> changesIn(r.body) }.distinct(),
             ),
         )
     }
 
-    /**
-     * Downloads the APK to [target]. The asset URL answers with a redirect to a signed storage
-     * URL, which must be fetched *without* the token (storage rejects a second credential, and
-     * the token has no business going there).
-     */
+    /** Downloads the APK to [target]; the download link redirects to GitHub's file storage. */
     suspend fun download(update: AppUpdate, target: File, onProgress: (Float) -> Unit) = withContext(Dispatchers.IO) {
-        val token = token() ?: error("No GitHub token")
-        val first = noRedirects.get(update.assetUrl) {
-            header(HttpHeaders.Authorization, "Bearer $token")
-            header(HttpHeaders.Accept, "application/octet-stream")
-        }
-        val location = first.headers[HttpHeaders.Location]
-        val url = when {
-            first.status.value in 300..399 && location != null -> location
-            first.status.isSuccess() -> null
-            else -> error("GitHub error (${first.status.value})")
-        }
         target.parentFile?.mkdirs()
-        val request = if (url != null) noRedirects.prepareGet(url) { timeout { requestTimeoutMillis = DOWNLOAD_TIMEOUT } } else null
-        val save: suspend (io.ktor.client.statement.HttpResponse) -> Unit = { response ->
+        http.prepareGet(update.assetUrl) {
+            timeout { requestTimeoutMillis = DOWNLOAD_TIMEOUT }
+        }.execute { response ->
             if (!response.status.isSuccess()) error("Download failed (${response.status.value})")
             val total = response.contentLength() ?: update.size
             val channel = response.bodyAsChannel()
@@ -138,16 +124,6 @@ class UpdateRepository(
                 }
             }
         }
-        if (request != null) {
-            request.execute { save(it) }
-        } else {
-            // Served directly (no redirect): re-request as a stream with the token.
-            noRedirects.prepareGet(update.assetUrl) {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                header(HttpHeaders.Accept, "application/octet-stream")
-                timeout { requestTimeoutMillis = DOWNLOAD_TIMEOUT }
-            }.execute { save(it) }
-        }
         target
     }
 
@@ -157,11 +133,19 @@ class UpdateRepository(
         /** `v0.1.27` → 27. */
         fun versionCodeOf(tag: String): Int? = Regex("""(\d+)$""").find(tag.trim())?.value?.toIntOrNull()
 
-        /** PR titles from GitHub's generated notes: `* feat: x by @someone in https://…/pull/24`. */
+        private val KIND = Regex("""^[a-z]+(\([^)]*\))?!?:\s*""")
+        private val PLUMBING = Regex("""^(docs|ci|chore|test|build|refactor|style)(\(|!|:)""")
+
+        /**
+         * What changed, from GitHub's generated notes (`* feat: x by @someone in https://…/pull/24`):
+         * the PR titles without their `feat:`/`fix:` prefix, leaving out docs and tooling.
+         */
         fun changesIn(body: String?): List<String> = body.orEmpty().lines()
             .map { it.trim() }
             .filter { it.startsWith("* ") }
             .map { it.removePrefix("* ").substringBefore(" by @").substringBefore(" in https://").trim() }
+            .filterNot { PLUMBING.containsMatchIn(it) }
+            .map { it.replace(KIND, "").replaceFirstChar(Char::uppercase) }
             .filter { it.isNotEmpty() }
     }
 }

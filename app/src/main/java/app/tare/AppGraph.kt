@@ -78,7 +78,7 @@ class AppGraph(
     val health: HealthRepository by lazy {
         HealthRepository(healthFactory?.invoke(context) ?: HealthConnectSource(context), db.weightDao(), settings, now)
     }
-    val updates: UpdateRepository by lazy { UpdateRepository(http, token = { secrets.githubToken() }, currentVersionCode = BuildConfig.VERSION_CODE) }
+    val updates: UpdateRepository by lazy { UpdateRepository(http, currentVersionCode = BuildConfig.VERSION_CODE) }
     val updater: Updater by lazy { Updater(context, updates, appScope, now, enabled = !BuildConfig.DEBUG) }
     val ai: FoodAi by lazy { FoodAi(apiKey = { secrets.apiKey() }, model = { settings.aiModel.first() }) }
 
