@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 sealed interface UpdateState {
-    /** No token yet, or not checked. */
+    /** Not checked yet. */
     data object Idle : UpdateState
     data object Checking : UpdateState
     data class UpToDate(val checkedAt: Long) : UpdateState
@@ -54,7 +54,6 @@ class Updater(
             _state.value = when (result) {
                 is UpdateCheck.Available -> UpdateState.Available(result.update)
                 UpdateCheck.UpToDate -> UpdateState.UpToDate(now())
-                UpdateCheck.NoToken -> UpdateState.Idle
                 is UpdateCheck.Failed -> UpdateState.Failed(result.message)
             }
             if (result !is UpdateCheck.Failed) prefs.edit().putLong(LAST_CHECK, now()).apply()

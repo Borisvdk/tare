@@ -99,11 +99,12 @@ Health Connect requires before it grants anything.
 
 ## In-app updates
 
-`data/update/`: `UpdateRepository` lists GitHub releases of the private repo with a read-only
-token the owner pastes in Settings (kept in `SecretStore`, never backed up). Tags are
-`v0.1.<commit count>` and the commit count is the version code, so the tag says what's newer.
-"What's new" is the PR titles from GitHub's generated notes of every newer release. The APK
-asset answers with a redirect to signed storage, fetched without the token. `ApkCheck` makes
+`data/update/`: `UpdateRepository` lists the public repo's GitHub releases, no account needed
+(60 unauthenticated API calls an hour is plenty). Tags are `v0.1.<commit count>` and the
+commit count is the version code, so the tag says what's newer. "What's new" is the PR titles
+from GitHub's generated notes of every newer release, minus docs and tooling. The APK comes
+from the asset's `browser_download_url` (the API asset URL serves JSON to a client whose
+Accept header mentions JSON, as ours does). `ApkCheck` makes
 sure the download is this app, newer, and signed with the same key; `UpdateInstaller`
 installs it with `PackageInstaller` (`InstallResultReceiver` shows Android's confirmation).
 After Tare has installed itself once, `UPDATE_PACKAGES_WITHOUT_USER_ACTION` lets later updates
@@ -124,6 +125,6 @@ every 3 hours on resume. Debug builds (a different app id) don't update; `Update
 
 `.github/workflows/ci.yml`: every push and PR runs unit tests and builds the APK. Pushes to
 `main` also build a signed release APK and publish GitHub release `v0.1.<commit count>`.
-The owner's phone tracks releases with Obtainium. The signing key is in GitHub secrets
+The owner's phone updates itself from these releases (see In-app updates). The signing key is in GitHub secrets
 (`TARE_KEYSTORE_BASE64`, …); locally, `keystore.properties` points to
 `C:/Users/Boris/.tare/tare-release.jks`.

@@ -28,15 +28,13 @@ A fast, calm calorie tracker for Android. Log food in seconds and see only what 
 
 ## Install on your phone
 
-Releases are built and signed by CI on every merge to `main`. Once installed, Tare updates
-itself: paste the same read-only token in Settings → Updates and new versions show up on Today
-with an Update button.
+Releases are built and signed by CI on every merge to `main`.
 
-1. Install [Obtainium](https://github.com/ImranR98/Obtainium).
-2. The repository is private, so create a GitHub fine-grained token with **read-only Contents**
-   access to `Borisvdk/tare`, and add it in Obtainium → Settings → GitHub token.
-3. Add app → `https://github.com/Borisvdk/tare`. Obtainium installs the latest
-   `tare-<version>.apk` and updates it from then on.
+1. On the phone, open the [latest release](https://github.com/Borisvdk/tare/releases/latest),
+   download `tare-<version>.apk` and open it (Android asks once to allow installs from your
+   browser).
+2. That's it. Tare updates itself: new versions show up on Today with an **Update** button.
+   The first time, Android asks once to allow installs from Tare.
 
 To use Describe and label reading, add a Claude API key in Tare → Settings → Claude, which
 walks through it: Claude Max includes monthly API credits (claim them on claude.ai →
