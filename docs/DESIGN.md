@@ -57,7 +57,9 @@ headlines only (screen titles such as "Today", empty states). Tokens are in `ui/
 ## Components (`ui/components`)
 
 - `CalorieGauge`: 270° dial open at the bottom, coral fill, overflow drawn in `over`.
-- `MacroBars` / `ProgressBar`: label, "value / target g", 6dp bar.
+- `MacroBars` / `ProgressBar`: label, "value / target g", 6dp bar. Bars can be tappable.
+- `EnergySplitBar`: one bar split into protein, carbs and fat by their share of calories
+  (4/4/9), with whole percentages that add up to 100 underneath.
 - `MiniRing`: day ring in the week strip.
 - `NumberPad` + `AmountInputState`: the first key replaces the value, long-press backspace
   clears.
@@ -72,6 +74,8 @@ headlines only (screen titles such as "Today", empty states). Tokens are in `ui/
 - **One primary action per screen**, bottom-anchored and coral.
 - **Sheets for quick decisions** (amount, quick add, meal log, targets); full screens for
   editing (food, meal, recipe).
+- **Breakdowns** (`ui/today/BreakdownSheet`): totals first, then a kcal/Protein/Carbs/Fat
+  switch that ranks what's inside, biggest first, with a share bar in that quantity's colour.
 - **Undo instead of confirm** for anything reversible (delete entry, quick log), via
   `LocalNotifier`. Confirm only for irreversible actions (import replaces data).
 - **Numbers:** `Fmt.kcal` ("1,240"), `Fmt.grams` (one decimal under 10 g), `Fmt.amount`

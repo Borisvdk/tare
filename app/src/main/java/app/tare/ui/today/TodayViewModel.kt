@@ -26,16 +26,17 @@ import java.time.ZoneId
 /** A row on the Today screen: a single entry or a group logged together (saved meal, AI batch). */
 sealed interface DayItem {
     val key: String
-    val kcal: Double
+    val nutrients: Nutrients
+    val kcal: Double get() = nutrients.kcal
 
     data class Single(val entry: LogEntry) : DayItem {
         override val key = "e${entry.id}"
-        override val kcal = entry.nutrients.kcal
+        override val nutrients = entry.nutrients
     }
 
     data class Group(val groupId: String, val name: String, val entries: List<LogEntry>) : DayItem {
         override val key = "g$groupId"
-        override val kcal = entries.sumOf { it.nutrients.kcal }
+        override val nutrients = entries.map { it.nutrients }.sum()
     }
 }
 
@@ -56,6 +57,15 @@ data class TodayState(
     val loaded: Boolean = false,
 ) {
     val remaining: Double get() = targets.kcal - totals.kcal
+
+    /** The entries of a group as Today shows it in [part]; a group can end up split by a time change. */
+    fun groupEntries(part: DayPart, groupId: String): List<LogEntry> =
+        sections.firstOrNull { it.part == part }?.items.orEmpty().flatMap { item ->
+            when (item) {
+                is DayItem.Group -> if (item.groupId == groupId) item.entries else emptyList()
+                is DayItem.Single -> listOf(item.entry).filter { it.groupId == groupId }
+            }
+        }
 }
 
 class TodayViewModel(private val graph: AppGraph) : ViewModel() {

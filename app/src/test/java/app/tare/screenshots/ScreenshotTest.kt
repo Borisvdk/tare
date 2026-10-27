@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
@@ -229,5 +233,49 @@ class ScreenshotTest {
         seed(ThemeMode.LIGHT)
         val id = runBlocking { graph.meals.observeAll().first().first().meal.id }
         shoot("meal_editor_light", waitFor = "Broccoli") { TareRoot(graph, start = Route.MealEditor(id)) }
+    }
+
+    /** A many-ingredient meal from Describe with Claude, logged as one group. */
+    private fun seedAiMeal() = runBlocking {
+        fun ai(name: String, per100: Nutrients, grams: Double) =
+            Triple(food("ai:${name.lowercase()}", name, per100, source = FoodSource.AI), grams, null)
+        val items = listOf(
+            ai("Penne, cooked", Nutrients(158.0, 5.8, 30.9, 0.9, 1.8), 250.0),
+            ai("Chicken thigh, grilled", Nutrients(177.0, 24.0, 0.0, 8.6), 150.0),
+            ai("Green pesto", Nutrients(450.0, 5.0, 6.0, 45.0, 2.0), 40.0),
+            ai("Parmesan", Nutrients(392.0, 36.0, 3.2, 26.0), 15.0),
+            ai("Cherry tomatoes", Nutrients(18.0, 0.9, 3.9, 0.2, 1.2), 80.0),
+            ai("Spinach", Nutrients(23.0, 2.9, 3.6, 0.4, 2.2), 40.0),
+            ai("Olive oil", Nutrients(884.0, 0.0, 0.0, 100.0), 10.0),
+            ai("Pine nuts", Nutrients(673.0, 13.7, 13.1, 68.4, 3.7), 10.0),
+        )
+        graph.db.foodDao().upsertAll(items.map { it.first })
+        graph.log.logBatch(items, today, "Pesto pasta with chicken", LocalTime.of(13, 10))
+    }
+
+    @Test fun mealBreakdown() {
+        seed(ThemeMode.DARK)
+        seedAiMeal()
+        compose.setContent { TareRoot(graph) }
+        compose.waitUntil(5_000) { compose.onAllNodes(hasText("Rolled oats")).fetchSemanticsNodes().isNotEmpty() }
+        compose.onAllNodes(hasScrollToNodeAction()).onFirst().performScrollToNode(hasText("Chicken rice bowl"))
+        compose.waitForIdle()
+        captureScreenRoboImage("src/test/screenshots/today_meal_dark.png")
+        compose.onNode(hasText("Pesto pasta with chicken")).performClick()
+        compose.waitUntil(5_000) { compose.onAllNodes(hasText("% protein", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitForIdle()
+        captureScreenRoboImage("src/test/screenshots/breakdown_meal_dark.png")
+    }
+
+    @Test fun dayBreakdownByProtein() {
+        seed(ThemeMode.LIGHT)
+        seedAiMeal()
+        compose.setContent { TareRoot(graph) }
+        compose.waitUntil(5_000) { compose.onAllNodes(hasText("Rolled oats")).fetchSemanticsNodes().isNotEmpty() }
+        // The hero's protein bar opens the day ranked by protein.
+        compose.onAllNodes(hasText("Protein")).onFirst().performClick()
+        compose.waitUntil(5_000) { compose.onAllNodes(hasText("% protein", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitForIdle()
+        captureScreenRoboImage("src/test/screenshots/breakdown_day_light.png")
     }
 }

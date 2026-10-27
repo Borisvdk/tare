@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -216,7 +218,7 @@ fun <T> Segmented(
                     .clip(Radii.pill)
                     .background(bg)
                     .then(if (isSelected && !colors.isDark) Modifier.border(BorderStroke(1.dp, colors.outline), Radii.pill) else Modifier)
-                    .clickable { onSelect(option) }
+                    .selectable(selected = isSelected, role = Role.Tab) { onSelect(option) }
                     .padding(vertical = 9.dp),
                 contentAlignment = Alignment.Center,
             ) {

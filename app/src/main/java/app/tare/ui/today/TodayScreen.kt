@@ -60,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
@@ -68,6 +69,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.domain.FoodSource
+import app.tare.domain.sum
 import app.tare.ui.Fmt
 import app.tare.ui.update.UpdateBanner
 import app.tare.ui.components.CalorieGauge
@@ -76,6 +78,7 @@ import app.tare.ui.components.EmptyState
 import app.tare.ui.components.KcalFigure
 import app.tare.ui.components.ListRow
 import app.tare.ui.components.MacroBars
+import app.tare.ui.components.MacroLine
 import app.tare.ui.components.MiniRing
 import app.tare.ui.components.PrimaryButton
 import app.tare.ui.components.RoundIconButton
@@ -117,6 +120,9 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
     var showTargets by remember { mutableStateOf(false) }
     var savingMeal by remember { mutableStateOf<List<LogEntry>?>(null) }
     var retiming by remember { mutableStateOf<List<LogEntry>?>(null) }
+    // A stack, so a meal opened from the day's breakdown can go back to it.
+    var breakdown by remember { mutableStateOf<List<Breakdown>>(emptyList()) }
+    var measure by remember { mutableStateOf(Measure.KCAL) }
 
     LifecycleResumeEffect(viewModel) {
         viewModel.onResume()
@@ -126,6 +132,7 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
     LaunchedEffect(state.day) {
         onDayChange(state.day)
         selected = emptySet()
+        breakdown = emptyList()
     }
 
     fun deleteWithUndo(entries: List<LogEntry>) {
@@ -222,7 +229,17 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
             )
         }
         item(key = "hero") {
-            HeroCard(state)
+            HeroCard(
+                state,
+                onBreakdown = if (state.entries.isNotEmpty() && selected.isEmpty()) {
+                    { m ->
+                        measure = m
+                        breakdown = listOf(Breakdown.Day)
+                    }
+                } else {
+                    null
+                },
+            )
         }
         item(key = "update") { UpdateBanner(Modifier.padding(top = 12.dp)) }
         if (!state.targetsConfirmed && state.loaded) {
@@ -271,6 +288,10 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                 selected = selected,
                 expandedGroups = expandedGroups,
                 onToggleGroup = { id -> expandedGroups = if (id in expandedGroups) expandedGroups - id else expandedGroups + id },
+                onOpenGroup = { id ->
+                    measure = Measure.KCAL
+                    breakdown = listOf(Breakdown.Group(section.part, id))
+                },
                 onClickEntry = { entry ->
                     if (selected.isNotEmpty()) {
                         selected = if (entry.id in selected) selected - entry.id else selected + entry.id
@@ -314,11 +335,13 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                 } else if (food.source == FoodSource.CUSTOM || food.source == FoodSource.OPEN_FOOD_FACTS) {
                     {
                         editing = null
+                        breakdown = emptyList()
                         nav.go(Route.FoodEditor(foodId = food.id))
                     }
                 } else if (food.source == FoodSource.RECIPE) {
                     {
                         editing = null
+                        breakdown = emptyList()
                         nav.go(Route.RecipeEditor(food.id))
                     }
                 } else {
@@ -338,6 +361,51 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                     editing = null
                     deleteWithUndo(listOf(entry))
                 },
+            )
+        }
+    }
+
+    // Hidden while an entry from it is being edited, then back with the new numbers.
+    val shownBreakdown = breakdown.lastOrNull()
+    if (shownBreakdown != null && editing == null) {
+        val onBack: (() -> Unit)? = if (breakdown.size > 1) ({ breakdown = breakdown.dropLast(1) }) else null
+        val onItem: (DayItem) -> Unit = { item ->
+            when (item) {
+                is DayItem.Single -> openEntry(item.entry)
+                is DayItem.Group -> state.sections.firstOrNull { item in it.items }?.let { section ->
+                    breakdown = breakdown + Breakdown.Group(section.part, item.groupId)
+                }
+            }
+        }
+        val entries = when (shownBreakdown) {
+            Breakdown.Day -> state.entries
+            is Breakdown.Group -> state.groupEntries(shownBreakdown.part, shownBreakdown.groupId)
+        }
+        if (entries.isEmpty()) {
+            // Everything in it was deleted.
+            LaunchedEffect(shownBreakdown) { breakdown = breakdown.dropLast(1) }
+        } else {
+            // One call site, so going from the day into a meal swaps the content in the open sheet.
+            val (title, subtitle) = when (shownBreakdown) {
+                Breakdown.Day -> Fmt.dayHeadline(state.day, state.today) to "${Fmt.daySubtitle(state.day)} · ${Fmt.items(entries.size)}"
+                is Breakdown.Group -> (entries.firstNotNullOfOrNull { it.groupName } ?: "Meal") to
+                    "${shownBreakdown.part.label} · ${Fmt.items(entries.size)}"
+            }
+            BreakdownSheet(
+                title = title,
+                subtitle = subtitle,
+                total = entries.map { it.nutrients }.sum(),
+                targets = state.targets,
+                items = when (shownBreakdown) {
+                    Breakdown.Day -> state.sections.flatMap { it.items }
+                    is Breakdown.Group -> entries.map { DayItem.Single(it) }
+                },
+                measure = measure,
+                onMeasure = { measure = it },
+                onItem = onItem,
+                onDismiss = { breakdown = emptyList() },
+                onBack = onBack,
+                page = shownBreakdown,
             )
         }
     }
@@ -385,6 +453,7 @@ private fun LazyListScope.sectionItems(
     selected: Set<Long>,
     expandedGroups: Set<String>,
     onToggleGroup: (String) -> Unit,
+    onOpenGroup: (String) -> Unit,
     onClickEntry: (LogEntry) -> Unit,
     onLongPress: (List<LogEntry>) -> Unit,
     onSwipeDelete: (LogEntry) -> Unit,
@@ -407,20 +476,32 @@ private fun LazyListScope.sectionItems(
                     val allSelected = item.entries.all { it.id in selected }
                     ListRow(
                         title = item.name,
-                        subtitle = Fmt.items(item.entries.size),
+                        subtitle = null,
+                        // A meal is judged by its macros, so they're on the row itself.
+                        subtitleContent = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(Fmt.items(item.entries.size), style = Tare.type.caption, color = Tare.colors.textMuted, maxLines = 1)
+                                Spacer(Modifier.width(10.dp))
+                                MacroLine(item.nutrients)
+                            }
+                        },
                         kcal = item.kcal,
                         selected = allSelected,
                         modifier = Modifier.animateItem(),
                         trailingAction = {
-                            Icon(
+                            RoundIconButton(
                                 Icons.Rounded.ExpandMore,
                                 contentDescription = if (expanded) "Collapse" else "Expand",
+                                onClick = { onToggleGroup(item.groupId) },
+                                size = 36.dp,
+                                iconSize = 20.dp,
+                                background = Color.Transparent,
                                 tint = Tare.colors.textFaint,
                                 modifier = Modifier.rotate(if (expanded) 180f else 0f),
                             )
                         },
                         onClick = {
-                            if (selected.isNotEmpty()) onLongPress(item.entries) else onToggleGroup(item.groupId)
+                            if (selected.isNotEmpty()) onLongPress(item.entries) else onOpenGroup(item.groupId)
                         },
                         onLongClick = { onLongPress(item.entries) },
                     )
@@ -624,10 +705,14 @@ private fun DayCell(
 }
 
 @Composable
-private fun HeroCard(state: TodayState) {
+private fun HeroCard(state: TodayState, onBreakdown: ((Measure) -> Unit)?) {
     val colors = Tare.colors
     val remaining = state.remaining
-    Card(Modifier.fillMaxWidth().padding(top = 4.dp), padding = PaddingValues(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 22.dp)) {
+    Card(
+        Modifier.fillMaxWidth().padding(top = 4.dp),
+        padding = PaddingValues(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 22.dp),
+        onClick = onBreakdown?.let { { it(Measure.KCAL) } },
+    ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             CalorieGauge(eaten = state.totals.kcal, target = state.targets.kcal) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -651,7 +736,7 @@ private fun HeroCard(state: TodayState) {
                 KcalFigure(state.totals.kcal)
                 Text("of ${Fmt.kcal(state.targets.kcal)}", style = Tare.type.caption, color = colors.textFaint, textAlign = TextAlign.Center)
             }
-            MacroBars(state.totals, state.targets)
+            MacroBars(state.totals, state.targets, onClick = onBreakdown?.let { { macro -> it(Measure.of(macro)) } })
         }
     }
 }

@@ -36,6 +36,10 @@ groceries from Albert Heijn and Jumbo, a mix of Dutch and English food names.
   each with a `+` to log into it; swipe to delete with undo, tap to edit, long-press to
   select (save as meal, copy to today, change time, delete). Past days can be copied to
   today in one tap.
+- **Breakdowns:** meals (saved meals, Describe batches) show their protein, carbs and fat on
+  Today. Tap one, or the day's calories or a macro bar, to see the totals against your
+  targets, where the calories come from, and which foods gave the most kcal, protein, carbs
+  or fat. Tap a food there to fix its amount.
 - **Log hub:** a Morning/Afternoon/Evening/Night selector, then search across bundled basic
   foods (USDA, with Dutch aliases), your foods, recipes and saved meals, plus Open Food
   Facts products online, forgiving typos. Shortcuts for scan, describe and quick add.
