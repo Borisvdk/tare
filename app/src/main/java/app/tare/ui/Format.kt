@@ -32,6 +32,10 @@ object Fmt {
 
     fun items(count: Int): String = if (count == 1) "1 item" else "$count items"
 
+    /** "72%"; "<1%" for a sliver that would otherwise round to nothing. */
+    fun percent(fraction: Double): String =
+        if (fraction > 0.0 && fraction < 0.005) "<1%" else "${(fraction * 100).roundToInt()}%"
+
     fun weight(kg: Double): String = String.format(locale, "%.1f", kg)
 
     fun signedWeight(kg: Double): String = (if (kg > 0) "+" else if (kg < 0) "−" else "±") + String.format(locale, "%.1f", abs(kg))

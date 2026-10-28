@@ -53,6 +53,8 @@ fun ListRow(
     titleColor: Color = Tare.colors.text,
     leading: (@Composable () -> Unit)? = null,
     trailingAction: (@Composable () -> Unit)? = null,
+    /** Replaces [subtitle] when a plain string isn't enough (e.g. a coloured macro line). */
+    subtitleContent: (@Composable () -> Unit)? = null,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
 ) {
@@ -78,7 +80,9 @@ fun ListRow(
         }
         Column(Modifier.weight(1f)) {
             Text(title, style = Tare.type.bodyStrong, color = titleColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (!subtitle.isNullOrEmpty()) {
+            if (subtitleContent != null) {
+                subtitleContent()
+            } else if (!subtitle.isNullOrEmpty()) {
                 Text(subtitle, style = Tare.type.caption, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -94,11 +98,17 @@ fun ListRow(
 }
 
 @Composable
-fun KcalFigure(kcal: Double, modifier: Modifier = Modifier) {
+fun KcalFigure(kcal: Double, modifier: Modifier = Modifier) = UnitFigure(Fmt.kcal(kcal), "kcal", modifier)
+
+@Composable
+fun GramsFigure(grams: Double, modifier: Modifier = Modifier) = UnitFigure(Fmt.grams(grams), "g", modifier)
+
+@Composable
+private fun UnitFigure(value: String, unit: String, modifier: Modifier) {
     Text(
         buildAnnotatedString {
-            withStyle(SpanStyle(color = Tare.colors.text)) { append(Fmt.kcal(kcal)) }
-            withStyle(SpanStyle(color = Tare.colors.textFaint, fontSize = Tare.type.caption.fontSize)) { append(" kcal") }
+            withStyle(SpanStyle(color = Tare.colors.text)) { append(value) }
+            withStyle(SpanStyle(color = Tare.colors.textFaint, fontSize = Tare.type.caption.fontSize)) { append(" $unit") }
         },
         style = Tare.type.figure,
         modifier = modifier,

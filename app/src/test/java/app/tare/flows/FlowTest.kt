@@ -2,9 +2,11 @@ package app.tare.flows
 
 import android.app.Application
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithText
@@ -24,6 +26,7 @@ import app.tare.data.db.TareDatabase
 import app.tare.domain.FoodSource
 import app.tare.domain.Nutrients
 import app.tare.domain.Portion
+import app.tare.domain.Targets
 import app.tare.domain.buildSearchText
 import app.tare.ui.navigation.Route
 import app.tare.ui.root.TareRoot
@@ -312,5 +315,60 @@ class FlowTest {
         compose.onNodeWithText("Save meal").performClick()
         compose.waitUntil(5_000) { runBlocking { graph.meals.observeAll().first() }.isNotEmpty() }
         assertThat(runBlocking { graph.meals.observeAll().first() }.single().items).hasSize(1)
+    }
+
+    /** Chicken, rice and a banana logged together at lunch, as Describe would. */
+    private fun logDinnerBowl() = runBlocking {
+        fun generic(id: String, name: String, per100: Nutrients) =
+            Food(id, FoodSource.GENERIC, name, searchText = buildSearchText(name, null, null), per100 = per100, createdAt = 0, updatedAt = 0)
+        val chicken = generic("usda:chicken", "Chicken breast", Nutrients(165.0, 31.0, 0.0, 3.6))
+        val rice = generic("usda:rice", "White rice", Nutrients(130.0, 2.7, 28.2, 0.3))
+        // Settings outlive a test, so don't rely on the defaults.
+        graph.settings.setTargets(Targets(2200, 150, 230, 75))
+        graph.db.foodDao().upsertAll(listOf(chicken, rice))
+        val items = listOf(Triple(chicken, 160.0, null), Triple(rice, 220.0, null), Triple(banana, 118.0, null))
+        graph.log.logBatch(items, today, "Dinner bowl", LocalTime.of(12, 30))
+    }
+
+    @Test
+    fun mealBreakdownShowsTotalsAndRanksFoodsByMacro() {
+        logDinnerBowl()
+        compose.setContent { TareRoot(graph) }
+        compose.waitForText("Dinner bowl")
+        compose.onNodeWithText("Dinner bowl").performClick()
+
+        // 264 + 286 + 105 kcal against 2,200.
+        compose.waitForText("30% of your 2,200 kcal")
+        fun top(name: String) = compose.onNodeWithText(name).fetchSemanticsNode().boundsInRoot.top
+        assertThat(top("White rice")).isLessThan(top("Chicken breast"))
+
+        compose.onNode(hasText("Protein") and isSelectable()).performClick()
+        compose.waitUntil(5_000) { top("Chicken breast") < top("White rice") }
+
+        // Editing a food from the breakdown comes back to it with the new numbers.
+        compose.onNodeWithText("Banana").performClick()
+        compose.waitForText("Save")
+        listOf("pad-2", "pad-0", "pad-0").forEach { compose.onNodeWithTag(it).performClick() }
+        compose.onNodeWithText("Save").performClick()
+        compose.waitUntil(5_000) { entries().first { it.name == "Banana" }.grams == 200.0 }
+        compose.waitForText("% protein", substring = true)
+    }
+
+    @Test
+    fun dayBreakdownOpensAMealAndGoesBack() {
+        logDinnerBowl()
+        runBlocking { graph.log.logQuick("Coffee", Nutrients(40.0, 2.0, 3.0, 2.0), today, LocalTime.of(9, 0)) }
+        compose.setContent { TareRoot(graph) }
+        compose.waitForText("Dinner bowl")
+
+        // The hero's protein bar opens the whole day, ranked by protein.
+        compose.onNodeWithText("Protein").performClick()
+        compose.waitForText("Sunday 25 October · 4 items")
+        compose.onNode(hasText("Protein") and isSelectable()).assertIsSelected()
+
+        compose.onAllNodesWithText("Dinner bowl").onLast().performClick()
+        compose.waitForText("Afternoon · 3 items")
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.waitForText("Sunday 25 October · 4 items")
     }
 }
