@@ -63,7 +63,8 @@ headlines only (screen titles such as "Today", empty states). Tokens are in `ui/
 - `MiniRing`: day ring in the week strip.
 - `NumberPad` + `AmountInputState`: the first key replaces the value, long-press backspace
   clears.
-- `ListRow` / `FoodRow`: title, subtitle, kcal figure, optional trailing action.
+- `ListRow` / `FoodRow`: title, subtitle, kcal figure (optionally with a P/C/F line under it,
+  as on Today), optional trailing action.
 - `TareSheet`: the modal bottom sheet every flow uses.
 - `PrimaryButton`, `SecondaryButton`, `TextAction`, `RoundIconButton`, `SelectChip`,
   `Segmented`, `Card`, `SectionHeader`, `TareTextField`, `EmptyState`.
