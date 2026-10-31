@@ -11,6 +11,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
@@ -277,5 +278,17 @@ class ScreenshotTest {
         compose.waitUntil(5_000) { compose.onAllNodes(hasText("% protein", substring = true)).fetchSemanticsNodes().isNotEmpty() }
         compose.waitForIdle()
         captureScreenRoboImage("src/test/screenshots/breakdown_day_light.png")
+    }
+
+    @Test fun dayBreakdownByFibre() {
+        seed(ThemeMode.DARK)
+        seedAiMeal()
+        compose.setContent { TareRoot(graph) }
+        compose.waitUntil(5_000) { compose.onAllNodes(hasText("Rolled oats")).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(hasText("left", substring = true)).performClick()
+        compose.waitUntil(5_000) { compose.onAllNodes(hasText("a day", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(hasText("Fibre") and isSelectable()).performClick()
+        compose.waitForIdle()
+        captureScreenRoboImage("src/test/screenshots/breakdown_day_fibre_dark.png")
     }
 }

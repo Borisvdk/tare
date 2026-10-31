@@ -75,8 +75,10 @@ headlines only (screen titles such as "Today", empty states). Tokens are in `ui/
 - **One primary action per screen**, bottom-anchored and coral.
 - **Sheets for quick decisions** (amount, quick add, meal log, targets); full screens for
   editing (food, meal, recipe).
-- **Breakdowns** (`ui/today/BreakdownSheet`): totals first, then a kcal/Protein/Carbs/Fat
+- **Breakdowns** (`ui/today/BreakdownSheet`): totals first, then a kcal/Protein/Carbs/Fat/Fibre
   switch that ranks what's inside, biggest first, with a share bar in that quantity's colour.
+  Fibre has no colour of its own, so its bars are neutral (`textMuted`), measured against a
+  fixed 30 g a day (the Dutch Health Council's advice), not a user target.
 - **Undo instead of confirm** for anything reversible (delete entry, quick log), via
   `LocalNotifier`. Confirm only for irreversible actions (import replaces data).
 - **Numbers:** `Fmt.kcal` ("1,240"), `Fmt.grams` (one decimal under 10 g), `Fmt.amount`
