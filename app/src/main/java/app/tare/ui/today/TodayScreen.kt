@@ -78,7 +78,6 @@ import app.tare.ui.components.EmptyState
 import app.tare.ui.components.KcalFigure
 import app.tare.ui.components.ListRow
 import app.tare.ui.components.MacroBars
-import app.tare.ui.components.MacroLine
 import app.tare.ui.components.MiniRing
 import app.tare.ui.components.PrimaryButton
 import app.tare.ui.components.RoundIconButton
@@ -476,16 +475,9 @@ private fun LazyListScope.sectionItems(
                     val allSelected = item.entries.all { it.id in selected }
                     ListRow(
                         title = item.name,
-                        subtitle = null,
-                        // A meal is judged by its macros, so they're on the row itself.
-                        subtitleContent = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(Fmt.items(item.entries.size), style = Tare.type.caption, color = Tare.colors.textMuted, maxLines = 1)
-                                Spacer(Modifier.width(10.dp))
-                                MacroLine(item.nutrients)
-                            }
-                        },
+                        subtitle = Fmt.items(item.entries.size),
                         kcal = item.kcal,
+                        macros = item.nutrients,
                         selected = allSelected,
                         modifier = Modifier.animateItem(),
                         trailingAction = {
@@ -531,6 +523,7 @@ private fun EntryRow(entry: LogEntry, selected: Boolean, onClick: () -> Unit, on
         title = entry.name,
         subtitle = listOfNotNull(entry.brand, Fmt.entryAmount(entry)).joinToString(" · "),
         kcal = entry.nutrients.kcal,
+        macros = entry.nutrients,
         selected = selected,
         onClick = onClick,
         onLongClick = onLongClick,

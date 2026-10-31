@@ -21,6 +21,8 @@ reason.
 
 ## Shipped
 
+- Every row on Today shows P/C/F under its kcal, not just meals (the owner wanted the numbers
+  for each item).
 - Macro breakdowns: meals on Today show P/C/F; tapping a meal, the calories or a macro bar
   opens a breakdown with totals against targets, the calorie split, and foods ranked by kcal,
   protein, carbs or fat (asked for after a many-ingredient Describe meal).

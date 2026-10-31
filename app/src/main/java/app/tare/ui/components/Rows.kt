@@ -37,12 +37,13 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import app.tare.data.db.Food
 import app.tare.domain.FoodSource
+import app.tare.domain.Nutrients
 import app.tare.ui.Fmt
 import app.tare.ui.theme.Radii
 import app.tare.ui.theme.Tare
 import kotlin.math.roundToInt
 
-/** Generic list row: title, subtitle, trailing kcal figure. */
+/** Generic list row: title, subtitle, trailing kcal figure with an optional macro line under it. */
 @Composable
 fun ListRow(
     title: String,
@@ -53,8 +54,8 @@ fun ListRow(
     titleColor: Color = Tare.colors.text,
     leading: (@Composable () -> Unit)? = null,
     trailingAction: (@Composable () -> Unit)? = null,
-    /** Replaces [subtitle] when a plain string isn't enough (e.g. a coloured macro line). */
-    subtitleContent: (@Composable () -> Unit)? = null,
+    /** Shown as "P 32  C 45  F 12" under the kcal; left out when there are no macros (calories-only quick adds). */
+    macros: Nutrients? = null,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
 ) {
@@ -80,15 +81,18 @@ fun ListRow(
         }
         Column(Modifier.weight(1f)) {
             Text(title, style = Tare.type.bodyStrong, color = titleColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (subtitleContent != null) {
-                subtitleContent()
-            } else if (!subtitle.isNullOrEmpty()) {
+            if (!subtitle.isNullOrEmpty()) {
                 Text(subtitle, style = Tare.type.caption, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         if (kcal != null) {
             Spacer(Modifier.width(12.dp))
-            KcalFigure(kcal)
+            Column(horizontalAlignment = Alignment.End) {
+                KcalFigure(kcal)
+                if (macros != null && (macros.protein > 0 || macros.carbs > 0 || macros.fat > 0)) {
+                    MacroLine(macros)
+                }
+            }
         }
         if (trailingAction != null) {
             Spacer(Modifier.width(10.dp))
