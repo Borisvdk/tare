@@ -21,6 +21,8 @@ reason.
 
 ## Shipped
 
+- Fibre in breakdowns: the day's (or a meal's) fibre against 30 g a day, and a Fibre option
+  that ranks foods by it. Off Today's main screen; tap the calories to see it.
 - Every row on Today shows P/C/F under its kcal, not just meals (the owner wanted the numbers
   for each item).
 - Macro breakdowns: meals on Today show P/C/F; tapping a meal, the calories or a macro bar

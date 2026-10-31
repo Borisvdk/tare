@@ -25,7 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import app.tare.domain.DayPart
 import app.tare.domain.Nutrients
@@ -61,17 +64,33 @@ enum class Measure(val label: String, val macro: Macro?) {
     PROTEIN("Protein", Macro.PROTEIN),
     CARBS("Carbs", Macro.CARBS),
     FAT("Fat", Macro.FAT),
+    FIBRE("Fibre", null),
     ;
 
-    fun of(nutrients: Nutrients): Double = macro?.let { nutrients.of(it) } ?: nutrients.kcal
+    fun of(nutrients: Nutrients): Double = when {
+        macro != null -> nutrients.of(macro)
+        this == FIBRE -> nutrients.fiber
+        else -> nutrients.kcal
+    }
 
     companion object {
         fun of(macro: Macro): Measure = entries.first { it.macro == macro }
     }
 }
 
+/**
+ * The Dutch Health Council's advice for adults is 30 to 40 g of fibre a day. It's a fixed
+ * reference, not a target the user sets: fibre isn't something Tare tracks against goals.
+ */
+private const val FIBRE_ADVICE_GRAMS = 30
+
+/** Fibre has no colour of its own (colour is for calories and macros), so it stays neutral. */
 @Composable
-private fun Measure.color(): Color = macro?.color() ?: Tare.colors.kcal
+private fun Measure.color(): Color = when {
+    macro != null -> macro.color()
+    this == Measure.FIBRE -> Tare.colors.textMuted
+    else -> Tare.colors.kcal
+}
 
 /**
  * How a meal (or a whole day) adds up: its calories against the daily target, where those
@@ -165,6 +184,30 @@ private fun Summary(total: Nutrients, targets: Targets, modifier: Modifier = Mod
         EnergySplitBar(total)
         Spacer(Modifier.height(22.dp))
         MacroBars(total, targets)
+        Spacer(Modifier.height(18.dp))
+        FibreLine(total.fiber)
+    }
+}
+
+@Composable
+private fun FibreLine(grams: Double) {
+    val colors = Tare.colors
+    Column {
+        Row {
+            Text("Fibre", style = Tare.type.caption, color = colors.textMuted, modifier = Modifier.alignByBaseline())
+            Spacer(Modifier.weight(1f))
+            Text(
+                buildAnnotatedString {
+                    withStyle(SpanStyle(color = colors.text)) { append(Fmt.grams(grams)) }
+                    withStyle(SpanStyle(color = colors.textFaint)) { append(" / ${FIBRE_ADVICE_GRAMS}g a day") }
+                },
+                style = Tare.type.figure,
+                maxLines = 1,
+                modifier = Modifier.alignByBaseline(),
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        ProgressBar((grams / FIBRE_ADVICE_GRAMS).toFloat(), colors.textMuted)
     }
 }
 

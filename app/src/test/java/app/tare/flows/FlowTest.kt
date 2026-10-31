@@ -355,6 +355,20 @@ class FlowTest {
     }
 
     @Test
+    fun breakdownShowsFibreAndRanksFoodsByIt() {
+        logDinnerBowl()
+        compose.setContent { TareRoot(graph) }
+        compose.waitForText("Dinner bowl")
+
+        // Only the banana has fibre: 118 g at 2.6 g per 100 g.
+        compose.onNodeWithText("Dinner bowl").performClick()
+        compose.waitForText("3.1 / 30g a day")
+        fun top(name: String) = compose.onNodeWithText(name).fetchSemanticsNode().boundsInRoot.top
+        compose.onNode(hasText("Fibre") and isSelectable()).performClick()
+        compose.waitUntil(5_000) { top("Banana") < top("White rice") && top("Banana") < top("Chicken breast") }
+    }
+
+    @Test
     fun dayBreakdownOpensAMealAndGoesBack() {
         logDinnerBowl()
         runBlocking { graph.log.logQuick("Coffee", Nutrients(40.0, 2.0, 3.0, 2.0), today, LocalTime.of(9, 0)) }
