@@ -128,9 +128,12 @@ fun ProgressBar(fraction: Float, color: Color, modifier: Modifier = Modifier, he
     }
 }
 
-/** Compact "P 32 · C 45 · F 12" line with coloured initials. */
+/**
+ * Compact "P 32 · C 45 · F 12" line with coloured initials. [rounded] drops the decimals for
+ * lists, where a column of "4.5" and "0.8" is hard to scan; editors keep them.
+ */
 @Composable
-fun MacroLine(nutrients: Nutrients, modifier: Modifier = Modifier) {
+fun MacroLine(nutrients: Nutrients, modifier: Modifier = Modifier, rounded: Boolean = false) {
     val colors = Tare.colors
     val protein = colors.protein
     val carbs = colors.carbs
@@ -140,7 +143,8 @@ fun MacroLine(nutrients: Nutrients, modifier: Modifier = Modifier) {
             listOf(Macro.PROTEIN to protein, Macro.CARBS to carbs, Macro.FAT to fat).forEachIndexed { i, (m, c) ->
                 if (i > 0) withStyle(SpanStyle(color = colors.textFaint)) { append("  ") }
                 withStyle(SpanStyle(color = c)) { append(m.short) }
-                withStyle(SpanStyle(color = colors.textMuted)) { append(" ${Fmt.grams(nutrients.of(m))}") }
+                val grams = nutrients.of(m)
+                withStyle(SpanStyle(color = colors.textMuted)) { append(" ${if (rounded) Fmt.wholeGrams(grams) else Fmt.grams(grams)}") }
             }
         },
         style = Tare.type.caption.merge(Tare.type.figure.copy(fontSize = Tare.type.caption.fontSize)),
