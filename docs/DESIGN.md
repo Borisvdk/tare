@@ -81,8 +81,8 @@ headlines only (screen titles such as "Today", empty states). Tokens are in `ui/
   fixed 30 g a day (the Dutch Health Council's advice), not a user target.
 - **Undo instead of confirm** for anything reversible (delete entry, quick log), via
   `LocalNotifier`. Confirm only for irreversible actions (import replaces data).
-- **Numbers:** `Fmt.kcal` ("1,240"), `Fmt.grams` (one decimal under 10 g), `Fmt.amount`
-  (no trailing zeros).
+- **Numbers:** `Fmt.kcal` ("1,240"), `Fmt.grams` (one decimal under 10 g), `Fmt.wholeGrams`
+  (no decimals, for the P/C/F line on list rows), `Fmt.amount` (no trailing zeros).
 - **Motion:** spring animations on the gauge and bars, slide and fade between screens, and
   haptics on log (`Confirm`) and long-press.
 

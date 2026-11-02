@@ -90,7 +90,7 @@ fun ListRow(
             Column(horizontalAlignment = Alignment.End) {
                 KcalFigure(kcal)
                 if (macros != null && (macros.protein > 0 || macros.carbs > 0 || macros.fat > 0)) {
-                    MacroLine(macros)
+                    MacroLine(macros, rounded = true)
                 }
             }
         }

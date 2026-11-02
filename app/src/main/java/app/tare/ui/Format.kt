@@ -24,6 +24,9 @@ object Fmt {
         value.roundToInt().toString()
     }
 
+    /** Grams of a macro with no decimals, for lists where many numbers sit together ("4.5 g" reads as "5"). */
+    fun wholeGrams(value: Double): String = value.roundToInt().toString()
+
     /** An amount the user typed or picked: drops trailing zeros ("1.5", "2", "0.25"). */
     fun amount(value: Double): String {
         val rounded = (value * 100).roundToLong() / 100.0
