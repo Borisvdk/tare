@@ -62,6 +62,30 @@ class MigrationTest {
         db.close()
     }
 
+    @Test
+    fun version3AddsDailyFoodsAndKeepsEntries() {
+        assumeFalse(System.getProperty("os.name").startsWith("Windows"))
+        helper.createDatabase(DB, 2).apply {
+            execSQL(
+                "INSERT INTO log_entry (day, loggedAt, foodId, name, source, grams, isLiquid, n_kcal, n_protein, n_carbs, n_fat, n_fiber) " +
+                    "VALUES (20000, 0, 'usda:1', 'Banana', 'GENERIC', 120, 0, 107, 1.3, 27, 0.4, 3.1)",
+            )
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(DB, 3, true)
+        db.query("SELECT name, daily FROM log_entry").use { c ->
+            c.moveToFirst()
+            assertThat(c.getString(0)).isEqualTo("Banana")
+            assertThat(c.getInt(1)).isEqualTo(0)
+        }
+        db.execSQL("INSERT INTO daily_food (foodId, grams, portionLabel, minuteOfDay, lastLoggedDay, createdAt) VALUES ('usda:1', 120, NULL, 480, 20000, 0)")
+        db.query("SELECT COUNT(*) FROM daily_food").use { c ->
+            c.moveToFirst()
+            assertThat(c.getInt(0)).isEqualTo(1)
+        }
+        db.close()
+    }
+
     private companion object {
         const val DB = "migration-test.db"
     }

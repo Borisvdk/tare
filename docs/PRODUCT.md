@@ -13,7 +13,7 @@ count.
 ## Principles
 
 1. **Seconds per log.** The common case is re-logging something you've had before; that's
-   one tap (recents' `+`, saved meals). Everything else is at most: search, tap, amount, log.
+   one tap (recents' `+`, saved meals), or none at all for what you have every day. Everything else is at most: search, tap, amount, log.
 2. **Show less.** Today shows calories left, three macro bars, and what you ate. Every extra
    element must earn its place.
 3. **The number pad beats the keyboard.** Amounts use a built-in pad that never moves the
@@ -46,6 +46,10 @@ groceries from Albert Heijn and Jumbo, a mix of Dutch and English food names.
   "Same as yesterday" cards; "Usually in the morning" (what you have in that part of the
   day, at your usual amount there, minus what's already logged); favourites and recents,
   all with one-tap re-log. Meal-like searches ("2 eggs and toast") lead with Describe.
+- **Every day:** foods you have daily (a morning cappuccino, a bowl of kwark) log themselves
+  once a day, the first time Tare opens, at their usual amount and time. On a day you skip
+  one, delete it from Today; it stays deleted. Turn it on with the repeat button in the
+  amount sheet, or add foods in Settings > Every day. Rows say "every day" so you can tell.
 - **Amount sheet:** number pad, food portions plus your own ("my bowl"), live macros and
   what's left after logging.
 - **Barcode scanning:** on-device ML Kit and Open Food Facts lookup. For an unknown product:

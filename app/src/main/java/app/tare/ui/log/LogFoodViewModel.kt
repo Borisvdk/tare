@@ -3,6 +3,7 @@ package app.tare.ui.log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.tare.AppGraph
+import app.tare.data.daily.DailyChange
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.data.db.MealWithItems
@@ -72,9 +73,11 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate, initialP
 
     val search = FoodSearch(graph, viewModelScope, includeMeals = true)
 
-    private val yesterday = graph.log.observeDay(day.minusDays(1)).map { entries ->
+    // Every-day foods Tare logged yesterday are left out once they're on this day too.
+    private val yesterday = combine(graph.log.observeDay(day.minusDays(1)), graph.log.observeDay(day)) { entries, onDay ->
         val zone = ZoneId.systemDefault()
-        entries.groupBy { DayPart.of(Instant.ofEpochMilli(it.loggedAt).atZone(zone).toLocalTime()) }
+        val had = onDay.mapNotNull { it.foodId }.toSet()
+        entries.filterNot { it.daily && it.foodId in had }.groupBy { DayPart.of(Instant.ofEpochMilli(it.loggedAt).atZone(zone).toLocalTime()) }
             .toSortedMap()
             .map { (part, list) -> CopySource(part, list) }
     }
@@ -118,6 +121,16 @@ class LogFoodViewModel(private val graph: AppGraph, val day: LocalDate, initialP
             session = if (base == null) emptyList() else entries.filter { it.id > base },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LogHubState())
+
+    /** Foods that log themselves every day, for the amount sheet's switch. */
+    val dailyIds: StateFlow<Set<String>> = graph.daily.observeIds().stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+
+    suspend fun setDaily(entry: LogEntry, daily: Boolean): DailyChange? = graph.daily.set(entry, daily)
+
+    fun undo(entries: List<LogEntry>, change: DailyChange) = viewModelScope.launch {
+        graph.log.delete(entries)
+        graph.daily.undo(change)
+    }
 
     fun setQuery(q: String) {
         search.query.value = q

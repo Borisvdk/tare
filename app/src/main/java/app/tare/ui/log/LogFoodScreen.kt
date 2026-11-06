@@ -92,6 +92,7 @@ fun LogFoodScreen(route: Route.LogFood) {
     val hub by viewModel.hub.collectAsState()
     val part by viewModel.part.collectAsState()
     val results by viewModel.search.results.collectAsState()
+    val dailyIds by viewModel.dailyIds.collectAsState()
     val nav = LocalNavigator.current
     val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
@@ -277,9 +278,21 @@ fun LogFoodScreen(route: Route.LogFood) {
             mode = AmountMode.LOG,
             remainingKcal = hub.remainingKcal,
             initialTime = viewModel.sessionTime(),
+            initialDaily = food.id in dailyIds,
             onConfirm = { result ->
                 picked = null
-                scope.launch { announce(listOf(viewModel.log(food, result.grams, result.portion, result.time))) }
+                scope.launch {
+                    val entry = viewModel.log(food, result.grams, result.portion, result.time)
+                    val change = result.daily?.let { viewModel.setDaily(entry, it) }
+                    if (change == null) {
+                        announce(listOf(entry))
+                    } else {
+                        notify.show(
+                            "Logged ${entry.name} · " + if (change.daily) "every day from tomorrow" else "not every day anymore",
+                            actionLabel = "Undo",
+                        ) { viewModel.undo(listOf(entry), change) }
+                    }
+                }
             },
             onDismiss = { picked = null },
             onToggleFavorite = if (food.source != FoodSource.OPEN_FOOD_FACTS || food.useCount > 0) {

@@ -21,6 +21,8 @@ reason.
 
 ## Shipped
 
+- Every-day foods: a repeat switch in the amount sheet (and Settings > Every day) makes a food
+  log itself once a day at its usual amount and time; delete it on a day you skip it.
 - The P/C/F line on Today's rows shows whole numbers (decimals made it busy and hard to read).
 - Fibre in breakdowns: the day's (or a meal's) fibre against 30 g a day, and a Fibre option
   that ranks foods by it. Off Today's main screen; tap the calories to see it.

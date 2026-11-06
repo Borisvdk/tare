@@ -70,3 +70,14 @@ confusing. Nothing secret lives in the repository (signing material is in GitHub
 `keystore.properties`, the Claude key stays on the phone; history checked), so it was made
 public and updates need no token. Diary data never leaves the phone either way.
 
+## 2026-11-06: Every-day foods log themselves, today only
+
+The owner has a cappuccino and skimmed quark nearly every day and asked for them to be added
+automatically, still removable on a day they skip one. They're real entries (`daily = 1`), not
+a separate layer, so totals, breakdowns, backups and history need no special cases. Rules:
+logged once per day on the first resume, at the food's usual time; a deleted one stays deleted
+that day; days the app never opened aren't backfilled (a half-logged day would skew averages);
+a new every-day food starts tomorrow, so turning it on never adds a surprise entry today; a
+food already logged by hand that day isn't logged again, and "copy to today" skips one Tare
+already logged. Auto-logging doesn't bump usage stats, so recents stay about what was picked.
+Schema v3 (auto-migration) adds `daily_food` and `log_entry.daily`.

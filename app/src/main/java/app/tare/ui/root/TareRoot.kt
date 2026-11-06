@@ -93,6 +93,8 @@ fun TareRoot(graph: AppGraph, start: Route = Route.Home, deepLinks: MutableState
         // New weigh-ins from the scale app (via Health Connect) whenever Tare comes back; the
         // repository skips this if it ran a few minutes ago or isn't connected.
         LifecycleResumeEffect(graph) {
+            // Every-day foods for today, whichever screen Tare opens on; also the first resume after midnight.
+            graph.appScope.launch { graph.daily.logDue() }
             graph.appScope.launch { runCatching { graph.health.syncWeights() } }
             // And new versions of Tare, every few hours at most.
             graph.updater.checkIfDue()

@@ -19,6 +19,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Repeat
+import androidx.compose.material.icons.rounded.RepeatOn
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.AlertDialog
@@ -72,7 +74,8 @@ import java.time.format.DateTimeFormatter
 
 enum class AmountMode { LOG, EDIT, PICK }
 
-data class AmountResult(val grams: Double, val portion: Portion?, val time: LocalTime?)
+/** [daily] is the "every day" switch as left on confirm; null when the sheet didn't offer it. */
+data class AmountResult(val grams: Double, val portion: Portion?, val time: LocalTime?, val daily: Boolean? = null)
 
 /**
  * The core interaction: pick how much of a food. Units are grams/ml plus the food's portions;
@@ -93,6 +96,14 @@ fun AmountSheet(
     onEditFood: (() -> Unit)? = null,
     /** Scanner only: log and go straight back to scanning the next product. */
     onConfirmAndNext: ((AmountResult) -> Unit)? = null,
+    /**
+     * Whether the food is an every-day food; non-null shows the switch. Like the amount, the
+     * change only counts once confirmed, so it can take the amount and time being saved.
+     */
+    initialDaily: Boolean? = null,
+    /** Offer a time even when picking (an every-day food needs one). */
+    pickTime: Boolean = mode != AmountMode.PICK,
+    deleteDescription: String = "Delete entry",
 ) {
     val colors = Tare.colors
     val (defaultGrams, defaultLabel) = remember(food.id) { defaultAmount(food) }
@@ -111,6 +122,7 @@ fun AmountSheet(
         maxDecimals = 2,
     )
     var time by remember { mutableStateOf(initialTime) }
+    var daily by remember(food.id) { mutableStateOf(initialDaily) }
     var pickingTime by remember { mutableStateOf(false) }
 
     val grams = (input.value ?: 0.0) * (portion?.grams ?: 1.0)
@@ -134,7 +146,7 @@ fun AmountSheet(
                     FoodSource.QUICK -> "Quick add"
                 }
                 Text(
-                    "$origin · ${Fmt.kcal(food.per100.kcal)} kcal per 100 ${food.unit}",
+                    if (daily == true) "Logs itself every day" else "$origin · ${Fmt.kcal(food.per100.kcal)} kcal per 100 ${food.unit}",
                     style = Tare.type.caption,
                     color = colors.textMuted,
                     maxLines = 1,
@@ -143,6 +155,18 @@ fun AmountSheet(
             }
             if (onEditFood != null) {
                 RoundIconButton(Icons.Rounded.Edit, "Edit food", onEditFood, size = 40.dp, iconSize = 18.dp)
+                Spacer(Modifier.width(8.dp))
+            }
+            daily?.let { on ->
+                RoundIconButton(
+                    if (on) Icons.Rounded.RepeatOn else Icons.Rounded.Repeat,
+                    if (on) "Stop logging every day" else "Log every day",
+                    { daily = !on },
+                    size = 40.dp,
+                    iconSize = 20.dp,
+                    background = if (on) colors.surfacePressed else colors.surfaceRaised,
+                    tint = if (on) colors.text else colors.textMuted,
+                )
                 Spacer(Modifier.width(8.dp))
             }
             if (onToggleFavorite != null) {
@@ -293,10 +317,10 @@ fun AmountSheet(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (onDelete != null) {
-                RoundIconButton(Icons.Rounded.DeleteOutline, "Delete entry", onDelete, size = 54.dp, tint = colors.over)
+                RoundIconButton(Icons.Rounded.DeleteOutline, deleteDescription, onDelete, size = 54.dp, tint = colors.over)
                 Spacer(Modifier.width(10.dp))
             }
-            if (mode != AmountMode.PICK) {
+            if (pickTime) {
                 TextAction(
                     text = time?.format(TIME) ?: "Now",
                     onClick = { pickingTime = true },
@@ -307,7 +331,7 @@ fun AmountSheet(
             if (onConfirmAndNext != null) {
                 SecondaryButton(
                     "Log & next",
-                    onClick = { onConfirmAndNext(AmountResult(grams, portion, time)) },
+                    onClick = { onConfirmAndNext(AmountResult(grams, portion, time, daily)) },
                     enabled = grams > 0,
                     modifier = Modifier.padding(end = 8.dp).semantics { contentDescription = "Log and scan another" },
                 )
@@ -318,7 +342,7 @@ fun AmountSheet(
                     AmountMode.EDIT -> "Save"
                     AmountMode.PICK -> "Add · ${Fmt.kcal(nutrients.kcal)} kcal"
                 },
-                onClick = { onConfirm(AmountResult(grams, portion, time)) },
+                onClick = { onConfirm(AmountResult(grams, portion, time, daily)) },
                 enabled = grams > 0,
                 modifier = Modifier.weight(1f),
             )

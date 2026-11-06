@@ -128,6 +128,9 @@ interface LogDao {
     @Query("SELECT * FROM log_entry WHERE id = :id")
     suspend fun get(id: Long): LogEntry?
 
+    @Query("SELECT DISTINCT foodId FROM log_entry WHERE day = :day AND foodId IS NOT NULL")
+    suspend fun foodIdsOn(day: Long): List<String>
+
     @Query("SELECT * FROM log_entry WHERE id IN (:ids)")
     suspend fun getAll(ids: List<Long>): List<LogEntry>
 
@@ -255,5 +258,39 @@ interface WeightDao {
     suspend fun insertAll(entries: List<WeightEntry>)
 
     @Query("DELETE FROM weight")
+    suspend fun clear()
+}
+
+@Dao
+interface DailyFoodDao {
+    @Transaction
+    @Query("SELECT * FROM daily_food ORDER BY minuteOfDay, createdAt")
+    fun observeAll(): Flow<List<DailyFoodWithFood>>
+
+    @Query("SELECT foodId FROM daily_food")
+    fun observeIds(): Flow<List<String>>
+
+    @Query("SELECT * FROM daily_food WHERE foodId = :foodId")
+    suspend fun get(foodId: String): DailyFood?
+
+    @Query("SELECT * FROM daily_food WHERE lastLoggedDay < :day ORDER BY minuteOfDay, createdAt")
+    suspend fun dueOn(day: Long): List<DailyFood>
+
+    @Query("UPDATE daily_food SET lastLoggedDay = :day WHERE foodId IN (:foodIds)")
+    suspend fun markLogged(foodIds: List<String>, day: Long)
+
+    @Upsert
+    suspend fun upsert(daily: DailyFood)
+
+    @Query("DELETE FROM daily_food WHERE foodId = :foodId")
+    suspend fun delete(foodId: String)
+
+    @Query("SELECT * FROM daily_food")
+    suspend fun all(): List<DailyFood>
+
+    @Insert
+    suspend fun insertAll(dailies: List<DailyFood>)
+
+    @Query("DELETE FROM daily_food")
     suspend fun clear()
 }

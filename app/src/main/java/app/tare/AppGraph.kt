@@ -3,6 +3,7 @@ package app.tare
 import android.content.Context
 import app.tare.data.ai.FoodAi
 import app.tare.data.backup.BackupManager
+import app.tare.data.daily.DailyRepository
 import app.tare.data.db.TareDatabase
 import app.tare.data.food.FoodRepository
 import app.tare.data.food.GenericFoodImporter
@@ -71,6 +72,7 @@ class AppGraph(
     val secrets: SecretStore by lazy { SecretStore(context.secretsDataStore) }
     val foods: FoodRepository by lazy { FoodRepository(db.foodDao(), OpenFoodFactsClient(http), now) }
     val log: LogRepository by lazy { LogRepository(db, now) }
+    val daily: DailyRepository by lazy { DailyRepository(db, log, now) }
     val meals: MealRepository by lazy { MealRepository(db, now) }
     val recipes: RecipeRepository by lazy { RecipeRepository(db, now) }
     val weights: WeightRepository by lazy { WeightRepository(db.weightDao(), now) }

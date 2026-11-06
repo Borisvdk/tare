@@ -16,12 +16,14 @@ import kotlinx.serialization.json.Json
  * (schemas are exported to app/schemas for that) — never destructive: this is the user's diary.
  */
 @Database(
-    entities = [Food::class, LogEntry::class, Meal::class, MealItem::class, RecipeIngredient::class, WeightEntry::class],
-    version = 2,
+    entities = [Food::class, LogEntry::class, Meal::class, MealItem::class, RecipeIngredient::class, WeightEntry::class, DailyFood::class],
+    version = 3,
     exportSchema = true,
     autoMigrations = [
         // 2: weight.source, so weigh-ins imported from Health Connect never overwrite typed ones.
         AutoMigration(from = 1, to = 2),
+        // 3: daily_food plus log_entry.daily, for foods that log themselves every day.
+        AutoMigration(from = 2, to = 3),
     ],
 )
 @TypeConverters(Converters::class)
@@ -31,6 +33,7 @@ abstract class TareDatabase : RoomDatabase() {
     abstract fun mealDao(): MealDao
     abstract fun recipeDao(): RecipeDao
     abstract fun weightDao(): WeightDao
+    abstract fun dailyDao(): DailyFoodDao
 
     companion object {
         const val NAME = "tare.db"

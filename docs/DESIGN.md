@@ -79,6 +79,9 @@ headlines only (screen titles such as "Today", empty states). Tokens are in `ui/
   switch that ranks what's inside, biggest first, with a share bar in that quantity's colour.
   Fibre has no colour of its own, so its bars are neutral (`textMuted`), measured against a
   fixed 30 g a day (the Dutch Health Council's advice), not a user target.
+- **Every day** switch: the repeat icon in the amount sheet's header (next to the star),
+  neutral, filled when on, with "Logs itself every day" as the subtitle. Like the amount and
+  time it counts on Save/Log. Rows Tare logged by itself end their subtitle in "every day".
 - **Undo instead of confirm** for anything reversible (delete entry, quick log), via
   `LocalNotifier`. Confirm only for irreversible actions (import replaces data).
 - **Numbers:** `Fmt.kcal` ("1,240"), `Fmt.grams` (one decimal under 10 g), `Fmt.wholeGrams`

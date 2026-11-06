@@ -46,9 +46,12 @@ object Fmt {
     /** "150 g", "1 × slice · 35 g", "2 × serving · 60 g". */
     fun entryAmount(entry: LogEntry): String {
         val grams = entry.grams ?: return "Quick add"
-        val unit = if (entry.isLiquid) "ml" else "g"
-        val portionGrams = entry.portionGrams
-        val label = entry.portionLabel
+        return amountOf(grams, entry.isLiquid, entry.portionLabel, entry.portionGrams)
+    }
+
+    /** Like [entryAmount], for an amount that isn't an entry (yet). */
+    fun amountOf(grams: Double, isLiquid: Boolean, label: String?, portionGrams: Double?): String {
+        val unit = if (isLiquid) "ml" else "g"
         return if (label != null && portionGrams != null && portionGrams > 0) {
             "${amount(grams / portionGrams)} × $label · ${grams.roundToInt()} $unit"
         } else {

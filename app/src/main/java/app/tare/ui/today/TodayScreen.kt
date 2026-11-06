@@ -108,6 +108,7 @@ private val HEADER_HEIGHT = 64.dp
 @Composable
 fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, contentPadding: PaddingValues) {
     val state by viewModel.state.collectAsState()
+    val dailyIds by viewModel.dailyIds.collectAsState()
     val nav = LocalNavigator.current
     val notify = LocalNotifier.current
     val scope = rememberCoroutineScope()
@@ -316,9 +317,18 @@ fun TodayScreen(viewModel: TodayViewModel, onDayChange: (LocalDate) -> Unit, con
                 initialGrams = entry.grams,
                 initialPortionLabel = entry.portionLabel,
                 initialTime = Instant.ofEpochMilli(entry.loggedAt).atZone(ZoneId.systemDefault()).toLocalTime(),
+                initialDaily = food.id in dailyIds,
                 onConfirm = { result ->
-                    viewModel.updateAmount(entry, result.grams, result.portion, result.time)
                     editing = null
+                    scope.launch {
+                        val change = viewModel.saveEntry(entry, result.grams, result.portion, result.time, result.daily)
+                        if (change != null) {
+                            notify.show(
+                                if (change.daily) "${food.name} logs itself every day from tomorrow" else "${food.name} no longer logs itself",
+                                actionLabel = "Undo",
+                            ) { viewModel.undoDaily(change) }
+                        }
+                    }
                 },
                 onDismiss = { editing = null },
                 onDelete = {
@@ -521,7 +531,7 @@ private fun LazyListScope.sectionItems(
 private fun EntryRow(entry: LogEntry, selected: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
     ListRow(
         title = entry.name,
-        subtitle = listOfNotNull(entry.brand, Fmt.entryAmount(entry)).joinToString(" · "),
+        subtitle = listOfNotNull(entry.brand, Fmt.entryAmount(entry), "every day".takeIf { entry.daily }).joinToString(" · "),
         kcal = entry.nutrients.kcal,
         macros = entry.nutrients,
         selected = selected,

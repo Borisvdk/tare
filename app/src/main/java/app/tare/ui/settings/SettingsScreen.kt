@@ -151,6 +151,8 @@ fun SettingsScreen() {
                 }
             }
 
+            EveryDaySection()
+
             SectionHeader("Appearance")
             Segmented(
                 options = ThemeMode.entries,

@@ -41,6 +41,10 @@ ui (Compose screens + ViewModels)
   together share a `groupId`/`groupName`.
 - `meal` + `meal_item`: saved meals (food id + grams + portion label).
 - `weight`: one row per day.
+- `daily_food`: every-day foods (food id, grams, portion, minute of the day, `lastLoggedDay`).
+  `DailyRepository.logDue()` runs on every resume (`TareRoot`) and logs the ones not logged
+  today yet as `log_entry` rows with `daily = 1`, then moves `lastLoggedDay` to today, so a
+  deleted entry stays deleted. Only today is filled in; usage stats aren't touched.
 
 Schema JSON is exported to `app/schemas/`. **Every schema change needs a migration.**
 

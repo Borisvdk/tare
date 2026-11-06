@@ -3,6 +3,7 @@ package app.tare.ui.today
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.tare.AppGraph
+import app.tare.data.daily.DailyChange
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.domain.DayPart
@@ -117,10 +118,21 @@ class TodayViewModel(private val graph: AppGraph) : ViewModel() {
         }
     }
 
-    fun updateAmount(entry: LogEntry, grams: Double, portion: Portion?, time: LocalTime?) = viewModelScope.launch {
+    /**
+     * Saves the amount sheet: amount, time and the every-day switch, which takes the saved
+     * amount and time. Returns the every-day change, if any, for undo.
+     */
+    suspend fun saveEntry(entry: LogEntry, grams: Double, portion: Portion?, time: LocalTime?, daily: Boolean?): DailyChange? {
         graph.log.updateAmount(entry, grams, portion)
         if (time != null) graph.log.get(entry.id)?.let { graph.log.setTime(listOf(it), time) }
+        val saved = graph.log.get(entry.id) ?: return null
+        return daily?.let { graph.daily.set(saved, it) }
     }
+
+    fun undoDaily(change: DailyChange) = graph.appScope.launch { graph.daily.undo(change) }
+
+    /** Foods that log themselves every day, for the amount sheet's switch. */
+    val dailyIds: StateFlow<Set<String>> = graph.daily.observeIds().stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
     fun updateQuick(entry: LogEntry, name: String, nutrients: Nutrients) = viewModelScope.launch {
         graph.log.update(entry.copy(name = name.ifBlank { "Quick add" }, nutrients = nutrients))

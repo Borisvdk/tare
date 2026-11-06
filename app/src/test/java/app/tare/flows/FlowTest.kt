@@ -61,7 +61,7 @@ class FlowTest {
 
     private val zone = ZoneId.of("Europe/Amsterdam")
     private val today = LocalDate.of(2026, 10, 25)
-    private val now = today.atTime(13, 0).atZone(zone).toInstant().toEpochMilli()
+    private var clock = today.atTime(13, 0).atZone(zone).toInstant().toEpochMilli()
     private lateinit var graph: AppGraph
 
     private val banana = Food(
@@ -82,7 +82,7 @@ class FlowTest {
         TimeZone.setDefault(TimeZone.getTimeZone(zone))
         graph = AppGraph(
             ApplicationProvider.getApplicationContext(),
-            now = { now },
+            now = { clock },
             databaseFactory = { TareDatabase.inMemory(it) },
             httpFactory = { HttpClient(MockEngine { respondError(HttpStatusCode.ServiceUnavailable) }) },
         )
@@ -211,6 +211,69 @@ class FlowTest {
 
         compose.waitUntil(5_000) { entries().single().grams == 354.0 }
         assertThat(entries().single().nutrients.kcal).isWithin(0.1).of(315.06)
+    }
+
+    @Test
+    fun logAFoodEveryDayFromTheAmountSheet() {
+        compose.setContent { TareRoot(graph, start = Route.LogFood(today.toEpochDay())) }
+        compose.onAllNodes(hasSetTextAction()).onFirst().performTextInput("banana")
+        compose.waitForText("Banana")
+        compose.onAllNodesWithText("Banana").onFirst().performClick()
+
+        compose.waitForText("Log · 105 kcal")
+        compose.onNodeWithContentDescription("Log every day").performClick()
+        compose.waitForText("Logs itself every day")
+        compose.onNodeWithText("Log · 105 kcal").performClick()
+
+        waitForEntries(1)
+        compose.waitForText("every day from tomorrow", substring = true)
+        val daily = runBlocking { graph.db.dailyDao().get(banana.id)!! }
+        assertThat(daily.grams).isEqualTo(118.0)
+        assertThat(daily.portionLabel).isEqualTo("medium")
+        // Today's entry is the one just logged; nothing extra.
+        assertThat(entries()).hasSize(1)
+        assertThat(entries().single().daily).isFalse()
+    }
+
+    @Test
+    fun everyDayFoodLogsItselfAndCanBeStoppedFromToday() {
+        runBlocking { graph.daily.save(banana, 118.0, banana.portions.first(), LocalTime.of(8, 0)) }
+        clock = today.plusDays(1).atTime(7, 30).atZone(zone).toInstant().toEpochMilli()
+        val tomorrow = today.plusDays(1)
+        compose.setContent { TareRoot(graph) }
+
+        // Opening Tare logged it, marked as such on the row.
+        compose.waitForText("1 × medium · 118 g · every day")
+        val logged = runBlocking { graph.log.observeDay(tomorrow).first() }.single()
+        assertThat(logged.daily).isTrue()
+
+        compose.onNodeWithText("Banana").performClick()
+        compose.waitForText("Logs itself every day")
+        compose.onNodeWithContentDescription("Stop logging every day").performClick()
+        compose.onNodeWithText("Save").performClick()
+
+        compose.waitUntil(5_000) { runBlocking { graph.db.dailyDao().get(banana.id) } == null }
+        assertThat(runBlocking { graph.log.observeDay(tomorrow).first() }).hasSize(1)
+    }
+
+    @Test
+    fun addAnEveryDayFoodInSettings() {
+        compose.setContent { TareRoot(graph, start = Route.Settings) }
+        compose.waitForText("Add a food")
+        compose.onNodeWithText("Add a food").performClick()
+        compose.onAllNodes(hasSetTextAction()).onLast().performTextInput("banana")
+        compose.waitForText("Banana")
+        compose.onAllNodesWithText("Banana").onFirst().performClick()
+        compose.waitForText("Add · 105 kcal")
+        // Asked when, starting at the part of the day it is now (13:00 → afternoon).
+        compose.onNodeWithText("12:30").assertExists()
+        compose.onNodeWithText("Add · 105 kcal").performClick()
+
+        compose.waitUntil(5_000) { runBlocking { graph.db.dailyDao().get(banana.id) } != null }
+        assertThat(runBlocking { graph.db.dailyDao().get(banana.id)!!.minuteOfDay }).isEqualTo(12 * 60 + 30)
+        compose.waitForText("12:30 · 1 × medium · 118 g")
+        // Starts tomorrow.
+        assertThat(entries()).isEmpty()
     }
 
     @Test

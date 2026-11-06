@@ -145,7 +145,10 @@ class FoodEditorViewModel(
             createdAt = base?.createdAt ?: at,
             updatedAt = at,
         )
-        return graph.foods.saveCustom(draft).also { original = it }
+        val saved = graph.foods.saveCustom(draft)
+        // Editing a scanned product forks it; an every-day food follows the fork.
+        if (base != null && base.id != saved.id) graph.daily.replaceFood(base.id, saved.id)
+        return saved.also { original = it }
     }
 
     suspend fun delete() {

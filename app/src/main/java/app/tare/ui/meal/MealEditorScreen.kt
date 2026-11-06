@@ -126,8 +126,8 @@ fun ItemsSection(viewModel: ItemsEditorViewModel, emptyHint: String) {
         FoodPickerDialog(
             search = viewModel.search,
             recent = recent,
-            onPicked = {
-                viewModel.add(it)
+            onPicked = { item, _ ->
+                viewModel.add(item)
                 picking = false
             },
             onDismiss = { picking = false },
