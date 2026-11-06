@@ -142,16 +142,35 @@ class LogRepository(
         dao.insertAll(entries)
     }
 
-    /** Copies entries to [day] at the same time of day. Returns the new rows (for undo). */
+    /**
+     * Copies entries to [day] at the same time of day. Returns the new rows (for undo).
+     * An every-day food Tare logged by itself is left out when [day] already has that food,
+     * so "same as yesterday" doesn't give you two cappuccinos.
+     */
     suspend fun copyTo(entries: List<LogEntry>, day: LocalDate): List<LogEntry> {
-        val groupIds = entries.mapNotNull { it.groupId }.distinct().associateWith { UUID.randomUUID().toString() }
-        val copies = entries.map { e ->
+        val onDay = dao.foodIdsOn(day.toEpochDay()).toSet()
+        val toCopy = entries.filterNot { it.daily && it.foodId in onDay }
+        val groupIds = toCopy.mapNotNull { it.groupId }.distinct().associateWith { UUID.randomUUID().toString() }
+        val copies = toCopy.map { e ->
             val time = Instant.ofEpochMilli(e.loggedAt).atZone(zone()).toLocalTime()
-            e.copy(id = 0, day = day.toEpochDay(), loggedAt = timestamp(day, time), groupId = e.groupId?.let(groupIds::get))
+            e.copy(
+                id = 0,
+                day = day.toEpochDay(),
+                loggedAt = timestamp(day, time),
+                groupId = e.groupId?.let(groupIds::get),
+                daily = false,
+            )
         }
         val ids = dao.insertAll(copies)
         return copies.zip(ids) { e, id -> e.copy(id = id) }
     }
+
+    /**
+     * The entry an every-day food gets on [day]. Usage stats are left alone: it wasn't picked
+     * by hand, and it shouldn't crowd recents every morning.
+     */
+    fun dailyEntry(food: Food, grams: Double, portion: Portion?, day: LocalDate, time: LocalTime): LogEntry =
+        entryFor(food, grams, portion, day, time, groupId = null, groupName = null).copy(daily = true)
 
     private fun entryFor(
         food: Food,

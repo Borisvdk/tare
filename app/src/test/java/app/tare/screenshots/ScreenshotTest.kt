@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import app.tare.AppGraph
+import app.tare.data.db.DailyFood
 import app.tare.data.db.Food
 import app.tare.data.db.TareDatabase
 import app.tare.data.health.FakeHealthSource
@@ -112,7 +113,9 @@ class ScreenshotTest {
         if (!withDiary) return@runBlocking
         val log = graph.log
         log.logFood(oats, 60.0, null, today, LocalTime.of(8, 5))
-        log.logFood(skyr, 150.0, skyr.portions.first(), today, LocalTime.of(8, 5))
+        // An every-day food, logged by Tare when the app opened today.
+        graph.db.dailyDao().upsert(DailyFood(skyr.id, 150.0, "serving", 8 * 60 + 5, lastLoggedDay = today.minusDays(1).toEpochDay(), createdAt = 0))
+        graph.daily.logDue()
         log.logFood(banana, 118.0, banana.portions.first(), today, LocalTime.of(10, 40))
         val dinner = graph.meals.save(null, "Chicken rice bowl", listOf(DraftItem(chicken, 160.0), DraftItem(rice, 220.0), DraftItem(broccoli, 120.0)))
         log.logMeal(graph.meals.get(dinner)!!, 1.0, today, LocalTime.of(18, 45))
@@ -165,6 +168,33 @@ class ScreenshotTest {
                 }
             }
         }
+    }
+
+    @Test fun amountSheetEveryDay() {
+        seed(ThemeMode.LIGHT, withDiary = false)
+        shoot("amount_sheet_every_day_light", waitFor = "Save") {
+            TareTheme(ThemeMode.LIGHT) {
+                CompositionLocalProvider(LocalAppGraph provides graph) {
+                    AmountSheet(
+                        food = skyr,
+                        mode = AmountMode.EDIT,
+                        initialGrams = 150.0,
+                        initialPortionLabel = "serving",
+                        initialTime = LocalTime.of(8, 5),
+                        initialDaily = true,
+                        onConfirm = {},
+                        onDismiss = {},
+                        onDelete = {},
+                        onToggleFavorite = {},
+                    )
+                }
+            }
+        }
+    }
+
+    @Test fun settingsLight() {
+        seed(ThemeMode.LIGHT)
+        shoot("settings_light", waitFor = "kcal per day") { TareRoot(graph, start = Route.Settings) }
     }
 
     @Test fun amountSheetFromScanner() {

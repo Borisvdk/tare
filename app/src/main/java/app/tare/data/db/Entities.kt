@@ -85,7 +85,33 @@ data class LogEntry(
     /** Entries logged together from a saved meal or AI batch share a group. */
     val groupId: String? = null,
     val groupName: String? = null,
+    /** Logged by Tare itself from a [DailyFood], not by hand; Today says so on the row. */
+    @ColumnInfo(defaultValue = "0") val daily: Boolean = false,
 )
+
+/**
+ * A food the user has every day. Tare logs it once per day, the first time the app opens that
+ * day, at [minuteOfDay]. Deleting that entry skips the day: [lastLoggedDay] has already moved on.
+ */
+@Serializable
+@Entity(tableName = "daily_food")
+data class DailyFood(
+    @PrimaryKey val foodId: String,
+    val grams: Double,
+    val portionLabel: String? = null,
+    /** Minutes after midnight, so the entry lands in the right part of the day. */
+    val minuteOfDay: Int,
+    /** Epoch day it was last logged for; set to the day it was created, so it starts the next day. */
+    val lastLoggedDay: Long,
+    val createdAt: Long,
+)
+
+data class DailyFoodWithFood(
+    @Embedded val daily: DailyFood,
+    @Relation(parentColumn = "foodId", entityColumn = "id") val food: Food?,
+) {
+    val nutrients: Nutrients get() = food?.per100?.forGrams(daily.grams) ?: Nutrients.Zero
+}
 
 @Serializable
 @Entity(tableName = "meal")

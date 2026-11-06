@@ -47,14 +47,20 @@ import app.tare.ui.log.AmountSheet
 import app.tare.ui.log.FoodSearch
 import app.tare.ui.log.searchResults
 import app.tare.ui.theme.Tare
+import java.time.LocalTime
 
-/** Full-screen search to add an ingredient to a meal or recipe. */
+/**
+ * Full-screen search to add an ingredient to a meal or recipe. With [initialTime] the amount
+ * sheet also asks when (for an every-day food) and [onPicked] gets the chosen time.
+ */
 @Composable
 fun FoodPickerDialog(
     search: FoodSearch,
     recent: List<Food>,
-    onPicked: (DraftItem) -> Unit,
+    onPicked: (DraftItem, LocalTime?) -> Unit,
     onDismiss: () -> Unit,
+    placeholder: String = "Add an ingredient",
+    initialTime: LocalTime? = null,
 ) {
     val results by search.results.collectAsState()
     var query by remember { mutableStateOf("") }
@@ -77,7 +83,7 @@ fun FoodPickerDialog(
                 TareTextField(
                     value = query,
                     onValueChange = { query = it },
-                    placeholder = "Add an ingredient",
+                    placeholder = placeholder,
                     imeAction = ImeAction.Search,
                     onIme = { focus.clearFocus() },
                     leading = { Icon(Icons.Rounded.Search, null, tint = Tare.colors.textFaint, modifier = Modifier.size(20.dp)) },
@@ -106,9 +112,11 @@ fun FoodPickerDialog(
             AmountSheet(
                 food = food,
                 mode = AmountMode.PICK,
+                initialTime = initialTime,
+                pickTime = initialTime != null,
                 onConfirm = { result ->
                     picked = null
-                    onPicked(DraftItem(food, result.grams, result.portion))
+                    onPicked(DraftItem(food, result.grams, result.portion), result.time)
                 },
                 onDismiss = { picked = null },
             )

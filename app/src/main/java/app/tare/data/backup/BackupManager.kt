@@ -1,6 +1,7 @@
 package app.tare.data.backup
 
 import androidx.room.withTransaction
+import app.tare.data.db.DailyFood
 import app.tare.data.db.Food
 import app.tare.data.db.LogEntry
 import app.tare.data.db.Meal
@@ -34,6 +35,8 @@ data class BackupFile(
     val mealItems: List<MealItem>,
     val recipeIngredients: List<RecipeIngredient>,
     val weights: List<WeightEntry>,
+    /** Absent in backups from before every-day foods. */
+    val dailyFoods: List<DailyFood> = emptyList(),
 ) {
     companion object {
         const val FORMAT = "tare-backup"
@@ -63,12 +66,13 @@ class BackupManager(
             mealItems = db.mealDao().allItems(),
             recipeIngredients = db.recipeDao().allIngredients(),
             weights = db.weightDao().all(),
+            dailyFoods = db.dailyDao().all(),
         )
         out.bufferedWriter().use { it.write(json.encodeToString(BackupFile.serializer(), file)) }
         file.summary()
     }
 
-    /** Replaces the diary, meals and weights with the backup's; foods are merged by id. */
+    /** Replaces the diary, meals, weights and every-day foods with the backup's; foods are merged by id. */
     suspend fun import(input: InputStream): BackupSummary = withContext(Dispatchers.IO) {
         val text = input.bufferedReader().use { it.readText() }
         val file = json.decodeFromString(BackupFile.serializer(), text)
@@ -78,12 +82,14 @@ class BackupManager(
             db.mealDao().clear()
             db.recipeDao().clear()
             db.weightDao().clear()
+            db.dailyDao().clear()
             db.foodDao().upsertAll(file.foods)
             db.logDao().insertAll(file.entries)
             file.meals.forEach { db.mealDao().upsertMeal(it) }
             db.mealDao().insertItems(file.mealItems)
             db.recipeDao().insertIngredients(file.recipeIngredients)
             db.weightDao().insertAll(file.weights)
+            db.dailyDao().insertAll(file.dailyFoods)
         }
         settings.setTargets(file.targets)
         file.summary()
